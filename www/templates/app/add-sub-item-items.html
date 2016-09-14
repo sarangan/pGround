@@ -1,0 +1,78 @@
+<ion-view view-title="{{data.item_name}}">
+
+
+<ion-nav-bar class="bar-calm pg-theme" >
+    <ion-nav-back-button>
+    </ion-nav-back-button>
+    <ion-nav-buttons side="right">
+    	<button class="button button-clear button-icon ion-refresh" ng-click="refresh()">
+	     </button>
+        <button class="button" ng-click="save()">Save
+        </button>
+        
+    </ion-nav-buttons>
+</ion-nav-bar>
+	
+	
+  <ion-content overflow-scroll="true">
+
+		<ion-list>
+
+			<label class="item item-divider" ng-if="type != 'METER'">Condition</label>
+
+
+			<div class="row" ng-if="type !='METER'">
+			   	<label class="item item-radio custom-search-box-col" ng-repeat="optItem in searchOptList">
+				  	<input type="radio" ng-model="data.searchOpt" ng-click="searchOptChange(optItem)" ng-checked="optItem.selected" />
+					  <div class="item-content custom-search-box-item">
+					    <span class="custom-search-box-item-text" ng-class="{'custom-search-box-border': searchOptSelected == optItem.value }">{{optItem.text}}</span>
+					  </div>
+				</label>
+
+			</div>
+
+
+			<label class="item item-divider" ng-if="type == 'METER'">Meter Reading</label>
+
+			<label class="item item-input" ng-if="type == 'METER'">
+			    <input type="text" placeholder="Meter Reading" ng-model="data.reading_value" ng-if="type == 'METER'">
+			 </label>
+
+
+			<label class="item item-divider">Comment</label>
+
+			<label class="item item-input pad-textarea">
+	            <textarea placeholder="Enter your message" my-text="" ng-model="data.comment" ng-trim="true" id="newpostTextarea" style="height: 20vh;"></textarea>
+	        </label>
+			
+			<label class="item item-divider">Photos</label>
+		</ion-list>
+
+
+		<div class="row " ng-repeat="image in images" ng-if="$index % 4 === 0">
+	        <div class="col col-25 imgur-image-wrapper" ng-if="$index < images.length">
+	            <img ng-src="{{images[$index].src}}" ng-click="tapImage(images[$index])" class="imgur-grid-image"/>
+	        </div>
+	        <div class="col col-25 imgur-image-wrapper" ng-if="$index + 1 < images.length">
+	            <img ng-src="{{images[$index + 1].src}}" ng-click="tapImage(images[$index + 1])" class="imgur-grid-image"/>
+	        </div>
+	        <div class="col col-25 imgur-image-wrapper" ng-if="$index + 2 < images.length">
+	            <img ng-src="{{images[$index + 2].src}}" ng-click="tapImage(images[$index + 2])" class="imgur-grid-image"/>
+	        </div>
+	        <div class="col col-25 imgur-image-wrapper" ng-if="$index + 3 < images.length">
+	            <img ng-src="{{images[$index + 3].src}}" ng-click="tapImage(images[$index + 3])" class="imgur-grid-image"/>
+	        </div>
+	    </div>
+
+
+  </ion-content>
+
+  <div class="float-button">
+		<span class="height-fix">
+	   		<a class="content" ng-click="openCamera()">
+	    		<i class="icon ion-camera"> </i>
+	   		</a>
+	  	</span>
+	</div>
+
+</ion-view>

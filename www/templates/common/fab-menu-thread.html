@@ -1,0 +1,28 @@
+<div>
+    <div class="fab-menu-overlay" ng-class="{active: fabMenu.active}" ng-click="fabMenuToggle()"></div>
+
+    <div class="float-button thread-new-btn" ng-class="{active: fabMenu.active}">
+        <span class="height-fix">
+            <button class="button button-energized-900 button-fab hwz-theme fab-custom-mainbtn"
+                    ng-click="fabMenuToggle()">
+                    <i class="icon ion-plus-round" ng-animate="{enter: 'rotate', leave: 'rotateCounterwise'}" ng-class="{true: 'rotate', false: 'rotateCounterwise'}[fabMenu.active]"></i>
+            </button>
+        </span>
+        <ul class="thread-fab-menu-items">
+            
+            <li ng-click="showAnnoc()" id="fbt-id1" style="display: none;">
+                <button class="button button-custom-small button-fab thread-fab-menu-button-item button-balanced-900 icon ion-android-notifications" ></button>
+            </li>
+           
+            <li ng-click="bookmarkForum()" id="fbt-id2" style="display: none;">
+                <button class="button button-custom-small button-fab thread-fab-menu-button-item button-positive-900 icon ion-bookmark"></button>
+            </li>
+
+             <li ng-click="newThread()" id="fbt-id3" style="display: none;">
+                <button class="button button-custom-small button-fab thread-fab-menu-button-item button-calm-900 icon ion-chatbox-working"></button>
+            </li>
+            
+           
+        </ul>
+    </div>
+</div>

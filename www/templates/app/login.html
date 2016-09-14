@@ -1,0 +1,48 @@
+<ion-view>
+
+  <ion-content overflow-scroll="true">
+    <div>
+        <div class="flat">
+            <div class="content">
+                <img class="login-logo" ng-src="img/logo.png" />
+            </div>
+        </div>
+
+      <div class="login-main-heading">
+          <h1 class="title login-heading">Inventory</h1>
+          <p class="login-subheading">Property Inventory App</p>
+      </div>
+
+      <div class="login-form-padding">
+
+        <div class="list">
+
+            <div class="list list-inset">
+              <label class="item item-input">
+                <i class="icon ion-person placeholder-icon"></i>
+                <input type="text" placeholder="Username" ng-model="data.username">
+              </label>
+            </div>
+
+            <div class="list list-inset">
+              <label class="item item-input">
+                <i class="icon ion-key placeholder-icon"></i>
+                <input type="password" placeholder="Password" ng-model="data.password">
+              </label>
+            </div>
+
+        </div>
+        <div class="padding">
+            <button class="button button-block button-balanced pg-theme ink" ng-click="doLogin(data)">Login</button>
+            <button class="button button-clear button-stable" ng-click="forgotPw()">Forgot password?</button>
+        </div>
+
+      </div>
+
+        <!-- <div class="button-bar">
+            <button class="button button-small button-clear button-dark light-bg waves-effect waves-button waves-light" ng-click="signUp()">Sign up</button>
+        </div> -->
+    </div>
+  </ion-content>
+
+</ion-view>

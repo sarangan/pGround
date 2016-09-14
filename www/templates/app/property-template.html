@@ -1,0 +1,73 @@
+<ion-view view-title="Add new property">
+
+	<ion-nav-bar class="bar-calm pg-theme">
+	    <!-- <ion-nav-back-button>
+	    </ion-nav-back-button> -->
+
+	    <ion-nav-buttons side="left">
+        <button class="button button-clear button-icon ion-android-arrow-back" ng-click="goBack()">
+        </button>
+      </ion-nav-buttons>
+
+	    <ion-nav-buttons side="right">
+	        <button class="button" ng-click="save()">Save
+	        </button>
+	    </ion-nav-buttons>
+	</ion-nav-bar>
+	
+  	<ion-content overflow-scroll="true">
+
+		<div class="list">
+
+		
+			<label class="item item-divider">Choose which room to add</label>
+			
+			   <div class="row" style="padding: 0px; padding-left: 7px; border-bottom: 1px solid #ddd;" ng-repeat="item in nums | orderBy: 'priority' ">
+
+			   		<div class="col col-55">
+				    	<span class="input-label">{{item.name}}</span>
+				    </div>
+
+			    	<div class="col col-45">
+			    		<div class="row">
+			    			<div class="col col-25" style="text-align: right;">
+					    		<button class="button button-calm button-small icon ion-ios-minus-empty" ng-click="deductRoom(item);"></button>
+					    	</div>
+					    	<div class="col col-50" style="text-align:center">
+					    		<input type="text" value="{{item.total_num}}" ng-model="item.total_num" style="width: 100%; padding-left: 2px; padding-right: 2px; text-align: center; margin-left: auto; margin-right: auto; border: 1px solid #e6e6e6; height: 30px;">
+					    	</div>
+					    	<div class="col col-25" >
+					    		<button class="button button-calm button-small icon ion-ios-plus-empty" ng-click="addRoom(item);"></button>
+					    	</div>
+					    	
+					    </div>
+				    </div>
+				  
+			    </div>
+			    
+
+
+
+			<!--<div class="item item-input range range-positive"  ng-repeat="item in nums | orderBy: 'priority' ">
+			    <span class="input-label">{{item.item_name}}</span>
+			    <h4 class="post-nav-numbers">0</h4>
+			     <input type="range" name="volume" min="0" max="10" value="{{item.total_num}}" ng-model="item.total_num" ng-init="item.total_num">
+			    <h4 class="post-nav-numbers">10</h4>
+			     <h5 class="property-slider-number">{{item.total_num}}</h5>			   
+			</div> -->
+
+
+			<div class="item item-toggle" ng-repeat="item in options | orderBy: 'priority' ">
+			     {{item.name}}
+			     <label class="toggle toggle-balanced">
+			       <input type="checkbox" ng-model="item.status" ng-checked="item.status" ng-change="toggleChange()">
+			       <div class="track">
+			         <div class="handle"></div>
+			       </div>
+			     </label>
+			</div>
+			  
+		</div>
+
+  	</ion-content>
+</ion-view>

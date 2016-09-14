@@ -1,0 +1,34 @@
+<ion-modal-view view-title="Comment" on-swipe-down="closeModal()">
+
+	<ion-header-bar class="bar-calm pg-theme-header">
+
+    <button class="button button-icon icon ion-close-circled" style="color:#ffffff; padding:0px;" ng-click="closeModal()"></button>
+
+	</ion-header-bar>
+
+  <ion-content has-bouncing="false" class="has-header padding" scroll="false" >
+
+    <!--  <ion-scroll direction="xy" scrollbar-x="false" scrollbar-y="false"
+        zooming="true" min-zoom="1" style="width: 100%; height: 100%; " delegate-handle="zoom-pane" class="zoom-pane">
+
+
+        <div class="image-view" style="background-image: url({{imageUrl}})"></div>      
+        
+      </ion-scroll> -->
+
+      <ion-scroll zooming="true"
+          direction="xy" 
+          delegate-handle="zoom-pane" 
+          class="zoom-pane" 
+          min-zoom="1" 
+                      scrollbar-x="false" 
+                scrollbar-y="false" 
+          overflow-scroll="false">
+      <img ng-src="{{imageUrl}}" >
+    </ion-scroll>
+
+
+  </ion-content>  
+  
+
+</ion-model-view>

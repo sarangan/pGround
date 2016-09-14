@@ -1,0 +1,35 @@
+<ion-view view-title="Voice Recorder">
+	
+	<ion-nav-bar class="bar-calm pg-theme">
+	    <ion-nav-back-button>
+	    </ion-nav-back-button>
+	</ion-nav-bar>
+
+	<ion-content overflow-scroll="true">	
+
+		<ion-list>
+
+			<div ng-repeat="sound in sounds" class="item item-button-right">
+			    {{sound.voice_name}}
+			    <button class="button button-positive"  ng-click="play(sound)" ng-if="sound.play">
+			      <i class="icon ion-play"></i>
+			    </button>
+			    <button class="button button-positive" ng-click="stop(sound)" ng-if="!sound.play">
+			      <i class="icon ion-stop"></i>
+			    </button>
+			</div>
+
+		</ion-list>
+
+
+  	</ion-content>
+
+  	  <div class="float-button">
+		<span class="height-fix">
+	   		<a class="content" ng-click="record()">
+	    		<i class="icon ion-android-microphone"> </i>
+	   		</a>
+	  	</span>
+	</div>
+
+</ion-view>

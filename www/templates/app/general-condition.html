@@ -1,0 +1,57 @@
+<ion-view view-title="General condition">
+
+	<ion-nav-bar class="bar-calm pg-theme">
+	    <ion-nav-back-button>
+	    </ion-nav-back-button>
+	    <ion-nav-buttons side="right">
+	        <button class="button" ng-click="save()">Save
+	        </button>
+	        <button class="button" ui-sref="app.generalconditionsort({property_id: property_id })">
+            	Reorder
+        	</button>
+	    </ion-nav-buttons>
+	</ion-nav-bar>
+	
+  	<ion-content overflow-scroll="true">
+
+
+		<div class="list">
+
+			<div ng-repeat="item in items | orderBy: 'priority' ">
+			     	
+					<div class="item row">
+						
+					  	<div class="col col-90">
+					  		
+					  		<label class="item-input item-select" ng-if="item.type=='ITEM'" style="padding: 0px;">
+							    <div class="input-label" style="max-width: 60%">
+							      {{item.item_name}}
+							    </div>
+							    <select ng-model="item.user_input" style="max-width: 40%">
+							      <option ng-selected="item.user_input == opt" ng-repeat="opt in splitArray(item.options)" ng-value="opt">{{opt}}</option>
+							    </select>
+						 	</label>
+
+						 	<div class="input-label" ng-if="item.type=='COMMENT'" >
+							      {{item.item_name}}
+							</div>
+
+					  	</div>
+
+					  	<div class="col col-10">
+					  		<button class="button button-small icon ion-chatbubbles" style="padding:0px;" ng-click="openComment( item.prop_general_id, item.comment)"></button>
+					  	</div>			  					  		
+					  		
+
+					</div>
+
+					  
+				</div>
+
+
+			</div>
+
+
+
+  	</ion-content>
+</ion-view>

@@ -1,0 +1,25 @@
+<ion-view view-title="Meter list">
+	
+	<ion-nav-bar class="bar-calm pg-theme">
+	    <ion-nav-back-button>
+	    </ion-nav-back-button>
+
+	        <ion-nav-buttons side="right">
+		        <button class="button" ng-click="reset()">Save
+		        </button>
+		        
+		    </ion-nav-buttons>
+	</ion-nav-bar>
+
+	<ion-content overflow-scroll="true">
+
+	  	<ion-list>
+			
+		  	<ion-item ng-repeat="item in items track by $index"  ui-sref="app.addSubDetails({sub_id: item.prop_meter_id, type: 'METER' })">
+			    <p style="font-size:16px;">{{item.meter_name}}</p>
+			</ion-item>
+
+		</ion-list>
+
+  </ion-content>
+</ion-view>

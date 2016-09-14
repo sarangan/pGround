@@ -1,0 +1,381 @@
+/* Empty. Add your own CSS if you like */
+.pg-theme{
+    border-color: #009AF2 !important;
+    background-color: #009AF2 !important;
+    background-image: linear-gradient(0deg, #009AF2, #009AF2 50%, transparent 50%) !important;
+    color: #ffffff !important;
+}
+.pg-theme-color{
+    color: #009AF2 !important;
+}
+.pg-theme-header{
+    border-color: #009AF2 !important;
+    background-color: #009AF2 !important;
+    background-image: linear-gradient(0deg, #009AF2, #009AF2 50%, transparent 50%) !important;
+    color: #ffffff !important;
+}
+
+
+/*---------------- login ----------------------------------*/
+
+.login_bg{
+    /*background-image: url('../img/login_bg.png');
+    background-position: 100% 100%;
+    background-size: 80% auto;*/
+    height: 100%;
+    /*background-repeat: no-repeat;*/
+    
+}
+
+.login-main-heading{
+    text-align: center;   
+}
+.login-heading{
+    color: #4F5055;
+    text-transform: uppercase;
+    font-weight: bolder;
+}
+.login-subheading{
+    color: #646464;
+}
+.login-logo{
+    width: 100%;
+    height: auto;
+    padding: 23% 27% 2%;
+}
+
+.login-input input{
+    background-color: rgba(0,0,0,.1);
+    color: #000000;
+}
+.login-input .input-label{
+    color: #009AF2;
+}
+
+.login-form-padding{
+    padding-left: 10%;
+    padding-right: 10%;
+}
+
+@media (min-width: 680px){
+    
+    .modal{
+      top: 0 !important;
+      bottom: 0 !important; 
+      left: 0 !important;
+      right: 0 !important;
+      min-height: 100% !important; 
+      width: 100% !important;
+    }
+}
+
+/*-------------login end----------------------------------*/
+
+/*-----alter popup for material design ----*/
+
+.popup-container .popup {
+    /*min-width: 240px;
+    max-width: 80%;
+    max-height: 80%;
+    position: relative;
+    overflow: hidden;*/
+     opacity: 0;
+    box-shadow: 0px 8px 10px -5px rgba(0, 0, 0, 0.14), 0px 16px 24px 2px rgba(0, 0, 0, 0.098), 0px 6px 30px 5px rgba(0, 0, 0, 0.084);
+    /*display: -webkit-flex;
+    display: flex;
+    -webkit-flex-direction: column;
+    flex-direction: column;*/
+    border-radius: 4px;
+    background-color: rgb(255,255,255);
+}
+
+
+.popup-container .popup .popup-head{
+    border: none;
+    padding: 24px;
+    text-align: left;
+}
+
+.popup-container .popup .popup-head .popup-title{
+    font-size: 20px;
+    font-weight: 500;
+    letter-spacing: 0.005em;
+}
+
+.popup-container .popup .popup-body{
+    padding: 0px 24px;
+}
+
+.popup-buttons button.button.ng-binding.button-positive{
+    border-color: #ffffff !important; 
+    background-color: #ffffff !important; 
+    color: #009AF2 !important;
+    text-align: right;
+    border: none;
+    box-shadow: none;
+    font-weight: bolder;
+}
+
+.popup-buttons button.button.ng-binding.button-default{
+    border-color: #ffffff !important; 
+    background-color: #ffffff !important; 
+    text-align: right;
+    border: none;
+    box-shadow: none;
+    font-weight: bolder;
+}
+
+/*-----alter popup for material design ----*/
+
+
+/*--------- floatinjg menu customization -------*/
+
+#floating-menu li{
+    width: 80%;
+    height: 80%;
+    left: 4.5px;
+    line-height: 50px;
+}
+
+#floating-menu li.menu-button{ 
+    line-height: 60px;
+}
+/*-------- floating menu customization --------*/
+
+
+/*-------------------- new property ---------------------*/
+
+.new-prop_camera-img{
+   /* padding: 40%;*/
+    padding: 30px;
+    padding-top: 30px;
+    text-align: center;
+    background-color: #e2e2e2;
+    padding-bottom: 30px;
+}
+.reportImage{
+    width: auto;
+    height: auto;
+    max-height: 300px;
+    max-height: auto;
+}
+
+/*-------------------- new property ---------------------*/
+
+.property-slider-number{
+    font-size: 9px;
+    font-weight: bold;
+    position: absolute;
+    right: 30%;
+    top: 4px;
+}
+
+
+/*---------------inspections ----------------------------*/
+
+.custom-avatar-img{
+    border-radius: 50%;
+    left: 16px;
+    max-height: 50px !important;
+    max-width: 50px !important;
+    border: 1px solid #bfbfbf;
+}
+
+/*---------------- end inspections -----------------------*/
+
+
+/*---------------float button fab ----------------------------*/
+
+.float-button {
+    background-color:#009AF2;
+    color: white;
+    font-size: 20px;
+    position: fixed;
+    bottom: 5%; /* Adjust height */
+    right: 5%; /* Adjust position */
+    
+    right: 20px;
+    z-index: 9999;
+    width: 60px;
+    height: 60px;
+    line-height: 62px;
+    margin: 0;
+    padding: 0;
+    text-align: center;
+    cursor: pointer;
+    box-shadow: 0 2px 10px 0 rgba(0, 0, 0, 0.2), 0 2px 5px 0 rgba(0, 0, 0, 0.2);
+    transform: translate3d(0, 0, 0);
+    backface-visibility: hidden;
+    padding: 0;
+    border: none;
+    border-radius: 50%;
+    
+}
+
+.float-button .content {
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  width: 100%;
+  text-align: center;
+  color: white;
+}
+/*---------------end float button fab ----------------------------*/
+
+/*---------------Image grid ----------------------------*/
+
+.imgur-image-wrapper{
+    /*height: 75px;
+    width: 75px;*/
+    overflow: hidden;
+    position: relative;
+   
+}
+.imgur-grid-image{
+    /*top: -33px;*/
+    height: auto;
+    width: 100%;
+    min-height: 100%;
+    position: relative;
+    text-align: center;
+}
+
+.image-view {
+    width: 100%;
+    height: 600px;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center, center;
+}
+
+
+
+.zoom-pane {
+	width: 100% !important;
+	height: 100% !important;
+}
+
+.zoom-pane .scroll {
+	min-height: 100% !important;
+	 
+	display: -webkit-box;
+	display: -moz-box;
+	display: -ms-flexbox;
+	display: -webkit-flex;
+	display: flex;
+	-webkit-box-direction: normal;
+	-moz-box-direction: normal;
+	-webkit-box-orient: horizontal;
+	-moz-box-orient: horizontal;
+	-webkit-flex-direction: row;
+	-ms-flex-direction: row;
+	flex-direction: row;
+	-webkit-flex-wrap: nowrap;
+	-ms-flex-wrap: nowrap;
+	flex-wrap: nowrap;
+	-webkit-box-pack: center;
+	-moz-box-pack: center;
+	-webkit-justify-content: center;
+	-ms-flex-pack: center;
+	justify-content: center;
+	-webkit-align-content: stretch;
+	-ms-flex-line-pack: stretch;
+	align-content: stretch;
+	-webkit-box-align: center;
+	-moz-box-align: center;
+	-webkit-align-items: center;
+	-ms-flex-align: center;
+	align-items: center;
+}
+
+.zoom-pane img {
+	width: 100% !important;
+	vertical-align: middle !important;
+}
+
+.image-modal {
+    width: 100% !important;
+    height: 100% !important;
+    top: 0 !important;
+    left: 0 !important;
+    background: black !important;
+}
+
+/*--------------end Image grid --------------------*/
+
+/*--------------- custom option button --------------*/
+.custom-search-box-col{
+    text-align: center;
+    color: #1785e3;
+    border: none;
+    max-width: 140px;
+}
+
+.custom-search-box-item{
+    padding: 8px !important;
+}
+
+.custom-search-box-item-text{
+    padding : 5px;
+}
+
+.custom-search-box-border{
+    border: 1px solid #1785e3;
+    border-radius: 5px;
+}
+
+.custom-search-box-no-border{
+    border: none;
+}
+
+.custom-search-btn .item-content{
+    padding-top: 9px;
+    padding-bottom: 9px;
+    background-color: #444444 !important;
+    color: white;
+    border-radius: 5px;
+}
+
+.custom-search-btn .radio-icon{
+    padding: 2px;
+}
+
+/*--------------- end custom option button --------------*/
+
+.general-buttons-container{
+    text-align: right;
+}
+
+.header-badge{
+    position: absolute !important;
+    top: -6px !important;
+    right: -7px !important;
+}
+
+.header-badgex{
+    position: absolute !important;
+    top: -6px !important;
+    right: -14px !important;
+    
+    color: darkgreen !important;
+}
+
+.general-action-btn{
+    margin-right: 20px;
+    
+    background-color: #009AF2;
+    color: white;
+    font-size: 20px;
+    width: 60px;
+    height: 60px;
+    padding: 0;
+    text-align: center;
+    cursor: pointer;
+    box-shadow: 0 2px 10px 0 rgba(0, 0, 0, 0.2), 0 2px 5px 0 rgba(0, 0, 0, 0.2);
+    transform: translate3d(0, 0, 0);
+    backface-visibility: hidden;
+    border: none;
+    border-radius: 50%;
+    
+}

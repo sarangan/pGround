@@ -1,0 +1,30 @@
+<ion-modal-view view-title="Comment" >
+
+	<ion-header-bar class="bar-calm pg-theme-header">
+
+       <button class="button button-icon icon ion-close-circled" style="color:#ffffff; padding:0px;" ng-click="onClose()"></button>
+
+      <h1 class="title">Comment</h1>
+
+      <div class="buttons">
+          <button class="button" ng-click="saveComment()">Save</button>
+      </div>
+
+	</ion-header-bar>
+
+  <ion-content has-bouncing="false" class="has-header" overflow-scroll="true" id="newpostContent" style="background-color:#f5f4f2;">
+
+    <div style="background-color:#ffffff;">
+
+        <div class="list">
+          <label class="item item-input pad-textarea">
+            <textarea placeholder="Enter your message" my-text="" ng-model="data.comment" ng-trim="true" id="newpostTextarea" style="height: 80vh;">{{data.comment}}</textarea>
+          </label>
+        </div>
+
+    </div>
+
+  </ion-content>  
+  
+
+</ion-model-view>

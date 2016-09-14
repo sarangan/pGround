@@ -1,0 +1,33 @@
+<ion-view view-title="Room list">
+	
+	<ion-nav-bar class="bar-calm pg-theme">
+	    <ion-nav-back-button>
+	    </ion-nav-back-button>
+	    <ion-nav-buttons side="right">
+	       	<button class="button"  ui-sref="app.proplistsort({property_id: property_id })">
+            	Reorder
+        	</button>
+	    </ion-nav-buttons>
+	</ion-nav-bar>
+
+	<ion-content overflow-scroll="true">
+
+	  	<ion-list >
+
+			<ion-item ui-sref="app.newPropertyinfo({property_id: property_id })">
+		    	<p style="font-size:16px;">Property info</p>
+		  	</ion-item>
+		  	<ion-item ui-sref="app.generalcondition({property_id: property_id })">
+		    	<p style="font-size:16px;">General Condition</p>
+		  	</ion-item>
+
+		  	<ion-item ng-repeat="item in items | orderBy: 'priority' track by $index"  ng-click="openLink(item)">
+			    <!-- <p style="font-size:16px;" ng-if="item.type == 'DEFAULT'">{{item.item_name}}</p>
+			  	<p style="font-size:16px;" ng-if="item.type == 'SELF'">{{item.name}}</p>  -->
+			  	<p style="font-size:16px;">{{item.name}}</p>
+			 </ion-item>
+
+		</ion-list>
+
+  </ion-content>
+</ion-view>

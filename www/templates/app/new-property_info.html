@@ -1,0 +1,72 @@
+<ion-view view-title="{{title}}">
+
+
+<ion-nav-bar class="bar-calm pg-theme">
+    <ion-nav-back-button>
+    </ion-nav-back-button>
+    <ion-nav-buttons side="right">
+        <button class="button" ng-click="save()">
+        	Save
+        </button>
+    </ion-nav-buttons>
+</ion-nav-bar>
+	
+  <ion-content overflow-scroll="true">
+
+		<div class="list">
+
+			<label class="item item-divider">Property Details</label>
+
+			  <label class="item item-input item-floating-label">
+			    <span class="input-label">Address</span>
+			    <input type="text" placeholder="Address" ng-model="data.address_1">
+			  </label>
+			  <label class="item item-input item-floating-label">
+			    <span class="input-label">Address 2</span>
+			    <input type="text" placeholder="Address 2" ng-model="data.address_2">
+			  </label>
+			  <label class="item item-input item-floating-label">
+			    <span class="input-label">Town</span>
+			    <input type="text" placeholder="Town" ng-model="data.city">
+			  </label>
+			  <label class="item item-input item-floating-label">
+			    <span class="input-label">Postal code</span>
+			    <input type="text" placeholder="Postal code" ng-model="data.postalcode">
+			  </label>
+
+		    <label class="item item-divider">Report Details</label>
+
+		    	<label class="item item-input item-select">
+				    <div class="input-label">
+				      Report type
+				    </div>
+				    <select ng-model="data.report_type">
+				      <option value="report_1">Report 1</option>
+				      <option value="report_2">Report 2</option>
+				      <option value="report_3">Report 3</option>
+				    </select>
+				</label>
+
+				<label class="item item-input" ng-click="openDate()">
+				  <span class="input-label">Report Date</span>
+				  <input type="text" placeholder="dd/mm/yyyy" ng-model="data.report_date">
+				</label>
+
+			<label class="item item-divider">Additional info</label>
+
+				<label class="item item-input item-floating-label">
+				    <span class="input-label">Description</span>
+				    <input type="text" placeholder="Description" ng-model="data.description">
+				</label>
+
+
+			<label class="item item-divider">Report Image</label>
+
+				<div class="new-prop_camera-img" ng-click="openCamera()">
+					<img ng-src="{{data.image_url}}" class="reportImage"/>
+				</div>
+
+		</div>
+
+  </ion-content>
+</ion-view>

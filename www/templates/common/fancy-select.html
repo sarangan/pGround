@@ -1,0 +1,28 @@
+<ion-modal-view class="fancy-select-modal">
+ <ion-header-bar align-title="center" class="bar-positive hmw-theme-header">
+   <button class="button button-clear button-icon ion-arrow-left-c" ng-click="closeModal()"></button>
+   <h1 class="title">{{headerText}}</h1>
+   <button class="button button-clear button-icon ion-checkmark-round" ng-if="!closeOnSelection" ng-click="select(); closeModal();"></button>
+ </ion-header-bar>
+ <ion-content overflow-scroll="true" has-bouncing="false" class="has-header">
+
+    <div ng-if="group">
+     <div class="list" ng-if="multiSelect" ng-repeat="(key, value) in selection.selectable | groupBy : group">
+        <ion-item ng-if="groupLabel" class="item-divider">{{groupLabel(value[0])}}</ion-item>
+            <ion-checkbox ng-repeat="item in value" ng-model="item.selected">{{itemLabel(item)}}</ion-checkbox>
+     </div>
+     <div class="list" ng-if="!multiSelect" ng-repeat="(key, value) in selection.selectable | groupBy : group">
+        <ion-item ng-if="groupLabel" class="item-divider">{{groupLabel(value[0])}}</ion-item>
+           <ion-radio ng-repeat="item in value" ng-model="selection.selected" ng-value="item" name="fancy-select">{{itemLabel(item)}}</ion-radio>
+      </div>
+    </div>
+
+    <div ng-if="!group">
+        <div class="list">
+            <ion-checkbox ng-if="multiSelect" ng-repeat="item in selection.selectable" ng-model="item.selected">{{itemLabel(item)}}</ion-checkbox> <!-- ng-checked="checkInit(item)" -->
+            <ion-radio ng-if="!multiSelect" ng-repeat="item in selection.selectable" ng-model="selection.selected" ng-value="item" name="fancy-select">{{itemLabel(item)}}</ion-radio>
+        </div>
+    </div>
+
+  </ion-content>
+</ion-modal-view>

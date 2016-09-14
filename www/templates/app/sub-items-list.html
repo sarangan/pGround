@@ -1,0 +1,33 @@
+<ion-view view-title="Sub items list">
+
+
+	<ion-floating-menu has-footer="false" button-color="#009AF2" icon="ion-plus" iconColor="#fff" ng-if="showButton">
+	    <ion-floating-item icon="ion-edit" button-color="#009AF2" click="rename()"></ion-floating-item>
+	    <ion-floating-item icon="ion-trash-b" button-color="#009AF2" click="search()"></ion-floating-item>
+	    <ion-floating-item icon="ion-ios-copy" button-color="#009AF2" click="addNew()"></ion-floating-item>
+	</ion-floating-menu>
+
+	<ion-content overflow-scroll="true">
+
+	  	<div class="list">
+
+
+	  		<a class="item" ng-repeat="item in items | filter: { type : 'GENERAL' } track by $index">		  		
+		  		{{item.item_name}}
+
+		  		<div class="general-buttons-container">
+		  			<button class="button icon ion-ios-camera general-action-btn" ng-click="generalCamera()"><span class="badge badge-assertive header-badge">5</span></button>
+		  			<button class="button icon ion-chatbubble-working general-action-btn" ng-click="generalComment(item.prop_subitem_id)"><span class="badge header-badgex"><i class="icon ion-checkmark-circled"></i></span></button>
+		  			<button class="button icon ion-ios-mic general-action-btn" ng-click="generalVoiceRecorder(item.prop_subitem_id)"><span class="badge header-badgex"><i class="icon ion-checkmark-circled"></i></span></button>
+		  		</div>
+			</a>
+
+		  	<a class="item" ng-repeat="item in items | filter: { type : 'ITEM' } track by $index" ui-sref="app.addSubDetails({sub_id: item.prop_subitem_id, type: 'SUB' })">
+		  		{{item.item_name}}
+			    <span class="item-note"> {{item.image_count}} {{ item.image_count > 1? 'Images': 'Image' }} <i class="icon ion-ios-arrow-right"></i></span>
+			</a>
+
+		</div>
+
+  </ion-content>
+</ion-view>

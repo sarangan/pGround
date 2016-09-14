@@ -1,0 +1,53 @@
+<ion-view view-title="Inspections">
+
+	<ion-nav-bar class="bar-calm pg-theme">
+	    <ion-nav-back-button>
+	    </ion-nav-back-button>
+	    <ion-nav-buttons side="left">
+        <button class="button button-icon button-clear ion-navicon" menu-toggle="left">
+        </button>
+      </ion-nav-buttons>
+      
+	    <ion-nav-buttons side="right">
+	     	<button class="button button-clear button-icon ion-android-upload">
+	        </button>
+	        <button class="button button-clear button-icon ion-refresh" ng-click="refresh()">
+	        </button>
+
+	    </ion-nav-buttons>
+	</ion-nav-bar>
+	
+	<!-- <ion-floating-menu has-footer="false" button-color="#009AF2" icon="ion-plus" iconColor="#fff">
+	    <ion-floating-item icon="ion-edit" button-color="#009AF2" click="addNew()"></ion-floating-item>
+	    <ion-floating-item icon="ion-android-search" button-color="#009AF2" click="search()"></ion-floating-item>
+	    <ion-floating-item icon="ion-android-upload" button-color="#009AF2" click="uploadAll()"></ion-floating-item>
+	</ion-floating-menu> -->
+
+	<ion-content overflow-scroll="true">
+
+
+	  	<div class="list">  		
+
+	  		<a class="item item-avatar" ng-repeat="item in items | orderBy: 'createdAt' " ng-click="openLink(item.property_id)">
+		      <img src="{{avatarImg(item.image_url)}}" class="custom-avatar-img">
+
+		      	<div class="row">
+				  	<div class="col col-75"><h2>{{item.address_1}} {{item.address_2}}</h2><p>{{item.city}} {{item.postalcode}}</p></div>
+				  	<div class="col"><span style="font-size: 11px; color: #b4b9b9;"><i class="icon ion-android-time"></i> {{item.created_date}}</span></div>
+				</div>
+		      
+		    </a>
+
+		</div>
+
+  </ion-content>
+
+    <div class="float-button">
+		<span class="height-fix">
+	   		<a class="content" ng-click="addNew()">
+	    		<i class="icon ion-plus"> </i>
+	   		</a>
+	  	</span>
+	</div>
+
+</ion-view>
