@@ -473,10 +473,10 @@ appCtrl.controller('NewPropInfoCtrl', function(
                                                     });
 
 
-                                                  $timeout(function(){
+                                                 // $timeout(function(){
                                                     //we got property id , upload image to server
                                                     //$state.go('app.property', {property_id : $scope.property_id });
-                                                  }, 300);
+                                                 // }, 300);
                                                   
 
 
