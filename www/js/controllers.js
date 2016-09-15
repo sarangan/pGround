@@ -401,7 +401,8 @@ appCtrl.controller('NewPropInfoCtrl', function(
                                 });
 
 
-                                //master items import
+                                //master items import 
+                                // merger wai
 
                                 query = "select Company_masteritem_link.* from Company_masteritem_link where Company_masteritem_link.status='true'";
 
