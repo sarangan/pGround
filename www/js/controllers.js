@@ -1734,6 +1734,8 @@ appCtrl.controller('SubItemsListCtrl', function($scope, $state, $stateParams, co
     $scope.data = {};
     $scope.breadcums = [];
 
+    $scope.data.viewName =  'Sub items list';
+
 
     $scope.property_id = $stateParams.property_id;
     $scope.prop_master_id = $stateParams.master_id;
@@ -2142,7 +2144,7 @@ appCtrl.controller('AddSubDetailsCtrl', function($scope, $state, $stateParams, c
         if(propinfo.status == 1){
           var address = (propinfo.data.address_1.length > 9) ? propinfo.data.address_1.substring(0, 9) + '...' : propinfo.data.address_1;
           $scope.breadcums.push(address);
-          $scope.breadcums.push('Room list');
+          $scope.breadcums.push('Room..');
 
           if($stateParams.type == 'ITEM' ){
               
@@ -2171,6 +2173,7 @@ appCtrl.controller('AddSubDetailsCtrl', function($scope, $state, $stateParams, c
                 console.log('item length imtem name', result.data.rows.length);
                 if(result.data.rows.length > 0) {
                   $scope.data.viewName = result.data.rows.item(0).meter_name;
+                  $scope.breadcums.push('Meter list');
                   $scope.breadcums.push(result.data.rows.item(0).meter_name);
                 }
 
@@ -2180,15 +2183,19 @@ appCtrl.controller('AddSubDetailsCtrl', function($scope, $state, $stateParams, c
           }
           else if($stateParams.type == 'SUB'){
 
-              var query = "select property_meter_link.*, company_meter_link.meter_name from property_meter_link left join company_meter_link on property_meter_link.com_meter_id = company_meter_link.com_meter_id where property_meter_link.status=1 and property_meter_link.prop_meter_id =?";
+
+              var query = "select property_subitem_link.*, company_subitem_link.item_name as sub_item_name, company_subitem_link.type, property_masteritem_link.prop_master_id, property_masteritem_link.name as master_item_name, company_subitem_link.com_master_id from property_subitem_link inner join company_subitem_link on property_subitem_link.com_subitem_id = company_subitem_link.com_subitem_id inner JOIN property_masteritem_link on company_subitem_link.com_master_id = property_masteritem_link.com_master_id  where property_subitem_link.status =1 and property_subitem_link.prop_subitem_id =? ";
               var data = [$scope.sub_id];
     
               DatabaseSrv.executeQuery(query, data ).then(function(result){
               
                 console.log('item length imtem name', result.data.rows.length);
                 if(result.data.rows.length > 0) {
-                  $scope.data.viewName = result.data.rows.item(0).meter_name;
-                  $scope.breadcums.push(result.data.rows.item(0).meter_name);
+                  $scope.data.viewName = result.data.rows.item(0).sub_item_name;
+                  var master_item_name = (result.data.rows.item(0).master_item_name > 5) ? result.data.rows.item(0).master_item_name.substring(0, 5) + '..' : result.data.rows.item(0).master_item_name;
+                  $scope.breadcums.push(master_item_name);
+                  var sub_item_name = (result.data.rows.item(0).sub_item_name.length > 5) ? result.data.rows.item(0).sub_item_name.substring(0, 5) + '..' : result.data.rows.item(0).sub_item_name;
+                  $scope.breadcums.push(sub_item_name);
                 }
 
               });
