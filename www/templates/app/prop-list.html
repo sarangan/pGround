@@ -14,6 +14,12 @@
 
 	  	<ion-list >
 
+	  		<ion-item style="padding: 0px;">
+	  			<div class="breadcrumb">
+					<a ng-repeat="bread in breadcums track by $index">{{bread}}</a>
+				</div>
+		  	</ion-item>
+
 			<ion-item ui-sref="app.newPropertyinfo({property_id: property_id })">
 		    	<p style="font-size:16px;">Property info</p>
 		  	</ion-item>

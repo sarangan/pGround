@@ -1,4 +1,4 @@
-<ion-view view-title="{{data.item_name}}">
+<ion-view view-title="{{data.viewName}}">
 
 
 <ion-nav-bar class="bar-calm pg-theme" >
@@ -18,10 +18,16 @@
 
 		<ion-list>
 
+			<div class="item" style="padding: 0px;" ng-show="breadcums.length">
+	  			<div class="breadcrumb">
+					<a ng-repeat="bread in breadcums track by $index">{{bread}}</a>
+				</div>
+		  	</div>
+
 			<label class="item item-divider" ng-if="type != 'METER'">Condition</label>
 
 
-			<div class="row" ng-if="type !='METER'">
+			<div class="row" ng-if="type !='METER'" style="display:inline-block;">
 			   	<label class="item item-radio custom-search-box-col" ng-repeat="optItem in searchOptList">
 				  	<input type="radio" ng-model="data.searchOpt" ng-click="searchOptChange(optItem)" ng-checked="optItem.selected" />
 					  <div class="item-content custom-search-box-item">

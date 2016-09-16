@@ -1,4 +1,4 @@
-<ion-view view-title="Sub items list">
+<ion-view view-title="{{data.viewName}}">
 
 
 	<ion-floating-menu has-footer="false" button-color="#009AF2" icon="ion-plus" iconColor="#fff" ng-if="showButton">
@@ -11,6 +11,11 @@
 
 	  	<div class="list">
 
+	  		<a class="item" style="padding: 0px;" ng-show="breadcums.length">
+	  			<div class="breadcrumb">
+					<a ng-repeat="bread in breadcums track by $index">{{bread}}</a>
+				</div>
+		  	</a>
 
 	  		<a class="item" ng-repeat="item in items | filter: { type : 'GENERAL' } track by $index">		  		
 		  		{{item.item_name}}
@@ -22,7 +27,7 @@
 		  		</div>
 			</a>
 
-		  	<a class="item" ng-repeat="item in items | filter: { type : 'ITEM' } track by $index" ui-sref="app.addSubDetails({sub_id: item.prop_subitem_id, type: 'SUB' })">
+		  	<a class="item" ng-repeat="item in items | filter: { type : 'ITEM' } track by $index" ui-sref="app.addSubDetails({sub_id: item.prop_subitem_id, type: 'SUB', property_id: property_id })">
 		  		{{item.item_name}}
 			    <span class="item-note"> {{item.image_count}} {{ item.image_count > 1? 'Images': 'Image' }} <i class="icon ion-ios-arrow-right"></i></span>
 			</a>

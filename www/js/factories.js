@@ -687,6 +687,69 @@ appFact.factory('roomObj', function(){
 
 });
 
+// this service to get property info based on property id
+appFact.factory('PropInfoSrv', function(DatabaseSrv, $q, $log){
+  
+  var propInfo = function(property_id){
+
+      var propInfoData = {};
+      var q = $q.defer();
+
+      if(property_id){
+        
+        DatabaseSrv.initLocalDB().then(function(initdb){
+
+          var query = "select property_info.*, strftime('%d/%m/%Y', property_info.createdAt) as created_date, property.description from property_info inner join property on property_info.property_id = property.property_id where property.property_id=?";
+          var data = [property_id];
+      
+          DatabaseSrv.executeQuery(query, data ).then(function(result){
+
+              if(result.status == 1 && result.data.rows.length > 0){
+                //$scope.data = result.property[0];
+                propInfoData.address_1 = result.data.rows.item(0).address_1;
+                propInfoData.address_2 =  result.data.rows.item(0).address_2;
+                propInfoData.city = result.data.rows.item(0).city;
+                propInfoData.postalcode =  result.data.rows.item(0).postalcode;
+                propInfoData.report_type = result.data.rows.item(0).report_type;
+                propInfoData.report_date = result.data.rows.item(0).report_date;
+                propInfoData.created_date = result.data.rows.item(0).created_date;
+                propInfoData.description = result.data.rows.item(0).description;
+
+                propInfoData.image_url = result.data.rows.item(0).image_url;
+
+                if( propInfoData.image_url.length == 0 || propInfoData.image_url.indexOf('list_icon.png') ){
+                  propInfoData.image_url =  "img/photo-camera.png";
+                }
+
+                q.resolve({data: propInfoData, status: 1} );
+
+              }
+              else{
+                q.resolve({data: propInfoData, status: 0});
+                $log.log('Could not find the property!'); 
+              }
+
+          });
+
+        });
+
+      }
+      else{
+        q.resolve({data: propInfoData, status: 0});
+      }
+
+
+    return q.promise;
+
+  };
+
+  return{
+      getPropInfo: propInfo 
+  };
+
+});
+
+
 
 /*//used to play and record sounds
 appFact.factory('Sounds', function($q) {

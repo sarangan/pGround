@@ -17,6 +17,13 @@
 
 		<div class="list">
 
+			<div class="item" style="padding: 0px;">
+	  			<div class="breadcrumb">
+					<a ng-repeat="bread in breadcums track by $index">{{bread}}</a>
+				</div>
+		  	</div>
+
+
 			<div ng-repeat="item in items | orderBy: 'priority' ">
 			     	
 					<div class="item row">

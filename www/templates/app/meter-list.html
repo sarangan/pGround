@@ -14,8 +14,14 @@
 	<ion-content overflow-scroll="true">
 
 	  	<ion-list>
+
+	  		<ion-item style="padding: 0px;">
+	  			<div class="breadcrumb">
+					<a ng-repeat="bread in breadcums track by $index">{{bread}}</a>
+				</div>
+		  	</ion-item>
 			
-		  	<ion-item ng-repeat="item in items track by $index"  ui-sref="app.addSubDetails({sub_id: item.prop_meter_id, type: 'METER' })">
+		  	<ion-item ng-repeat="item in items track by $index"  ui-sref="app.addSubDetails({sub_id: item.prop_meter_id, type: 'METER', property_id: property_id })">
 			    <p style="font-size:16px;">{{item.meter_name}}</p>
 			</ion-item>
 

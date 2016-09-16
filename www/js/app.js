@@ -198,7 +198,7 @@ angular.module('PGApp', [
     })
 
     .state('app.addSubDetails', {
-      url: '/addSubDetails/:sub_id/:type',
+      url: '/addSubDetails/:sub_id/:type/:property_id',
       views: {
         'menuContent': {
           templateUrl: 'templates/app/add-sub-item-items.html',
