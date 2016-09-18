@@ -1712,7 +1712,7 @@ appCtrl.controller('MeterListCtrl', function($scope, $state, $stateParams, commo
 
 
 //--------------------------sub items list ---------------------------------------------
-appCtrl.controller('SubItemsListCtrl', function($scope, $state, $stateParams, commonSrv, $log, $ionicPopup, DatabaseSrv, $ionicPopup, roomObj, myModals, genericModalService, PropInfoSrv){
+appCtrl.controller('SubItemsListCtrl', function($scope, $state, $stateParams, commonSrv, $log, $ionicPopup, DatabaseSrv, $ionicPopup, roomObj, myModals, genericModalService, PropInfoSrv, $cordovaCamera, srvObjManipulation){
 
   $scope.property_id = 0;
   $scope.prop_master_id = 0;
@@ -1726,6 +1726,19 @@ appCtrl.controller('SubItemsListCtrl', function($scope, $state, $stateParams, co
 
   $scope.data.viewName = "Sub items list";
   $scope.breadcums = [];
+
+   var options = {
+        quality: 75,
+        destinationType: Camera.DestinationType.FILE_URI,
+        sourceType: Camera.PictureSourceType.CAMERA,
+        allowEdit: false,
+        encodingType: Camera.EncodingType.JPEG,
+        targetWidth: 800,
+        targetHeight: 800,
+        popoverOptions: CameraPopoverOptions,
+        saveToPhotoAlbum: false,
+        correctOrientation:true
+      };
 
 
   $scope.$on('$ionicView.beforeEnter', function() {
@@ -1780,6 +1793,8 @@ appCtrl.controller('SubItemsListCtrl', function($scope, $state, $stateParams, co
           var query = "select property_subitem_link.*, company_subitem_link.item_name, company_subitem_link.type, property_masteritem_link.prop_master_id, property_masteritem_link.name as master_item_name, company_subitem_link.com_master_id, (select count(photos.photo_id) from photos where photos.item_id = property_subitem_link.prop_subitem_id ) as image_count from property_subitem_link inner join company_subitem_link on property_subitem_link.com_subitem_id = company_subitem_link.com_subitem_id inner JOIN property_masteritem_link on company_subitem_link.com_master_id = property_masteritem_link.com_master_id where property_subitem_link.status =1 and property_masteritem_link.prop_master_id =? and property_subitem_link.property_id=? order by company_subitem_link.type";
 
           var data = [$scope.prop_master_id, $scope.property_id];
+
+          var general_sub_item_id = '';
       
           DatabaseSrv.executeQuery(query, data ).then(function(result){
             
@@ -1791,9 +1806,15 @@ appCtrl.controller('SubItemsListCtrl', function($scope, $state, $stateParams, co
 
                   console.log('item ', item);
                   $scope.items.push(item);
-                }
-                 $scope.data.viewName =  result.data.rows.item(0).master_item_name ;
+                  //$scope.data.photos = item.image_count;
 
+                  if(item.type =='GENERAL' ){
+                    general_sub_item_id= item.prop_subitem_id;
+                  }
+
+                }
+
+                 $scope.data.viewName =  result.data.rows.item(0).master_item_name ;
                   //getting property info for breadcums
                   PropInfoSrv.getPropInfo($scope.property_id).then(function(propinfo){
                     
@@ -1810,15 +1831,43 @@ appCtrl.controller('SubItemsListCtrl', function($scope, $state, $stateParams, co
                   }); 
 
 
+                   //-----------------------------------------------------------------------
+                    query = "select count(photos.photo_id) as image_count from photos where photos.item_id =? and photos.type='GENERAL' ";
+                    data = [general_sub_item_id];      
+                    DatabaseSrv.executeQuery(query, data ).then(function(result){            
+                      console.log('item length', result.data.rows.length);
+                        if(result.data.rows.length > 0) {
+                            $scope.data.image_count = result.data.rows.item(0).image_count;
+                        }            
+                    });
+
+                    //----------------------------------------------------------------------
+                    query = "select property_sub_feedback_general.* from property_sub_feedback_general where property_sub_feedback_general.item_id=?";
+                    data = [general_sub_item_id];      
+                    DatabaseSrv.executeQuery(query, data ).then(function(result){
+                      console.log('item length', result.data.rows.length);
+                        if(result.data.rows.length > 0) {
+                            $scope.data.comment_length = result.data.rows.item(0).comment.trim().length;
+                        }
+                    });
+
+                    //----------------------------------------------------------------------
+                    query = "select count(property_sub_voice_general.prop_sub_feedback_general_id) as voice_count from property_sub_voice_general where property_sub_voice_general.item_id =?";
+                    data = [general_sub_item_id];                
+                    DatabaseSrv.executeQuery(query, data ).then(function(result){
+                        if(result.data.rows.length > 0) {
+                           $scope.data.voice_count = result.data.rows.item(0).voice_count;
+                        }                      
+                    });
 
                 
-
-                //$scope.items = result.data;
 
               }
 
             
           });
+
+
 
         });
 
@@ -1830,8 +1879,86 @@ appCtrl.controller('SubItemsListCtrl', function($scope, $state, $stateParams, co
 
 
   //open camera 
-  $scope.generalCamera = function(){
-    $log.log('camera camera');
+  $scope.generalCamera = function(prop_subitem_id){     
+
+    $log.log('general camera');
+
+
+          $cordovaCamera.getPicture(options).then(function(imageData){
+          // var image = document.getElementById('reportImage');
+          // $scope.data['reportImage'] = "data:image/jpeg;base64," + imageData;
+
+          //$scope.data['reportImage'] = imageData;
+
+          console.log('file url ', imageData);
+          
+          var query = "INSERT INTO photos (photo_id, item_id, type, img_url) VALUES (?,?,?,?) ";
+          var data = [srvObjManipulation.generateUid(), prop_subitem_id, 'GENERAL', imageData ];
+          $log.log('camera data saving');
+          $log.log(data);
+          DatabaseSrv.executeQuery(query, data).then(function(result){
+              
+              if(result.status == 1){
+                $log.log('Saved  photo ' + imageData);
+                $scope.data.image_count = parseInt($scope.data.image_count) +  1;
+              }
+              else{
+                $log.log('photo saving problem') ;           
+              }
+
+          });
+
+
+
+        //-------------- 
+
+        var
+            closeInSeconds = 3,
+            displayText = "<span id='timer_id_camera'>Close in #1 seconds.</span>",
+            timer;
+
+        swal(
+              { 
+                title: "Do you want to take more photos?",
+                text: displayText.replace(/#1/, closeInSeconds),   
+                timer: closeInSeconds * 1000,   
+                showConfirmButton: true,
+                confirmButtonColor: "#DD6B55",   
+                confirmButtonText: "Done!",
+                html: true
+              },
+              function(isConfirm){
+
+                  if (isConfirm) {
+                    $log.log("camera bye bye.");
+                  }
+                  else{
+                    $log.log("normal cancel");
+                    $scope.generalCamera();
+                  }
+                
+              }
+
+          );
+
+          timer = setInterval(function() {
+            closeInSeconds--;
+            if (closeInSeconds < 0) {
+              clearInterval(timer);
+              swal.close();
+            }
+            document.getElementById("timer_id_camera").innerHTML = displayText.replace(/#1/, closeInSeconds);
+          }, 1000);
+
+        //-----------------
+
+        }, function(err){
+          // error
+          $log.log(err);
+      });
+
+
+
   };
 
   $scope.generalComment = function(prop_subitem_id){
@@ -2322,19 +2449,64 @@ appCtrl.controller('AddSubDetailsCtrl', function($scope, $state, $stateParams, c
           $scope.images.push({src: imageData, link: imageData } );
           $scope.newImages.push( {src: imageData, link: imageData} );
 
+          var query = "INSERT INTO photos (photo_id, item_id, type, img_url) VALUES (?,?,?,?) ";
+          var data = [srvObjManipulation.generateUid(), $scope.sub_id, $scope.type, imageData ];
+          $log.log('camera data saving');
+          $log.log(data);
+          DatabaseSrv.executeQuery(query, data).then(function(result){
+              
+              if(result.status == 1){
+                $log.log('Saved  photo ' + imageData) ;
+              }
+              else{
+                $log.log('photo saving problem') ;           
+              }
 
-          var confirmPopup = $ionicPopup.confirm({
-              okText : 'Yes',
-              cancelText : 'No',
-              title: 'Notice',
-              template: 'Do you want to take more photos?'
           });
 
-        confirmPopup.then(function(res) {
-            if(res) {
-                $scope.openCamera();
+
+
+          //-------------- 
+
+        var
+            closeInSeconds = 3,
+            displayText = "<span id='timer_id_camera'>Close in #1 seconds.</span>",
+            timer;
+
+        swal(
+              { 
+                title: "Do you want to take more photos?",
+                text: displayText.replace(/#1/, closeInSeconds),   
+                timer: closeInSeconds * 1000,   
+                showConfirmButton: true,
+                confirmButtonColor: "#DD6B55",   
+                confirmButtonText: "Done!",
+                html: true
+              },
+              function(isConfirm){
+
+                  if (isConfirm) {
+                    $log.log("camera bye bye.");
+                  }
+                  else{
+                    $log.log("normal cancel");
+                    $scope.openCamera();
+                  }
+                
+              }
+
+          );
+
+          timer = setInterval(function() {
+            closeInSeconds--;
+            if (closeInSeconds < 0) {
+              clearInterval(timer);
+              swal.close();
             }
-        });
+            document.getElementById("timer_id_camera").innerHTML = displayText.replace(/#1/, closeInSeconds);
+          }, 1000);
+
+        //-----------------
 
         }, function(err){
           // error
@@ -2395,7 +2567,6 @@ appCtrl.controller('AddSubDetailsCtrl', function($scope, $state, $stateParams, c
                      $scope.images.splice(index, 1);
                 }
 
-
               }
 
             });
@@ -2427,7 +2598,6 @@ appCtrl.controller('AddSubDetailsCtrl', function($scope, $state, $stateParams, c
 
     DatabaseSrv.initLocalDB().then(function(initdb){
 
-
         var query = "SELECT * from property_feedback where item_id=? and type=?";
         var data = [$scope.sub_id, $scope.type ];
 
@@ -2438,40 +2608,24 @@ appCtrl.controller('AddSubDetailsCtrl', function($scope, $state, $stateParams, c
                 query = "UPDATE property_feedback set option=?, comment=? where item_id=? and type=?";
 
                 //we got data exists
-                if($scope.type == 'SUB'){ //sub items details general items 
-                  
+                if($scope.type == 'SUB'){ //sub items details general items                   
                   data = [$scope.searchOptSelected, $scope.data.comment, $scope.sub_id,  $scope.type ];
-
                 }
                 else if($scope.type == 'METER'){
-
                   data = ['', $scope.data.comment, $scope.sub_id,  $scope.type ];
                 }
                 else{
-
                   data = [$scope.searchOptSelected, $scope.data.comment, $scope.sub_id,  $scope.type ];
                 }
             
                   DatabaseSrv.executeQuery(query, data ).then(function(result){
                       
                     if($scope.newImages.length == 0 ){
-
                         if(result.status == 1 ){
-                            
-                            /*var alertPopup = $ionicPopup.alert({
-                              title: 'Updated!',
-                              template: 'Successfully Updated!'
-                            }); */ 
-                            genericModalService.showToast('Successfully Saved!', 'LCenter');                       
+                          genericModalService.showToast('Successfully Saved!', 'LCenter');                       
                         }
                         else{
-
-                            /*var alertPopup = $ionicPopup.alert({
-                              title: 'Error!',
-                              template: 'Something went wrong!'
-                            });  */ 
-
-                            genericModalService.showToast('Something went wrong!', 'LCenter');               
+                          genericModalService.showToast('Something went wrong!', 'LCenter');               
                         }
                     }
 
@@ -2479,7 +2633,7 @@ appCtrl.controller('AddSubDetailsCtrl', function($scope, $state, $stateParams, c
 
 
 
-                  if($scope.newImages.length > 0 ){
+                 /* if($scope.newImages.length > 0 ){
 
                     query = "INSERT INTO photos (photo_id, item_id, type, img_url) ";
                     query += " SELECT '"+ srvObjManipulation.generateUid()+"' as photo_id, '"+ $scope.sub_id +"' as item_id, '"+ $scope.type +"' as type, '"+ $scope.newImages[0].link +"' as img_url ";
@@ -2491,27 +2645,15 @@ appCtrl.controller('AddSubDetailsCtrl', function($scope, $state, $stateParams, c
                     DatabaseSrv.executeQuery(query, []).then(function(result){
               
                         if(result.status == 1){
-                          
-                         /* var alertPopup = $ionicPopup.alert({
-                            title: 'Saved!',
-                            template: 'Successfully Saved!'
-                          });*/
                           genericModalService.showToast('Successfully Saved!', 'LCenter');
-
                         }
                         else{
-
-                          /*var alertPopup = $ionicPopup.alert({
-                            title: 'Error!',
-                            template: 'Something went wrong!'
-                          });*/
-                          genericModalService.showToast('Something went wrong!', 'LCenter'); 
-                  
+                          genericModalService.showToast('Something went wrong!', 'LCenter');                  
                         }
 
                     });
 
-                  }
+                  }*/
                
 
               }
@@ -2537,23 +2679,10 @@ appCtrl.controller('AddSubDetailsCtrl', function($scope, $state, $stateParams, c
                         if($scope.newImages.length == 0 ){
 
                           if(result.status == 1 ){
-                              
-                             /* var alertPopup = $ionicPopup.alert({
-                                title: 'Saved!',
-                                template: 'Successfully Saved!'
-                              });*/
-                              genericModalService.showToast('Successfully Saved!', 'LCenter');
-                             
+                            genericModalService.showToast('Successfully Saved!', 'LCenter');                             
                           }
                           else{
-
-                              /*var alertPopup = $ionicPopup.alert({
-                                title: 'Error!',
-                                template: 'Something went wrong!'
-                              });*/
-
-                              genericModalService.showToast('Something went wrong!', 'LCenter'); 
-                      
+                            genericModalService.showToast('Something went wrong!', 'LCenter');                     
                           }
 
                         }
@@ -2561,7 +2690,7 @@ appCtrl.controller('AddSubDetailsCtrl', function($scope, $state, $stateParams, c
                     });
 
 
-                    if($scope.newImages.length > 0 ){ // this is where get insert new images database
+                    /*if($scope.newImages.length > 0 ){ // this is where get insert new images database
 
                         query = "INSERT INTO photos (photo_id, item_id, type, img_url) "; 
                         query += " select '"+ srvObjManipulation.generateUid()+"' as photo_id, '"+ $scope.sub_id +"' as item_id, '"+ $scope.type +"' as type, '"+ $scope.newImages[0].link +"' as img_url ";
@@ -2573,29 +2702,15 @@ appCtrl.controller('AddSubDetailsCtrl', function($scope, $state, $stateParams, c
                         DatabaseSrv.executeQuery(query, [] ).then(function(result){
                   
                             if(result.status == 1){
-                              
-                              /*var alertPopup = $ionicPopup.alert({
-                                title: 'Saved!',
-                                template: 'Successfully Saved!'
-                              });*/
-
                               genericModalService.showToast('Successfully Saved!', 'LCenter');
-
                             }
                             else{
-
-                            /*  var alertPopup = $ionicPopup.alert({
-                                title: 'Error!',
-                                template: 'Something went wrong!'
-                              });*/
-
-                              genericModalService.showToast('Something went wrong!', 'LCenter'); 
-                      
+                              genericModalService.showToast('Something went wrong!', 'LCenter');                      
                             }
 
                         });
 
-                    }                
+                    }*/
 
               }
 

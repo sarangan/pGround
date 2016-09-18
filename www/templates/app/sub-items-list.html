@@ -21,9 +21,9 @@
 		  		{{item.item_name}}
 
 		  		<div class="general-buttons-container">
-		  			<button class="button icon ion-ios-camera general-action-btn" ng-click="generalCamera()"><span class="badge badge-assertive header-badge">5</span></button>
-		  			<button class="button icon ion-chatbubble-working general-action-btn" ng-click="generalComment(item.prop_subitem_id)"><span class="badge header-badgex"><i class="icon ion-checkmark-circled"></i></span></button>
-		  			<button class="button icon ion-ios-mic general-action-btn" ng-click="generalVoiceRecorder(item.prop_subitem_id)"><span class="badge header-badgex"><i class="icon ion-checkmark-circled"></i></span></button>
+		  			<button class="button icon ion-ios-camera general-action-btn" ng-click="generalCamera(item.prop_subitem_id)"><span class="badge badge-assertive header-badge" ng-if="data.image_count">{{data.image_count}}</span></button>
+		  			<button class="button icon ion-chatbubble-working general-action-btn" ng-click="generalComment(item.prop_subitem_id)"><span ng-if="data.comment_length" class="badge header-badgex"><i class="icon ion-checkmark-circled"></i></span></button>
+		  			<button class="button icon ion-ios-mic general-action-btn" ng-click="generalVoiceRecorder(item.prop_subitem_id)"><span class="badge header-badgex" ng-if="data.voice_count"><i class="icon ion-checkmark-circled"></i></span></button>
 		  		</div>
 			</a>
 
