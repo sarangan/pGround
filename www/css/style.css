@@ -234,7 +234,7 @@
 }
 .imgur-grid-image{
     /*top: -33px;*/
-    height: auto;
+    height: 100%;
     width: 100%;
     min-height: 100%;
     position: relative;
@@ -382,22 +382,23 @@
 }
 
 .breadcrumb {
-	/*centering*/
-	display: inline-block;
+	/*centering*/	
 	overflow-x: auto;
+    white-space: nowrap;
 }
 
 .breadcrumb a {
 	text-decoration: none;
 	outline: none;
-	display: block;
-	float: left;
+	display: block;	
 	font-size: 12px;
 	line-height: 30px;
 	color: white;
 	padding: 0 10px 0 30px;
 	background: #66b5de;
 	position: relative;
+    display: inline-block;
+    /*float: left;*/
 }
 
 .breadcrumb a:first-child:before {

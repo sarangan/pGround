@@ -217,14 +217,19 @@ appCtrl.controller('NewPropInfoCtrl', function(
                 $scope.data.city =  result.data.rows.item(0).city;
                 $scope.data.postalcode =  result.data.rows.item(0).postalcode;
                 $scope.data.report_type =  result.data.rows.item(0).report_type;
-                $scope.data.report_date =  result.data.rows.item(0).report_date;
+                $scope.data.report_date =  new Date(result.data.rows.item(0).report_date);
                 $scope.data.created_date =  result.data.rows.item(0).created_date;
                 $scope.data.description =  result.data.rows.item(0).description;
 
                 $scope.data.image_url =  result.data.rows.item(0).image_url;
 
-                if( $scope.data.image_url.length == 0 || $scope.data.image_url.indexOf('list_icon.png') ){
+
+                $log.log('image url test');
+                $log.log($scope.data.image_url);
+
+                if( $scope.data.image_url.length == 0 ){
                   $scope.data.image_url =  "img/photo-camera.png";
+                  $log.log('i am here because they call me ');
                 }
 
               }
@@ -335,8 +340,9 @@ appCtrl.controller('NewPropInfoCtrl', function(
 
 
                           var query = "INSERT INTO property_info (property_id, address_1, address_2, city, postalcode,  report_type, report_date, image_url) VALUES (?,?,?,?,?,?,?,?)";
-                          var data = [$scope.property_id, $scope.data.address_1, $scope.data.address_2, $scope.data.city, $scope.data.postalcode, $scope.data.report_type, $scope.data.report_date, $scope.data.reportImage ];
-                      
+                          var data = [$scope.property_id, $scope.data.address_1, $scope.data.address_2, $scope.data.city, $scope.data.postalcode, $scope.data.report_type, new Date($scope.data.report_date).toLocaleDateString("en-UK"), $scope.data.reportImage ];
+                          $log.log('date');
+                          $log.log(data);
                           DatabaseSrv.executeQuery(query, data ).then(function(prop_info_result){
 
 
@@ -571,7 +577,10 @@ appCtrl.controller('NewPropInfoCtrl', function(
                       
 
                 var query = "UPDATE property_info SET address_1=?, address_2=?, city=?, postalcode=?, report_type=?, report_date=?, image_url=? WHERE property_id=?";
-                var data = [$scope.data.address_1, $scope.data.address_2, $scope.data.city, $scope.data.postalcode, $scope.data.report_type, $scope.data.report_date, $scope.data.image_url, $scope.property_id ];
+                var data = [$scope.data.address_1, $scope.data.address_2, $scope.data.city, $scope.data.postalcode, $scope.data.report_type, new Date($scope.data.report_date).toLocaleDateString("en-UK"), $scope.data.image_url, $scope.property_id ];
+
+                $log.log('image urkl test');
+                $log.log(data);
 
                   DatabaseSrv.executeQuery(query, data ).then(function(prop_info_result){
 
@@ -1925,7 +1934,8 @@ appCtrl.controller('SubItemsListCtrl', function($scope, $state, $stateParams, co
                 showConfirmButton: true,
                 confirmButtonColor: "#DD6B55",   
                 confirmButtonText: "Done!",
-                html: true
+                html: true,
+                animation: false
               },
               function(isConfirm){
 
@@ -2445,18 +2455,21 @@ appCtrl.controller('AddSubDetailsCtrl', function($scope, $state, $stateParams, c
 
           //$scope.data['reportImage'] = imageData;
 
-          console.log('file url ', imageData);
-          $scope.images.push({src: imageData, link: imageData } );
-          $scope.newImages.push( {src: imageData, link: imageData} );
+          console.log('file url ', imageData);          
 
           var query = "INSERT INTO photos (photo_id, item_id, type, img_url) VALUES (?,?,?,?) ";
-          var data = [srvObjManipulation.generateUid(), $scope.sub_id, $scope.type, imageData ];
+          var photo_id  = srvObjManipulation.generateUid();
+          var data = [photo_id, $scope.sub_id, $scope.type, imageData ];
           $log.log('camera data saving');
           $log.log(data);
           DatabaseSrv.executeQuery(query, data).then(function(result){
               
               if(result.status == 1){
                 $log.log('Saved  photo ' + imageData) ;
+
+                $scope.images.push({src: imageData, link: imageData, image_id: photo_id } );
+                $scope.newImages.push( {src: imageData, link: imageData, image_id: photo_id } );
+
               }
               else{
                 $log.log('photo saving problem') ;           
@@ -2481,7 +2494,8 @@ appCtrl.controller('AddSubDetailsCtrl', function($scope, $state, $stateParams, c
                 showConfirmButton: true,
                 confirmButtonColor: "#DD6B55",   
                 confirmButtonText: "Done!",
-                html: true
+                html: true,
+                animation: false
               },
               function(isConfirm){
 
@@ -2564,7 +2578,8 @@ appCtrl.controller('AddSubDetailsCtrl', function($scope, $state, $stateParams, c
 
                 var index =  $scope.images.indexOf($scope.daleteImage);
                 if (index > -1) {
-                     $scope.images.splice(index, 1);
+                    $scope.images.splice(index, 1);
+                    $scope.closeModal();
                 }
 
               }
@@ -2579,11 +2594,13 @@ appCtrl.controller('AddSubDetailsCtrl', function($scope, $state, $stateParams, c
             var index =  $scope.images.indexOf($scope.daleteImage);
             if (index > -1) {
               $scope.images.splice(index, 1);
+               $scope.closeModal();
             }
 
             index =  $scope.newImages.indexOf($scope.daleteImage);
             if (index > -1) {
               $scope.newImages.splice(index, 1);
+               $scope.closeModal();
             }
 
         }
