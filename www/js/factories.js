@@ -524,14 +524,14 @@ appFact.factory('DatabaseSrv', function($q, PGAppConfig, $cordovaSQLite, $ionicP
              q.resolve({status: true, db: db_con});
           }*/
 
-         /*db_con = $cordovaSQLite.openDB({ name: db_name, iosDatabaseLocation:'default'}); 
-         q.resolve({status: true, db: db_con});*/
+         db_con = window.sqlitePlugin.openDatabase({name: db_name , location: 'default'});
+         q.resolve({status: true, db: db_con});
 
-         if (window.cordova && window.SQLitePlugin) {
-            var db = window.sqlitePlugin.openDatabase({ name: db_name, location: 1 })
+        /* if (window.cordova && window.SQLitePlugin) {
+           db_con  = window.sqlitePlugin.openDatabase({ name: db_name, location: 1 })
         } else {
-            db = window.openDatabase('property_ground', '1.0', db_name, 100 * 1024 * 1024);
-        }
+            db_con  = window.openDatabase('property_ground', '1.0', db_name, 100 * 1024 * 1024);
+        }*/
 
 
         /*if (!db_con) {
