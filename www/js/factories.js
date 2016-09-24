@@ -515,9 +515,19 @@ appFact.factory('DatabaseSrv', function($q, PGAppConfig, $cordovaSQLite, $ionicP
     
       $ionicPlatform.ready(function(){
 
+        if (window.cordova && window.SQLitePlugin) { 
+          db_con = $cordovaSQLite.openDB( db_name , 1 );
+          q.resolve({status: true, db: db_con});
+        } 
+        else { 
+          db_con = window.openDatabase('property_ground', '1.0', db_name, 100 * 1024 * 1024);
+          q.resolve({status: true, db: db_con});
+        } 
+
+
          // if( ionic.Platform.isAndroid() ){
-            db_con = $cordovaSQLite.openDB({ name: db_name , iosDatabaseLocation:'default', location: 2, createFromLocation: 1  });
-             q.resolve({status: true, db: db_con});
+            /*db_con = $cordovaSQLite.openDB({ name: db_name , iosDatabaseLocation:'default', location: 2, createFromLocation: 1  });
+             q.resolve({status: true, db: db_con});*/
           // }
           // else if(ionic.Platform.isIOS() ){
           //   db_con = $cordovaSQLite.openDB({ name: db_name ,  location: 2, createFromLocation: 1 });
