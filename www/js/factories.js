@@ -515,24 +515,24 @@ appFact.factory('DatabaseSrv', function($q, PGAppConfig, $cordovaSQLite, $ionicP
     
       $ionicPlatform.ready(function(){
 
-        if (window.cordova && window.SQLitePlugin) { 
+        /*if (window.cordova && window.SQLitePlugin) { 
           db_con = $cordovaSQLite.openDB( db_name , 1 );
           q.resolve({status: true, db: db_con});
         } 
         else { 
           db_con = window.openDatabase('property_ground', '1.0', db_name, 100 * 1024 * 1024);
           q.resolve({status: true, db: db_con});
-        } 
+        } */
 
 
-         // if( ionic.Platform.isAndroid() ){
-            /*db_con = $cordovaSQLite.openDB({ name: db_name , iosDatabaseLocation:'default', location: 2, createFromLocation: 1  });
-             q.resolve({status: true, db: db_con});*/
-          // }
-          // else if(ionic.Platform.isIOS() ){
-          //   db_con = $cordovaSQLite.openDB({ name: db_name ,  location: 2, createFromLocation: 1 });
-          //    q.resolve({status: true, db: db_con});
-          // }
+          if( ionic.Platform.isAndroid() ){
+            db_con = $cordovaSQLite.openDB({ name: db_name , iosDatabaseLocation:'default', location: 2, createFromLocation: 1  });
+             q.resolve({status: true, db: db_con});
+           }
+           else if(ionic.Platform.isIOS() ){
+             db_con = $cordovaSQLite.openDB({ name: db_name ,  location: 2, createFromLocation: 1 });
+              q.resolve({status: true, db: db_con});
+           }
 
           /*if (window.cordova && window.SQLitePlugin) {
               db_con = $cordovaSQLite.openDB( 'property_ground.db', 1 );
@@ -581,6 +581,8 @@ appFact.factory('DatabaseSrv', function($q, PGAppConfig, $cordovaSQLite, $ionicP
       $cordovaSQLite.execute(db_con, "CREATE TABLE IF NOT EXISTS company_subitem_link (com_subitem_id integer primary key, com_master_id integer, company_id integer, item_name text, type text, priority integer, status integer)");
       $cordovaSQLite.execute(db_con, "CREATE TABLE IF NOT EXISTS company_meter_link (com_meter_id integer primary key, company_id integer, meter_name text, type text, status integer)");
       $cordovaSQLite.execute(db_con, "CREATE TABLE IF NOT EXISTS company_general_condition_link (com_general_id integer primary key, company_id integer, item_name text, options text, priority integer, type text, status integer)");
+
+      $cordovaSQLite.execute(db_con, "CREATE TABLE IF NOT EXISTS sync (id integer primary key, syn_id text, property_id text, table_name text, key_id text, task text, status integer )"); //task INSERT, UPDATE, DELETE
 
       createOtherTable();
 
@@ -858,3 +860,40 @@ appFact.factory('Sounds', function($q) {
     play:playSound
   };
 });*/
+
+
+// $cordovaSQLite.execute(db_con, "CREATE TABLE IF NOT EXISTS sync (id integer primary key, syn_id text, property_id text, table_name text, key_id text, task text, status integer )");
+ //task INSERT, UPDATE, DELETE
+appFact.factory('synSrv', function($log, DatabaseSrv, srvObjManipulation ){
+   
+    var update = function(property_id, table, key_id, task) {
+      
+          DatabaseSrv.initLocalDB().then(function(initdb){
+
+            var query = "INSERT INTO sync (syn_id, property_id, table_name, key_id, task, status) VALUES (?,?,?,?,?,?)";
+            var data = [srvObjManipulation.generateUid(), property_id, table, key_id, task, 1 ];
+            
+            DatabaseSrv.executeQuery(query, data ).then(function(result){
+      
+                  if(result.status == 1){                   
+
+                      $log.log('Successfully Saved!');
+                  }
+                  else{
+                      $log.log('Something went wrong!');
+              
+                  }
+
+            });
+
+        });
+      
+
+    };
+
+    
+    return {
+      update: update
+    };
+
+});
