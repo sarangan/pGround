@@ -208,14 +208,25 @@ angular.module('PGApp', [
     })
 
     .state('app.recordSound', {
-      url: '/recordSoundCtrl/:prop_subitem_id',
+      url: '/recordSoundCtrl/:prop_subitem_id/:property_id',
       views:{
         'menuContent': {
           templateUrl: 'templates/app/record-sound.html',
           controller: 'RecordSoundCtrl'
         }
       }
-    });
+    })
+
+    .state('app.generalPhotos', {
+      url: '/generalPhotosCtrl/:prop_subitem_id/:property_id',
+      views:{
+        'menuContent': {
+          templateUrl: 'templates/app/general-photos.html',
+          controller: 'GeneralPhotosCtrl'
+        }
+      }
+    })
+    ;
 
   // if none of the above states are matched, use this as the fallback
   $urlRouterProvider.otherwise('/app/inspections');

@@ -1,0 +1,40 @@
+<ion-view view-title="Photos">
+	
+	<ion-nav-bar class="bar-calm pg-theme">
+	    <ion-nav-back-button>
+	    </ion-nav-back-button>
+	</ion-nav-bar>
+
+	<ion-content overflow-scroll="true">	
+
+		<ion-list>
+
+			<div class="row " ng-repeat="image in images" ng-if="$index % 4 === 0">
+		        <div class="col col-25 imgur-image-wrapper" ng-if="$index < images.length">
+		            <img ng-src="{{images[$index].src}}" ng-click="tapImage(images[$index])" class="imgur-grid-image"/>
+		        </div>
+		        <div class="col col-25 imgur-image-wrapper" ng-if="$index + 1 < images.length">
+		            <img ng-src="{{images[$index + 1].src}}" ng-click="tapImage(images[$index + 1])" class="imgur-grid-image"/>
+		        </div>
+		        <div class="col col-25 imgur-image-wrapper" ng-if="$index + 2 < images.length">
+		            <img ng-src="{{images[$index + 2].src}}" ng-click="tapImage(images[$index + 2])" class="imgur-grid-image"/>
+		        </div>
+		        <div class="col col-25 imgur-image-wrapper" ng-if="$index + 3 < images.length">
+		            <img ng-src="{{images[$index + 3].src}}" ng-click="tapImage(images[$index + 3])" class="imgur-grid-image"/>
+		        </div>
+		    </div>
+
+		</ion-list>
+
+
+  	</ion-content>
+
+  	  <div class="float-button">
+		<span class="height-fix">
+	   		<a class="content" ng-click="openCamera()">
+	    		<i class="icon ion-ios-camera"> </i>
+	   		</a>
+	  	</span>
+	</div>
+
+</ion-view>

@@ -42,7 +42,13 @@
 
 			<label class="item item-input" ng-if="type == 'METER'">
 			    <input type="text" placeholder="Meter Reading" ng-model="data.reading_value" ng-if="type == 'METER'">
-			 </label>
+			</label>
+
+			<label class="item item-divider">Description</label>
+
+			<label class="item item-input pad-textarea">
+	            <input type="text" placeholder="Description" ng-model="data.description" >
+	        </label>
 
 
 			<label class="item item-divider">Comment</label>
