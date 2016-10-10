@@ -6,7 +6,7 @@ appCtrl.controller('AppCtrl', function($scope, $state, $ionicModal, $timeout, Au
     AuthService.logout();
     $state.go('login');
   }
-  
+
 });
 
 
@@ -41,7 +41,7 @@ appCtrl.controller('InspectionListCtrl', function(
 
     //load data
     function loadData() {
-      
+
       $scope.items =  [];
 
       if (!AuthService.isAuthenticated()) {
@@ -60,7 +60,7 @@ appCtrl.controller('InspectionListCtrl', function(
           var data = [AuthService.getCompanyId()];
 
           $log.log('company id ', AuthService.getCompanyId());
-      
+
           DatabaseSrv.executeQuery(query , []).then(function(result){
 
             $log.log('resultsss');
@@ -82,12 +82,12 @@ appCtrl.controller('InspectionListCtrl', function(
 
             }
 
-            
+
 
           });
 
         });
-        
+
 
       }
 
@@ -97,15 +97,15 @@ appCtrl.controller('InspectionListCtrl', function(
 
       loadData();
     })();*/
-    
+
     //refresh data
     $scope.refresh = function(){
 
       loadData();
     };
-    
 
-    //add new property 
+
+    //add new property
     $scope.addNew = function(){
 
       $log.log('add new ');
@@ -136,9 +136,9 @@ appCtrl.controller('InspectionListCtrl', function(
           var query = "SELECT property_masteritem_link.total_num FROM property_masteritem_link where property_masteritem_link.option = 'NUM' and property_masteritem_link.total_num > 0 and property_masteritem_link.property_id = ?";
 
           var data = [prop_id];
-      
+
           DatabaseSrv.executeQuery(query, data ).then(function(result){
-    
+
             if(result.status == 1 && result.data.rows.length > 0){
 
                 //$scope.data = result.property[0];
@@ -156,7 +156,7 @@ appCtrl.controller('InspectionListCtrl', function(
         });
 
 
-      
+
     };
 
 
@@ -164,28 +164,29 @@ appCtrl.controller('InspectionListCtrl', function(
 
 //-----------------------------End Inspections list control ---------------------------------------
 appCtrl.controller('NewPropInfoCtrl', function(
-  $scope, 
+  $scope,
   $state,
   $stateParams,
-  $cordovaDatePicker, 
-  $log, 
-  $cordovaCamera, 
-  commonSrv, 
-  $ionicPopup, 
-  $cordovaFileTransfer, 
+  $cordovaDatePicker,
+  $log,
+  $cordovaCamera,
+  commonSrv,
+  $ionicPopup,
+  $cordovaFileTransfer,
   PGAppConfig,
   DatabaseSrv,
   srvObjManipulation,
   genericModalService,
   AuthService,
   $timeout,
-  synSrv){
+  synSrv,
+  $ionicLoading){
 
 
   $scope.data = {};
   $scope.data['reportImage'] = "img/list_icon.png";
   $scope.data['image_url'] = "img/photo-camera.png";
-  
+
   $scope.property_id = 0;
 
   $scope.title = "Add new property";
@@ -196,7 +197,7 @@ appCtrl.controller('NewPropInfoCtrl', function(
     $scope.property_id = $stateParams.property_id;
 
     if( $scope.property_id ){
-      //this is where we need to load the old data 
+      //this is where we need to load the old data
 
       $scope.title =  "Property info";
 
@@ -207,9 +208,9 @@ appCtrl.controller('NewPropInfoCtrl', function(
           var query = "select property_info.*, strftime('%d/%m/%Y', property_info.createdAt) as created_date, property.description from property_info inner join property on property_info.property_id = property.property_id where property.property_id=?";
 
           var data = [$scope.property_id];
-      
+
           DatabaseSrv.executeQuery(query, data ).then(function(result){
-    
+
             if(result.status == 1 && result.data.rows.length > 0){
 
                 //$scope.data = result.property[0];
@@ -235,7 +236,7 @@ appCtrl.controller('NewPropInfoCtrl', function(
 
               }
               else{
-                genericModalService.showToast('Could not find the property!', 'LCenter'); 
+                genericModalService.showToast('Could not find the property!', 'LCenter');
               }
 
           });
@@ -249,7 +250,7 @@ appCtrl.controller('NewPropInfoCtrl', function(
 
   });
 
-  // open date 
+  // open date
   $scope.openDate = function(){
 
     var options = {
@@ -265,7 +266,7 @@ appCtrl.controller('NewPropInfoCtrl', function(
     };
 
     $cordovaDatePicker.show(options).then(function(date){
-        //report_date 
+        //report_date
         $scope.data.report_date =new Date(date).toLocaleDateString("en-UK");
     });
 
@@ -305,20 +306,27 @@ appCtrl.controller('NewPropInfoCtrl', function(
 
 
 
-  //save propertyInfo 
+  //save propertyInfo
   $scope.save = function(){
 
     if($scope.data.address_1 != undefined ){
 
       if($scope.data.address_1 != ''){
-      
+
           $log.log($scope.data);
 
 
             if(!$scope.property_id){
-              
+
 
               $log.log('inserting');
+
+              $ionicLoading.show({
+                content: 'Loading',
+                showBackdrop: true,
+                maxWidth: 200,
+                showDelay: 0
+              });
 
               //commonSrv.postData('property/add', $scope.data).then(function(result) {
               DatabaseSrv.initLocalDB().then(function(initdb){
@@ -328,9 +336,9 @@ appCtrl.controller('NewPropInfoCtrl', function(
                   var prop_unique_id = srvObjManipulation.generateUid();
 
                   var data = [prop_unique_id , AuthService.getCompanyId(),  $scope.data.description , 1];
-              
+
                   DatabaseSrv.executeQuery(query, data ).then(function(result){
-            
+
                     if(result.status == 1){
                       $scope.property_id =  prop_unique_id;//result.data.insertId;
 
@@ -350,7 +358,7 @@ appCtrl.controller('NewPropInfoCtrl', function(
 
 
                             if(prop_info_result.status ==  1){
-                                
+
                                 synSrv.update($scope.property_id, 'property_info', $scope.property_id, 'INSERT' );
 
                                 //------------------- setting property template --------------------
@@ -358,32 +366,32 @@ appCtrl.controller('NewPropInfoCtrl', function(
                                 //meter import
 
                                 query = "select Company_meter_link.* from Company_meter_link where Company_meter_link.status=1";
-                                                            
+
                                 DatabaseSrv.executeQuery(query, []).then(function(Meter_types){
-                          
+
                                     if(Meter_types.status == 1 && Meter_types.data.rows.length > 0){
 
                                       //query = "INSERT INTO property_meter_link (prop_meter_id, property_id, com_meter_id, reading_value, status) VALUES (?,?,?,?,?)";
                                       query = "INSERT INTO property_meter_link (prop_meter_id, property_id, com_meter_id, meter_name, reading_value, status) ";
-                                      
+
                                       var property_meter_link_id = srvObjManipulation.generateUid();
                                       synSrv.update($scope.property_id, 'property_meter_link', property_meter_link_id, 'INSERT' );
 
                                       query += " select '"+ property_meter_link_id +  "' as prop_meter_id, '" + $scope.property_id + "' as property_id, " +  Meter_types.data.rows.item(0).com_meter_id +  " as com_meter_id, '"+ Meter_types.data.rows.item(0).meter_name + "' as meter_name, '' as reading_value, 1 as status ";
-                                      
+
 
                                       //for (var i = 0; i < Meter_types.data.rows.length; i++) {
                                       for (var i = 1; i < Meter_types.data.rows.length; i++) {
 
                                         property_meter_link_id = srvObjManipulation.generateUid();
                                         synSrv.update($scope.property_id, 'property_meter_link', property_meter_link_id, 'INSERT' );
-                                        
+
                                         /*data = [srvObjManipulation.generateUid(), $scope.property_id, Meter_types.data.rows.item(i).com_meter_id, '', 1 ];
 
                                         DatabaseSrv.executeQuery(query, data).then(function(prop_meter){
                                           $log.log('updating prop meter!');
                                         });*/
-                                        query += " UNION ALL SELECT '" + property_meter_link_id + "','"+  $scope.property_id +  "'," + Meter_types.data.rows.item(i).com_meter_id + ",'"+ Meter_types.data.rows.item(i).meter_name + "', '', 1 "; 
+                                        query += " UNION ALL SELECT '" + property_meter_link_id + "','"+  $scope.property_id +  "'," + Meter_types.data.rows.item(i).com_meter_id + ",'"+ Meter_types.data.rows.item(i).meter_name + "', '', 1 ";
                                       }
 
                                        DatabaseSrv.executeQuery(query, []).then(function(prop_meter){ //meter saving
@@ -393,14 +401,14 @@ appCtrl.controller('NewPropInfoCtrl', function(
 
                                           //general condition import
                                           query = "select Company_general_condition_link.* from Company_general_condition_link where Company_general_condition_link.status=1";
-                                                                      
+
                                           DatabaseSrv.executeQuery(query, []).then(function(General_conditions){
-                                    
+
                                               if(General_conditions.status == 1 && General_conditions.data.rows.length > 0){
 
                                                 //query = "INSERT INTO property_general_condition_link (prop_general_id, property_id, com_general_id, priority, user_input, comment, status ) VALUES (?,?,?,?,?,?,?)";
                                                 query = "INSERT INTO property_general_condition_link (prop_general_id, property_id, com_general_id, item_name, options, type, priority, user_input, comment, status ) ";
-                                                
+
                                                 var property_general_condition_link_id = srvObjManipulation.generateUid();
                                                 synSrv.update($scope.property_id, 'property_general_condition_link', property_general_condition_link_id, 'INSERT' );
 
@@ -428,13 +436,13 @@ appCtrl.controller('NewPropInfoCtrl', function(
 
                                                   //----------------------------------------------------------------------------------------------------------------------------------
 
-                                                        //master items import 
-                                                        // merger 
+                                                        //master items import
+                                                        // merger
 
                                                         query = "select Company_masteritem_link.* from Company_masteritem_link where Company_masteritem_link.status='true'";
 
                                                         DatabaseSrv.executeQuery(query, []).then(function(master_items){
-                                                  
+
                                                             if(master_items.status == 1 && master_items.data.rows.length > 0){
 
                                                              // query = "INSERT INTO property_masteritem_link (prop_master_id, property_id, com_master_id, type, self_prop_master_id, name,  priority, total_num, status) VALUES (?,?,?,?,?,?,?,?,?)";
@@ -467,9 +475,9 @@ appCtrl.controller('NewPropInfoCtrl', function(
 
                                                                   //sub items import
                                                                     query = "select Company_subitem_link.* from Company_subitem_link where Company_subitem_link.status=1";
-                                                                                                
+
                                                                     DatabaseSrv.executeQuery(query, []).then(function(sub_items){
-                                                              
+
                                                                         if(sub_items.status == 1 && sub_items.data.rows.length > 0){
 
 
@@ -481,8 +489,8 @@ appCtrl.controller('NewPropInfoCtrl', function(
                                                                           synSrv.update($scope.property_id, 'property_subitem_link', property_subitem_link_id, 'INSERT' );
 
                                                                           query += " select '" +  property_subitem_link_id + "' as prop_subitem_id, '" + $scope.property_id + "' as property_id, '"+ sub_items.data.rows.item(0).com_subitem_id +"' as com_subitem_id, '"+ sub_items.data.rows.item(0).item_name + "' as item_name,'" + sub_items.data.rows.item(0).type + "' as type," + sub_items.data.rows.item(0).priority +" as priority, 1 as status ";
-                                                                          //query += " UNION ALL SELECT '" +  srvObjManipulation.generateUid() + "', '" + $scope.property_id + "', '"+ sub_items.data.rows.item(0).com_subitem_id +"', "+ sub_items.data.rows.item(0).priority +", 1 " ; 
-                                                                          
+                                                                          //query += " UNION ALL SELECT '" +  srvObjManipulation.generateUid() + "', '" + $scope.property_id + "', '"+ sub_items.data.rows.item(0).com_subitem_id +"', "+ sub_items.data.rows.item(0).priority +", 1 " ;
+
                                                                           //for (var i = 0; i < sub_items.data.rows.length; i++) {
                                                                           for (var i = 1; i < sub_items.data.rows.length; i++) {
 
@@ -502,7 +510,7 @@ appCtrl.controller('NewPropInfoCtrl', function(
 
                                                                           DatabaseSrv.executeQuery(query, []).then(function(prop_subs){
                                                                               $log.log('updated once property sub items!');
-
+                                                                              $ionicLoading.hide();
                                                                                genericModalService.showToast('Please add rooms for this property!', 'LCenter');
 
                                                                               $timeout(function(){
@@ -516,23 +524,23 @@ appCtrl.controller('NewPropInfoCtrl', function(
                                                                             //we got property id , upload image to server
                                                                             //$state.go('app.property', {property_id : $scope.property_id });
                                                                          // }, 300);
-                                                                          
+
 
 
                                                                         }
                                                                         else{
-                                                                          $log.log('Could not load sub items !'); 
+                                                                          $log.log('Could not load sub items !');
                                                                         }
 
                                                                     });
 
 
-                                                                 
-                                                                });                                                                   
+
+                                                                });
 
                                                             }
                                                             else{
-                                                              $log.log('Could not load master items !'); 
+                                                              $log.log('Could not load master items !');
                                                             }
 
                                                         });
@@ -548,7 +556,7 @@ appCtrl.controller('NewPropInfoCtrl', function(
 
                                               }
                                               else{
-                                                $log.log('Could not load general condition !'); 
+                                                $log.log('Could not load general condition !');
                                               }
 
                                           });
@@ -558,11 +566,11 @@ appCtrl.controller('NewPropInfoCtrl', function(
 
                                       });
 
-                                      
+
 
                                     }
                                     else{
-                                      $log.log('Could not load company meter!'); 
+                                      $log.log('Could not load company meter!');
                                     }
 
                                 });
@@ -570,12 +578,12 @@ appCtrl.controller('NewPropInfoCtrl', function(
                                 //------------------------------------------------------------------
 
 
-                               
+
                                 /*var alertPopup = $ionicPopup.alert({
                                   title: 'Saved!',
                                   template: 'Successfully Saved!'
                                 });*/
-                               
+
 
 
                             }
@@ -587,11 +595,11 @@ appCtrl.controller('NewPropInfoCtrl', function(
                       }
 
 
-                     
+
                     }
 
                   });
-        
+
               });
 
 
@@ -605,8 +613,8 @@ appCtrl.controller('NewPropInfoCtrl', function(
 
               //commonSrv.postData('property/edit', $scope.data).then(function(result) {
 
-              DatabaseSrv.initLocalDB().then(function(initdb){                    
-                      
+              DatabaseSrv.initLocalDB().then(function(initdb){
+
 
                 var query = "UPDATE property_info SET address_1=?, address_2=?, city=?, postalcode=?, report_type=?, report_date=?, image_url=? WHERE property_id=?";
                 var data = [$scope.data.address_1, $scope.data.address_2, $scope.data.city, $scope.data.postalcode, $scope.data.report_type, new Date($scope.data.report_date).toLocaleDateString("en-UK"), $scope.data.image_url, $scope.property_id ];
@@ -625,12 +633,12 @@ appCtrl.controller('NewPropInfoCtrl', function(
                         template: 'Successfully Saved!'
                       });*/
 
-                      genericModalService.showToast('Successfully Saved!', 'LCenter'); 
+                      genericModalService.showToast('Successfully Saved!', 'LCenter');
 
                     }
 
                   });
-        
+
               });
 
             }
@@ -656,17 +664,17 @@ appCtrl.controller('NewPropInfoCtrl', function(
     }
 
 
-     // Destination URL 
+     // Destination URL
      /*var url = PGAppConfig.apiEndPoint +  'property/uploadlogo';
-      
+
      //File for Upload
      var targetPath =  $scope.data['reportImage'];
-      
+
      // File name only
      var filename = targetPath.split("/").pop();
 
      $log.log(filename);
-      
+
      var options = {
           fileKey: "file",
           fileName: filename,
@@ -674,7 +682,7 @@ appCtrl.controller('NewPropInfoCtrl', function(
           mimeType: "image/jpg",
           params : {'directory':'upload', 'fileName':filename}
       };
-      
+
       targetPath =  '../img/ionic.png';
       $cordovaFileTransfer.upload(url, targetPath, options).then(function (result) {
           console.log("SUCCESS: " + JSON.stringify(result.response));
@@ -686,13 +694,13 @@ appCtrl.controller('NewPropInfoCtrl', function(
 
       //$state.go('app.newProperty');
   };
-    
+
 
 
 });
 
 
-//-------------------------- this is to load property template -------------------------------------- 
+//-------------------------- this is to load property template --------------------------------------
 appCtrl.controller('PropCtrl', function($scope, $state, $stateParams, commonSrv, $log, $ionicPopup, $ionicHistory, DatabaseSrv, srvObjManipulation, $timeout, genericModalService, synSrv){
 
   $scope.property_id = 0;
@@ -715,11 +723,11 @@ appCtrl.controller('PropCtrl', function($scope, $state, $stateParams, commonSrv,
   });
 
 
-  // go back to listing screen 
+  // go back to listing screen
   $scope.goBack = function(){
 
       $state.go('app.inspections');
-  } 
+  }
 
 
   function initLoadData(){
@@ -738,24 +746,24 @@ appCtrl.controller('PropCtrl', function($scope, $state, $stateParams, commonSrv,
           var query = "select property_masteritem_link.* from property_masteritem_link where property_masteritem_link.type='DEFAULT' and property_masteritem_link.status=1 and property_masteritem_link.property_id =? order by property_masteritem_link.com_master_id, property_masteritem_link.option ";
           //var query = "select property_masteritem_link.* from property_masteritem_link ";
           var data = [$scope.property_id];
-      
+
           DatabaseSrv.executeQuery(query, data ).then(function(result){
 
             $log.log('result');
-            
+
 
             $scope.template = result.data;
 
             if(result.status == 1 && $scope.template.rows.length > 0){
 
-             // sub_items.data.rows.item(i).com_subitem_id 
+             // sub_items.data.rows.item(i).com_subitem_id
 
               for (var i=0, l=$scope.template.rows.length; i < l; i++) {
 
                 $log.log($scope.template.rows.item(i));
-                
+
                 if( $scope.template.rows.item(i).option == 'OPT'){
-                  $scope.options.push({name: $scope.template.rows.item(i).name, prop_master_id: $scope.template.rows.item(i).prop_master_id, status: $scope.setToggle($scope.template.rows.item(i).status), priority: $scope.template.rows.item(i).priority, com_master_id:  $scope.template.rows.item(i).com_master_id }); 
+                  $scope.options.push({name: $scope.template.rows.item(i).name, prop_master_id: $scope.template.rows.item(i).prop_master_id, status: $scope.setToggle($scope.template.rows.item(i).status), priority: $scope.template.rows.item(i).priority, com_master_id:  $scope.template.rows.item(i).com_master_id });
                 }
                 else if($scope.template.rows.item(i).option == 'NUM' ){
                   $scope.nums.push({name: $scope.template.rows.item(i).name, prop_master_id: $scope.template.rows.item(i).prop_master_id, total_num: $scope.template.rows.item(i).total_num, priority: $scope.template.rows.item(i).priority, com_master_id:  $scope.template.rows.item(i).com_master_id })
@@ -763,7 +771,7 @@ appCtrl.controller('PropCtrl', function($scope, $state, $stateParams, commonSrv,
 
               }
 
-            }                    
+            }
 
           });
 
@@ -782,7 +790,7 @@ appCtrl.controller('PropCtrl', function($scope, $state, $stateParams, commonSrv,
       return false;
   };
 
-  //toggle change 
+  //toggle change
   $scope.toggleChange = function(){
 
     console.log($scope.options);
@@ -792,7 +800,7 @@ appCtrl.controller('PropCtrl', function($scope, $state, $stateParams, commonSrv,
 
   };
 
-  //set data 
+  //set data
   $scope.setData = function(model, value){
 
       console.log(model);
@@ -817,7 +825,7 @@ appCtrl.controller('PropCtrl', function($scope, $state, $stateParams, commonSrv,
   };
 
 
-  //save 
+  //save
   $scope.save = function(){
 
 
@@ -831,7 +839,10 @@ appCtrl.controller('PropCtrl', function($scope, $state, $stateParams, commonSrv,
 
     //commonSrv.postData('property/saveTemplate', data).then(function(result){
 
-        
+
+
+
+
       DatabaseSrv.initLocalDB().then(function(initdb){
 
            if($scope.nums){
@@ -864,7 +875,7 @@ appCtrl.controller('PropCtrl', function($scope, $state, $stateParams, commonSrv,
                   DatabaseSrv.executeQuery(query, data, xparams ).then(function(com_master_item){
 
                     if(com_master_item.status == 1 && com_master_item.data.rows.length > 0){
-                      
+
                       if(com_master_item.params.total_num > 0){
 
                         query = "INSERT INTO property_masteritem_link (prop_master_id, property_id, com_master_id, type, com_type, option, self_prop_master_id, name,  priority, total_num, status) ";
@@ -872,7 +883,7 @@ appCtrl.controller('PropCtrl', function($scope, $state, $stateParams, commonSrv,
                         var property_masteritem_link_id = srvObjManipulation.generateUid();
 
                         query += " select '"+ property_masteritem_link_id +  "' as prop_master_id, '" +  $scope.property_id +  "' as property_id, " + com_master_item.params.com_master_id +  " as com_master_id, 'SELF' as type, '" +  com_master_item.data.rows.item(0).type + "' as com_type,'" +  com_master_item.data.rows.item(0).option + "' as option, '" + com_master_item.params.prop_master_id + "' as self_prop_master_id, '" + com_master_item.data.rows.item(0).item_name + ' ' + (1).toString() + "' as name, 1 as priority, 0 as total_num, 1 as status ";
-                        
+
                         synSrv.update($scope.property_id, 'property_masteritem_link', property_masteritem_link_id, 'INSERT' );
 
                         //for(var j=1; j <= com_master_item.params.total_num; j++){
@@ -889,7 +900,7 @@ appCtrl.controller('PropCtrl', function($scope, $state, $stateParams, commonSrv,
                           property_masteritem_link_id = srvObjManipulation.generateUid();
                           synSrv.update($scope.property_id, 'property_masteritem_link', property_masteritem_link_id, 'INSERT' );
 
-                           query += " UNION ALL SELECT '" + property_masteritem_link_id + "','"+ $scope.property_id + "',"+  com_master_item.params.com_master_id + ",'SELF','"+  com_master_item.data.rows.item(0).type + "','"+ com_master_item.data.rows.item(0).option + "','" + com_master_item.params.prop_master_id + "','" + com_master_item.data.rows.item(0).item_name + ' ' + (j).toString() + "', 1, 0, 1 " 
+                           query += " UNION ALL SELECT '" + property_masteritem_link_id + "','"+ $scope.property_id + "',"+  com_master_item.params.com_master_id + ",'SELF','"+  com_master_item.data.rows.item(0).type + "','"+ com_master_item.data.rows.item(0).option + "','" + com_master_item.params.prop_master_id + "','" + com_master_item.data.rows.item(0).item_name + ' ' + (j).toString() + "', 1, 0, 1 "
 
                         }
 
@@ -903,7 +914,7 @@ appCtrl.controller('PropCtrl', function($scope, $state, $stateParams, commonSrv,
 
                       }
 
-                      
+
                     }
 
                   });
@@ -930,7 +941,7 @@ appCtrl.controller('PropCtrl', function($scope, $state, $stateParams, commonSrv,
               var params =  {
                 prop_master_id : $scope.options[i].prop_master_id
               }
-             
+
               DatabaseSrv.executeQuery(query, data, params).then(function(com_sub){
 
                 if(com_sub.status ==  1){
@@ -956,17 +967,17 @@ appCtrl.controller('PropCtrl', function($scope, $state, $stateParams, commonSrv,
                 template: 'Successfully Saved!'
               });*/
 
-              genericModalService.showToast('Successfully Saved!', 'LCenter'); 
+              genericModalService.showToast('Successfully Saved!', 'LCenter');
 
               $state.go('app.inspections');
 
           }, 600);
-    
+
       });
 
-      
 
-      
+
+
       /*if(result.status == 1){
 
          var alertPopup = $ionicPopup.alert({
@@ -1018,10 +1029,10 @@ appCtrl.controller('ProplistCtrl', function($scope, $state, $stateParams, common
 
     //getting property info for breadcums
         PropInfoSrv.getPropInfo($scope.property_id).then(function(propinfo){
-          
+
           if(propinfo.hasOwnProperty('status')){
             if(propinfo.status == 1){
-              var address = (propinfo.data.address_1.length > 9) ? propinfo.data.address_1.substring(0, 9) + '...' : propinfo.data.address_1;  
+              var address = (propinfo.data.address_1.length > 9) ? propinfo.data.address_1.substring(0, 9) + '...' : propinfo.data.address_1;
               $scope.breadcums.push(address);
               $scope.breadcums.push('Room list');
             }
@@ -1031,7 +1042,7 @@ appCtrl.controller('ProplistCtrl', function($scope, $state, $stateParams, common
 
   });
 
-  (function init(){     
+  (function init(){
 
   })();
 
@@ -1044,7 +1055,7 @@ appCtrl.controller('ProplistCtrl', function($scope, $state, $stateParams, common
         };
 
 
-        
+
 
 
         DatabaseSrv.initLocalDB().then(function(initdb){
@@ -1052,9 +1063,9 @@ appCtrl.controller('ProplistCtrl', function($scope, $state, $stateParams, common
           var query = "select property_masteritem_link.*,  property_masteritem_link.com_type as template_type from property_masteritem_link where NOT(property_masteritem_link.option ='NUM' and property_masteritem_link.type ='DEFAULT') and property_masteritem_link.property_id =? and property_masteritem_link.status = 1 order by property_masteritem_link.priority, property_masteritem_link.prop_master_id, property_masteritem_link.option,  property_masteritem_link.name";
 
           var data = [$scope.property_id];
-      
+
           DatabaseSrv.executeQuery(query, data ).then(function(result){
-            
+
             console.log('item length', result.data.rows.length);
               if(result.data.rows.length > 0) {
 
@@ -1069,7 +1080,7 @@ appCtrl.controller('ProplistCtrl', function($scope, $state, $stateParams, common
 
               }
 
-            
+
           });
 
       });
@@ -1080,7 +1091,7 @@ appCtrl.controller('ProplistCtrl', function($scope, $state, $stateParams, common
           //$log.log(result);
 
         //  $scope.items = result.template;
-     
+
 
        // });
 
@@ -1116,7 +1127,7 @@ appCtrl.controller('ProplistCtrl', function($scope, $state, $stateParams, common
   });
 
 
-  //open links 
+  //open links
   $scope.openLink = function(item){
 
     if(item.template_type == 'METER'){
@@ -1131,7 +1142,7 @@ appCtrl.controller('ProplistCtrl', function($scope, $state, $stateParams, common
     else if(item.template_type == 'ITEM' ){
        $state.go('app.addSubDetails', {sub_id: item.prop_master_id, type: 'ITEM', property_id: $scope.property_id  });
     }
-    
+
   };
 
 
@@ -1159,7 +1170,7 @@ appCtrl.controller('PropertyListSortCtrl', function($scope, $state, $stateParams
 
   });
 
-  (function init(){    
+  (function init(){
 
   })();
 
@@ -1171,7 +1182,7 @@ appCtrl.controller('PropertyListSortCtrl', function($scope, $state, $stateParams
           property_id:  $scope.property_id
         };
 
-        
+
 
 
         DatabaseSrv.initLocalDB().then(function(initdb){
@@ -1179,9 +1190,9 @@ appCtrl.controller('PropertyListSortCtrl', function($scope, $state, $stateParams
           var query = "select property_masteritem_link.*, property_masteritem_link.com_type as template_type from property_masteritem_link where NOT(property_masteritem_link.option ='NUM' and property_masteritem_link.type ='DEFAULT') and property_masteritem_link.property_id =? and property_masteritem_link.status = 1 order by property_masteritem_link.priority, property_masteritem_link.prop_master_id, property_masteritem_link.option,  property_masteritem_link.name";
 
           var data = [$scope.property_id];
-      
+
           DatabaseSrv.executeQuery(query, data ).then(function(result){
-            
+
             console.log('item length', result.data.rows.length);
               if(result.data.rows.length > 0) {
 
@@ -1196,7 +1207,7 @@ appCtrl.controller('PropertyListSortCtrl', function($scope, $state, $stateParams
 
               }
 
-            
+
           });
 
       });
@@ -1206,7 +1217,7 @@ appCtrl.controller('PropertyListSortCtrl', function($scope, $state, $stateParams
 
   $scope.moveItem = function(item, fromIndex, toIndex) {
     $scope.items.splice(fromIndex, 1);
-    $scope.items.splice(toIndex, 0, item);    
+    $scope.items.splice(toIndex, 0, item);
 
   };
 
@@ -1224,9 +1235,9 @@ appCtrl.controller('PropertyListSortCtrl', function($scope, $state, $stateParams
             var params =  {
               prop_master_id : $scope.items[i].prop_master_id
             };
-        
+
               DatabaseSrv.executeQuery(query, data, params ).then(function(result){
-      
+
                   if(result.status == 1){
 
                     synSrv.update($scope.property_id, 'property_masteritem_link', result.params.prop_master_id , 'UPDATE' );
@@ -1248,7 +1259,7 @@ appCtrl.controller('PropertyListSortCtrl', function($scope, $state, $stateParams
                         template: 'Successfully Saved!'
                       });*/
 
-            genericModalService.showToast('Successfully Saved!', 'LCenter'); 
+            genericModalService.showToast('Successfully Saved!', 'LCenter');
 
           }, 300);
 
@@ -1258,7 +1269,7 @@ appCtrl.controller('PropertyListSortCtrl', function($scope, $state, $stateParams
 
   }
 
-  
+
 
 });
 
@@ -1287,7 +1298,7 @@ appCtrl.controller('GeneralConditionCtrl', function($scope, $state, $stateParams
 
     //getting property info for breadcums
     PropInfoSrv.getPropInfo($scope.property_id).then(function(propinfo){
-      
+
       if(propinfo.hasOwnProperty('status')){
         if(propinfo.status == 1){
           var address = (propinfo.data.address_1.length > 9) ? propinfo.data.address_1.substring(0, 9) + '...' : propinfo.data.address_1;
@@ -1298,11 +1309,11 @@ appCtrl.controller('GeneralConditionCtrl', function($scope, $state, $stateParams
       }
 
     });
-    
+
   });
 
-  (function init(){    
-   
+  (function init(){
+
 
   })();
 
@@ -1317,10 +1328,10 @@ appCtrl.controller('GeneralConditionCtrl', function($scope, $state, $stateParams
         /*commonSrv.postData('property/getConditions', data).then(function(result){
 
           $log.log(result);
-          $scope.items = result.conditions;     
+          $scope.items = result.conditions;
 
         });*/
-        
+
 
 
         DatabaseSrv.initLocalDB().then(function(initdb){
@@ -1328,9 +1339,9 @@ appCtrl.controller('GeneralConditionCtrl', function($scope, $state, $stateParams
           var query = "select property_general_condition_link.* from property_general_condition_link where property_general_condition_link.status=1 and property_general_condition_link.property_id=? order by property_general_condition_link.priority";
 
           var data = [$scope.property_id];
-      
+
           DatabaseSrv.executeQuery(query, data ).then(function(result){
-            
+
             console.log('item length', result.data.rows.length);
               if(result.data.rows.length > 0) {
 
@@ -1345,7 +1356,7 @@ appCtrl.controller('GeneralConditionCtrl', function($scope, $state, $stateParams
 
               }
 
-            
+
           });
 
       });
@@ -1384,7 +1395,7 @@ appCtrl.controller('GeneralConditionCtrl', function($scope, $state, $stateParams
           prop_general_id: $scope.items[i].prop_general_id
         };
           DatabaseSrv.executeQuery(query, data, params ).then(function(result){
-  
+
               if(result.status == 1){
 
                 synSrv.update($scope.property_id, 'Property_general_condition_link', result.params.prop_general_id , 'UPDATE' );
@@ -1406,7 +1417,7 @@ appCtrl.controller('GeneralConditionCtrl', function($scope, $state, $stateParams
                     template: 'Successfully Saved!'
                   });*/
 
-           genericModalService.showToast('Successfully Saved!', 'LCenter'); 
+           genericModalService.showToast('Successfully Saved!', 'LCenter');
 
       }, 300);
 
@@ -1426,7 +1437,7 @@ appCtrl.controller('GCommentCtrl', function($scope, $state, $stateParams, parame
   $scope.property_id = '';
   $scope.data = {};
 
-  //init function 
+  //init function
   var init = (function(){
 
     $scope.general_condition_id = parameters.general_id;
@@ -1447,20 +1458,20 @@ appCtrl.controller('GCommentCtrl', function($scope, $state, $stateParams, parame
           var query = "select Property_general_condition_link.* from Property_general_condition_link where Property_general_condition_link.prop_general_id=?";
 
           var data = [$scope.general_condition_id];
-      
+
           DatabaseSrv.executeQuery(query, data ).then(function(result){
-            
+
             console.log('item length', result.data.rows.length);
               if(result.data.rows.length > 0) {
 
                   $scope.data.comment = result.data.rows.item(0).comment;
-                 
-                
+
+
                 //$scope.items = result.data;
 
               }
 
-            
+
           });
 
       });
@@ -1496,11 +1507,11 @@ appCtrl.controller('GCommentCtrl', function($scope, $state, $stateParams, parame
 
         var query = "UPDATE Property_general_condition_link SET comment=? WHERE prop_general_id=?";
         var data = [$scope.data.comment, $scope.general_condition_id ];
-    
+
           DatabaseSrv.executeQuery(query, data ).then(function(result){
-  
+
               if(result.status == 1){
-                  
+
                   /*var alertPopup = $ionicPopup.alert({
                     title: 'Saved!',
                     template: 'Successfully Saved!'
@@ -1508,7 +1519,7 @@ appCtrl.controller('GCommentCtrl', function($scope, $state, $stateParams, parame
 
                   synSrv.update($scope.property_id, 'Property_general_condition_link', $scope.general_condition_id , 'UPDATE' );
 
-                   genericModalService.showToast('Successfully Saved!', 'LCenter'); 
+                   genericModalService.showToast('Successfully Saved!', 'LCenter');
 
                   $scope.closeModal(null);
 
@@ -1521,8 +1532,8 @@ appCtrl.controller('GCommentCtrl', function($scope, $state, $stateParams, parame
                     template: 'Something went wrong!'
                   });*/
 
-                   genericModalService.showToast('Something went wrong!', 'LCenter'); 
-          
+                   genericModalService.showToast('Something went wrong!', 'LCenter');
+
               }
 
           });
@@ -1533,7 +1544,7 @@ appCtrl.controller('GCommentCtrl', function($scope, $state, $stateParams, parame
         /*commonSrv.postData('property/addConditionComment', data).then(function(result){
 
           $log.log(result);
-          
+
           if(result.status == 1){
 
              var alertPopup = $ionicPopup.alert({
@@ -1584,7 +1595,7 @@ appCtrl.controller('GeneralConditionSortCtrl', function($scope, $state, $statePa
 
   });
 
-  (function init(){    
+  (function init(){
 
   })();
 
@@ -1608,9 +1619,9 @@ appCtrl.controller('GeneralConditionSortCtrl', function($scope, $state, $statePa
           var query = "select property_general_condition_link.* from property_general_condition_link where property_general_condition_link.status=1 and property_general_condition_link.property_id=? order by property_general_condition_link.priority";
 
           var data = [$scope.property_id];
-      
+
           DatabaseSrv.executeQuery(query, data ).then(function(result){
-            
+
             console.log('item length', result.data.rows.length);
               if(result.data.rows.length > 0) {
 
@@ -1625,7 +1636,7 @@ appCtrl.controller('GeneralConditionSortCtrl', function($scope, $state, $statePa
 
               }
 
-            
+
           });
 
         });
@@ -1636,7 +1647,7 @@ appCtrl.controller('GeneralConditionSortCtrl', function($scope, $state, $statePa
 
   $scope.moveItem = function(item, fromIndex, toIndex) {
     $scope.items.splice(fromIndex, 1);
-    $scope.items.splice(toIndex, 0, item);    
+    $scope.items.splice(toIndex, 0, item);
 
   };
 
@@ -1655,9 +1666,9 @@ appCtrl.controller('GeneralConditionSortCtrl', function($scope, $state, $statePa
           var params = {
             prop_general_id: $scope.items[i].prop_general_id
           };
-      
+
             DatabaseSrv.executeQuery(query, data, params).then(function(result){
-    
+
                 if(result.status == 1){
 
                   synSrv.update($scope.property_id, 'Property_general_condition_link', result.params.prop_general_id , 'UPDATE' );
@@ -1679,7 +1690,7 @@ appCtrl.controller('GeneralConditionSortCtrl', function($scope, $state, $statePa
                       template: 'Successfully Saved!'
                     });*/
 
-                    genericModalService.showToast('Successfully Saved!', 'LCenter'); 
+                    genericModalService.showToast('Successfully Saved!', 'LCenter');
 
         }, 300);
 
@@ -1689,7 +1700,7 @@ appCtrl.controller('GeneralConditionSortCtrl', function($scope, $state, $statePa
 
   }
 
-  
+
 
 });
 
@@ -1716,7 +1727,7 @@ appCtrl.controller('MeterListCtrl', function($scope, $state, $stateParams, commo
 
     //getting property info for breadcums
     PropInfoSrv.getPropInfo($scope.property_id).then(function(propinfo){
-      
+
       if(propinfo.hasOwnProperty('status')){
         if(propinfo.status == 1){
           var address = (propinfo.data.address_1.length > 9) ? propinfo.data.address_1.substring(0, 9) + '...' : propinfo.data.address_1;
@@ -1745,9 +1756,9 @@ appCtrl.controller('MeterListCtrl', function($scope, $state, $stateParams, commo
           var query = "select property_meter_link.* from property_meter_link where property_meter_link.status=1 and property_meter_link.property_id =?";
 
           var data = [$scope.property_id];
-      
+
           DatabaseSrv.executeQuery(query, data ).then(function(result){
-            
+
             console.log('item length', result.data.rows.length);
               if(result.data.rows.length > 0) {
 
@@ -1762,7 +1773,7 @@ appCtrl.controller('MeterListCtrl', function($scope, $state, $stateParams, commo
 
               }
 
-            
+
           });
 
         });
@@ -1778,7 +1789,7 @@ appCtrl.controller('MeterListCtrl', function($scope, $state, $stateParams, commo
           if(result.status == 1){
             $scope.items = result.meter_list;
           }
-          
+
 
         });*/
 
@@ -1839,7 +1850,7 @@ appCtrl.controller('SubItemsListCtrl', function($scope, $state, $stateParams, co
 
     $scope.room  =  roomObj.getData().roomObj;
 
-    $scope.showButton = ($scope.room.type == 'SELF')? true: false; 
+    $scope.showButton = ($scope.room.type == 'SELF')? true: false;
 
     $log.log('room obj ', $scope.room);
 
@@ -1866,7 +1877,7 @@ appCtrl.controller('SubItemsListCtrl', function($scope, $state, $stateParams, co
           if(result.status == 1){
             $scope.items = result.sub_items;
           }
-          
+
 
         });*/
 
@@ -1878,9 +1889,9 @@ appCtrl.controller('SubItemsListCtrl', function($scope, $state, $stateParams, co
           var data = [$scope.prop_master_id, $scope.property_id];
 
           var general_sub_item_id = '';
-      
+
           DatabaseSrv.executeQuery(query, data ).then(function(result){
-            
+
             console.log('item length', result.data.rows.length);
               if(result.data.rows.length > 0) {
 
@@ -1900,33 +1911,33 @@ appCtrl.controller('SubItemsListCtrl', function($scope, $state, $stateParams, co
                  $scope.data.viewName =  result.data.rows.item(0).master_item_name ;
                   //getting property info for breadcums
                   PropInfoSrv.getPropInfo($scope.property_id).then(function(propinfo){
-                    
+
                     if(propinfo.hasOwnProperty('status')){
                       if(propinfo.status == 1){
                         var address = (propinfo.data.address_1.length > 9) ? propinfo.data.address_1.substring(0, 9) + '...' : propinfo.data.address_1;
                         $scope.breadcums.push(address);
                         $scope.breadcums.push('Room list');
                         $scope.breadcums.push( $scope.data.viewName);
-                        
+
                       }
                     }
 
-                  }); 
+                  });
 
 
                    //-----------------------------------------------------------------------
                     query = "select count(photos.photo_id) as image_count from photos where photos.item_id =? and photos.type='GENERAL' ";
-                    data = [general_sub_item_id];      
-                    DatabaseSrv.executeQuery(query, data ).then(function(result){            
+                    data = [general_sub_item_id];
+                    DatabaseSrv.executeQuery(query, data ).then(function(result){
                       console.log('item length', result.data.rows.length);
                         if(result.data.rows.length > 0) {
                             $scope.data.image_count = result.data.rows.item(0).image_count;
-                        }            
+                        }
                     });
 
                     //----------------------------------------------------------------------
                     query = "select property_sub_feedback_general.* from property_sub_feedback_general where property_sub_feedback_general.item_id=?";
-                    data = [general_sub_item_id];      
+                    data = [general_sub_item_id];
                     DatabaseSrv.executeQuery(query, data ).then(function(result){
                       console.log('item length', result.data.rows.length);
                         if(result.data.rows.length > 0) {
@@ -1936,18 +1947,18 @@ appCtrl.controller('SubItemsListCtrl', function($scope, $state, $stateParams, co
 
                     //----------------------------------------------------------------------
                     query = "select count(property_sub_voice_general.prop_sub_feedback_general_id) as voice_count from property_sub_voice_general where property_sub_voice_general.item_id =?";
-                    data = [general_sub_item_id];                
+                    data = [general_sub_item_id];
                     DatabaseSrv.executeQuery(query, data ).then(function(result){
                         if(result.data.rows.length > 0) {
                            $scope.data.voice_count = result.data.rows.item(0).voice_count;
-                        }                      
+                        }
                     });
 
-                
+
 
               }
 
-            
+
           });
 
 
@@ -1961,26 +1972,26 @@ appCtrl.controller('SubItemsListCtrl', function($scope, $state, $stateParams, co
   };
 
 
-  //general camera function 
+  //general camera function
   $scope.generalCamera = function(prop_subitem_id){
-    $state.go('app.generalPhotos', {prop_subitem_id: prop_subitem_id, property_id: $scope.property_id})
+    $state.go('app.generalPhotos', {prop_subitem_id: prop_subitem_id, property_id: $scope.property_id, prop_master_id: $scope.prop_master_id})
   };
 
   $scope.generalComment = function(prop_subitem_id){
 
-    myModals.subCommentBox({ prop_subitem_id: prop_subitem_id, property_id: $scope.property_id });
+    myModals.subCommentBox({ prop_subitem_id: prop_subitem_id, property_id: $scope.property_id, prop_master_id: $scope.prop_master_id });
 
   };
 
   $scope.generalVoiceRecorder = function(prop_subitem_id){
 
-    $state.go('app.recordSound', {prop_subitem_id: prop_subitem_id, property_id: $scope.property_id});
+    $state.go('app.recordSound', {prop_subitem_id: prop_subitem_id, property_id: $scope.property_id, prop_master_id: $scope.prop_master_id});
   };
 
   $scope.rename = function(){
 
     $scope.input.roomname = $scope.room.name;
-    
+
     var myPopup = $ionicPopup.show({
           template: '<input type="text" ng-model="input.roomname" style="border-bottom: 1px solid #009AF2;">',
           title: 'Rename',
@@ -1996,84 +2007,7 @@ appCtrl.controller('SubItemsListCtrl', function($scope, $state, $stateParams, co
                 if (!$scope.input.roomname) {
                   //don't allow the user to close unless he enters wifi password
                   e.preventDefault();
-                } 
-                else{
-                  return $scope.input.roomname;
                 }
-              }
-            }
-          ]
-        });
-
-
-    myPopup.then(function(res){      
-
-      if(res){
-        $log.log(res);
-
-        DatabaseSrv.initLocalDB().then(function(initdb){
-
-          var query = "UPDATE property_masteritem_link SET name=? WHERE prop_master_id=?";
-          var data = [res, $scope.prop_master_id ];
-    
-          DatabaseSrv.executeQuery(query, data ).then(function(result){
-  
-              if(result.status == 1){
-                  
-                  synSrv.update($scope.property_id, 'property_masteritem_link', $scope.prop_master_id , 'INSERT' );
-
-                 /* var alertPopup = $ionicPopup.alert({
-                    title: 'Saved!',
-                    template: 'Successfully Saved!'
-                  });*/
-
-                  genericModalService.showToast('Successfully Saved!', 'LCenter'); 
-
-                 
-              }
-              else{
-
-                 /* var alertPopup = $ionicPopup.alert({
-                    title: 'Error!',
-                    template: 'Something went wrong!'
-                  });*/
-
-                  genericModalService.showToast('Something went wrong!', 'LCenter'); 
-          
-              }
-
-          });
-
-        });
-
-
-      }
-      
-    });
-
-  }
-
-  //copy 
-  $scope.copy = function(){
-
-    $scope.input.roomname = $scope.room.name + ' copy';
-    
-    var myPopup = $ionicPopup.show({
-          template: '<input type="text" ng-model="input.roomname" style="border-bottom: 1px solid #009AF2;">',
-          title: 'Rename',
-          subTitle: 'Rename this room',
-          scope: $scope,
-          buttons: [
-            { text: 'No',
-              type: 'button-positive' },
-            {
-              text: '<b>Yes</b>',
-              type: 'button-positive',
-              onTap: function(e) {
-                if (!$scope.input.roomname) {
-                  //don't allow the user to close unless he enters wifi password
-                  e.preventDefault();
-                } 
                 else{
                   return $scope.input.roomname;
                 }
@@ -2090,106 +2024,178 @@ appCtrl.controller('SubItemsListCtrl', function($scope, $state, $stateParams, co
 
         DatabaseSrv.initLocalDB().then(function(initdb){
 
-                
+          var query = "UPDATE property_masteritem_link SET name=? WHERE prop_master_id=?";
+          var data = [res, $scope.prop_master_id ];
 
-                    DatabaseSrv.executeQuery(query, []).then(function(master_item){
-                      
+          DatabaseSrv.executeQuery(query, data ).then(function(result){
 
-                      synSrv.update($scope.property_id, 'property_masteritem_link', property_masteritem_link_id, 'INSERT' );
+              if(result.status == 1){
 
-                      //sub items import
-                      query = "INSERT INTO property_subitem_link (prop_subitem_id, property_id, com_subitem_id, item_name, type, priority, status) select prop_subitem_id, property_id, com_subitem_id, item_name, type, priority, status from property_subitem_link inner join company_subitem_link on property_subitem_link.com_subitem_id = company_subitem_link.com_subitem_id inner JOIN property_masteritem_link on company_subitem_link.com_master_id = property_masteritem_link.com_master_id where property_masteritem_link.prop_master_id='" + property_masteritem_link_id + "'";
-                      
-                      DatabaseSrv.executeQuery(query, []).then(function(sub_items){
-                         $log.log('copied property sub items!');
+                  synSrv.update($scope.property_id, 'property_masteritem_link', $scope.prop_master_id , 'INSERT' );
 
-                         query = "INSERT INTO property_feedback (prop_feedback_id, item_id, option, comment, description, type) select prop_feedback_id, item_id, option, comment, description, type from property_feedback where ";
+                 /* var alertPopup = $ionicPopup.alert({
+                    title: 'Saved!',
+                    template: 'Successfully Saved!'
+                  });*/
 
-                      });
-
+                  genericModalService.showToast('Successfully Saved!', 'LCenter');
 
 
-                    });
+              }
+              else{
 
-                    //master items import 
+                 /* var alertPopup = $ionicPopup.alert({
+                    title: 'Error!',
+                    template: 'Something went wrong!'
+                  });*/
+
+                  genericModalService.showToast('Something went wrong!', 'LCenter');
+
+              }
+
+          });
+
+        });
+
+
+      }
+
+    });
+
+  }
+
+  //copy
+  $scope.copy = function(){
+
+    $scope.input.roomname = $scope.room.name + ' copy';
+
+    var myPopup = $ionicPopup.show({
+          template: '<input type="text" ng-model="input.roomname" style="border-bottom: 1px solid #009AF2;">',
+          title: 'Copy',
+          subTitle: 'Copy this room',
+          scope: $scope,
+          buttons: [
+            { text: 'No',
+              type: 'button-positive' },
+            {
+              text: '<b>Yes</b>',
+              type: 'button-positive',
+              onTap: function(e) {
+                if (!$scope.input.roomname) {
+                  //don't allow the user to close unless he enters wifi password
+                  e.preventDefault();
+                }
+                else{
+                  return $scope.input.roomname;
+                }
+              }
+            }
+          ]
+        });
+
+
+    myPopup.then(function(res){
+
+      if(res){
+        $log.log(res);
+
+        DatabaseSrv.initLocalDB().then(function(initdb){
+
+                    //master items import
                     var property_masteritem_link_id = srvObjManipulation.generateUid();
 
                     var query = "INSERT INTO property_masteritem_link (prop_master_id, property_id, com_master_id, type, com_type, option, self_prop_master_id, name,  priority, total_num, status) select '" + property_masteritem_link_id + "',  property_id,  com_master_id, type, com_type, option, self_prop_master_id, '" + res + "', priority, total_num, status from property_masteritem_link where prop_master_id='" + $scope.prop_master_id + "'";
-
-                    //query += " select '"+ property_masteritem_link_id +"' as prop_master_id, '"+ $scope.property_id +"' as property_id, '"+ master_items.data.rows.item(0).com_master_id +"' as com_master_id, 'DEFAULT' as type, '0' as self_prop_master_id, '"+ master_items.data.rows.item(0).item_name +"' as name, "+ master_items.data.rows.item(0).priority +" as priority, 0 as total_num, 1 as status ";
-
-                    /*data = [srvObjManipulation.generateUid(), $scope.property_id, master_items.data.rows.item(i).com_master_id, 'DEFAULT', 0, master_items.data.rows.item(i).item_name , master_items.data.rows.item(i).priority, 0, 1 ];
-                    */
 
                     $log.log('copy query');
 
                     $log.log(query);
 
-
-                     
                     DatabaseSrv.executeQuery(query, []).then(function(master_item){
                       $log.log('copied property master item!');
 
-                        query = "select property_subitem_link.*, property_masteritem_link.prop_master_id, property_masteritem_link.name as master_item_name, company_subitem_link.com_master_id from property_subitem_link inner join company_subitem_link on property_subitem_link.com_subitem_id = company_subitem_link.com_subitem_id inner JOIN property_masteritem_link on company_subitem_link.com_master_id = property_masteritem_link.com_master_id where property_subitem_link.status =1 and property_masteritem_link.prop_master_id =? order by property_subitem_link.type";
+                      $log.log(master_item);
 
+                      $log.log('copping master something wrong');
+
+                        query = "select property_subitem_link.*, property_masteritem_link.prop_master_id, property_masteritem_link.name as master_item_name, company_subitem_link.com_master_id from property_subitem_link inner join company_subitem_link on property_subitem_link.com_subitem_id = company_subitem_link.com_subitem_id inner JOIN property_masteritem_link on company_subitem_link.com_master_id = property_masteritem_link.com_master_id where property_subitem_link.status =1 and property_masteritem_link.prop_master_id =? order by property_subitem_link.type";
                         var data = [$scope.prop_master_id];
-                                                  
+
                         DatabaseSrv.executeQuery(query, data).then(function(sub_items){
-                  
+
                             if(sub_items.status == 1 && sub_items.data.rows.length > 0){
 
-                              //query = "INSERT INTO property_subitem_link (prop_subitem_id, property_id, com_subitem_id, priority, status) VALUES (?,?,?,?,?)";
+                              query = "INSERT INTO property_subitem_link (prop_subitem_id, property_id, com_subitem_id, item_name, type, priority, status) VALUES (?,?,?,?,?,?,?)";
 
-                              query = "INSERT INTO property_subitem_link (prop_subitem_id, property_id, com_subitem_id, priority, status) ";
+                              for (var i = 0; i < sub_items.data.rows.length; i++) {
 
-                              var property_subitem_link_id = srvObjManipulation.generateUid();
-                              synSrv.update($scope.property_id, 'property_subitem_link', property_subitem_link_id, 'INSERT' );
+                                var property_subitem_link_id = srvObjManipulation.generateUid();
+                                data = [property_subitem_link_id, sub_items.data.rows.item(i).property_id , sub_items.data.rows.item(i).com_subitem_id, sub_items.data.rows.item(i).item_name, sub_items.data.rows.item(i).type, sub_items.data.rows.item(i).priority, 1 ];
+                                var params = {
+                                  property_subitem_link_id : property_subitem_link_id,
+                                  type: sub_items.data.rows.item(i).type,
+                                  master_sub_item_id:  sub_items.data.rows.item(i).prop_subitem_id
+                                };
 
-                              query += " select '" +  property_subitem_link_id + "' as prop_subitem_id, '" + $scope.property_id + "' as property_id, '"+ sub_items.data.rows.item(0).com_subitem_id +"' as com_subitem_id, "+ sub_items.data.rows.item(0).priority +" as priority, 1 as status ";
-                              //query += " UNION ALL SELECT '" +  srvObjManipulation.generateUid() + "', '" + $scope.property_id + "', '"+ sub_items.data.rows.item(0).com_subitem_id +"', "+ sub_items.data.rows.item(0).priority +", 1 " ; 
-                              
-                              //for (var i = 0; i < sub_items.data.rows.length; i++) {
-                              for (var i = 1; i < sub_items.data.rows.length; i++) {
+                                DatabaseSrv.executeQuery(query, data, params).then(function(prop_subs){
+                                  $log.log('copy property sub item!');
 
-                                /*data = [srvObjManipulation.generateUid(), $scope.property_id, sub_items.data.rows.item(i).com_subitem_id, sub_items.data.rows.item(i).priority, 1 ];
+                                  if(prop_subs.status == 1){
 
-                                DatabaseSrv.executeQuery(query, data).then(function(prop_subs){
-                                  $log.log('updating property sub items!');
-                                });*/
+                                    synSrv.update($scope.property_id, 'property_subitem_link', prop_subs.params.property_subitem_link_id, 'INSERT' );
 
-                                property_subitem_link_id = srvObjManipulation.generateUid();
-                                synSrv.update($scope.property_id, 'property_subitem_link', property_subitem_link_id, 'INSERT' );
+                                    if(prop_subs.params.type =='GENERAL' ){
 
-                                query += " UNION ALL SELECT '" +  property_subitem_link_id + "', '" + $scope.property_id + "', '"+ sub_items.data.rows.item(i).com_subitem_id +"', "+ sub_items.data.rows.item(i).priority +", 1 ";
+                                      $log.log('copy GENERAL feedback');
+                                      var prop_sub_feedback_general_id = srvObjManipulation.generateUid();
+                                      query = "INSERT INTO property_sub_feedback_general (prop_sub_feedback_general_id, item_id, comment ) select '"+ prop_sub_feedback_general_id +"' item_id, comment from property_sub_feedback_general where property_sub_feedback_general.item_id='" + prop_subs.params.master_sub_item_id +"'";
+                                      var params = {
+                                        prop_sub_feedback_general_id: prop_sub_feedback_general_id
+                                      };
+                                      DatabaseSrv.executeQuery(query, [], params).then(function(gen_feed){
+                                          $log.log('copied GENERAL feedback');
+                                        synSrv.update($scope.property_id, 'property_sub_feedback_general', gen_feed.params.prop_sub_feedback_general_id, 'INSERT' );
+                                      });
 
-                              }
+                                    }
+                                    else{
+                                      $log.log('copy other feedback');
+                                      var prop_feedback_id = srvObjManipulation.generateUid();
+                                      var params = {
+                                        prop_feedback_id: prop_feedback_id
+                                      };
+                                      query = "INSERT INTO property_feedback (prop_feedback_id, item_id, option, comment, description, type) select '" + prop_feedback_id + "', item_id, option, comment, description, type from property_feedback where property_feedback.item_id='"+ prop_subs.params.master_sub_item_id + "'";
+                                      DatabaseSrv.executeQuery(query, [], params).then(function(nar_feed){
+                                          $log.log('copied normalL feedback');
+                                          synSrv.update($scope.property_id, 'property_sub_feedback_general', nar_feed.params.prop_sub_feedback_general_id, 'INSERT' );
+                                      });
+
+                                    }
 
 
-                              DatabaseSrv.executeQuery(query, []).then(function(prop_subs){
-                                  $log.log('updated once property sub items!');
+                                  }
 
-                                   genericModalService.showToast('Please add rooms for this property!', 'LCenter');
-
-                                  $timeout(function(){
-                                    $state.go('app.property', {property_id : $scope.property_id });
-                                  });
 
                                 });
 
 
-                          
+
+                              }
+
+                              genericModalService.showToast('Successfully Copied!', 'LCenter');
+
+
                             }
                             else{
-                              $log.log('Could not load sub items !'); 
+                              $log.log('Could not load sub items !');
                             }
 
                         });
 
 
-                     
-                    });                                                                   
 
-                
+                    });
+
+
 
 
 
@@ -2198,7 +2204,7 @@ appCtrl.controller('SubItemsListCtrl', function($scope, $state, $stateParams, co
 
 
       }
-      
+
     });
 
   };
@@ -2215,11 +2221,12 @@ appCtrl.controller('SubCommentCtrl', function($scope, $state, $stateParams, para
 
   $scope.prop_sub_feedback_general_id = '';
 
-  //init function 
+  //init function
   var init = (function(){
 
     $scope.prop_subitem_id = parameters.prop_subitem_id;
     $scope.property_id = parameters.property_id;
+    $scope.prop_master_id = parameters.prop_master_id;
     //$scope.data.comment = parameters.comment;
 
     if($scope.prop_subitem_id ){
@@ -2232,23 +2239,23 @@ appCtrl.controller('SubCommentCtrl', function($scope, $state, $stateParams, para
 
         DatabaseSrv.initLocalDB().then(function(initdb){
 
-          var query = "select property_sub_feedback_general.* from property_sub_feedback_general where property_sub_feedback_general.item_id=?";
+          var query = "select property_sub_feedback_general.* from property_sub_feedback_general where property_sub_feedback_general.item_id=? and property_sub_feedback_general.parent_id=?";
 
-          var data = [$scope.prop_subitem_id];
-      
+          var data = [$scope.prop_subitem_id, $scope.prop_master_id];
+
           DatabaseSrv.executeQuery(query, data ).then(function(result){
-            
+
             console.log('item length', result.data.rows.length);
               if(result.data.rows.length > 0) {
 
                   $scope.data.comment = result.data.rows.item(0).comment;
                   $scope.prop_sub_feedback_general_id = result.data.rows.item(0).prop_sub_feedback_general_id
-                
+
                 //$scope.items = result.data;
 
               }
 
-            
+
           });
 
       });
@@ -2271,19 +2278,19 @@ appCtrl.controller('SubCommentCtrl', function($scope, $state, $stateParams, para
 
       DatabaseSrv.initLocalDB().then(function(initdb){
 
-        var query = "UPDATE property_sub_feedback_general SET comment=? WHERE item_id=?";
-        var data = [$scope.data.comment, $scope.prop_subitem_id ];
-    
+        var query = "UPDATE property_sub_feedback_general SET comment=? WHERE item_id=? and parent_id=?";
+        var data = [$scope.data.comment, $scope.prop_subitem_id, $scope.prop_master_id ];
+
           DatabaseSrv.executeQuery(query, data ).then(function(result){
-  
+
               if(result.status == 1){
-                  
+
                   /*var alertPopup = $ionicPopup.alert({
                     title: 'Saved!',
                     template: 'Successfully Saved!'
                   });*/
 
-                  synSrv.update($scope.property_id, 'property_sub_feedback_general', $scope.prop_subitem_id , 'UPDATE' );
+                  synSrv.update($scope.property_id, 'property_sub_feedback_general', $scope.prop_sub_feedback_general_id , 'UPDATE' );
 
                   genericModalService.showToast('Successfully Saved!', 'LCenter');
 
@@ -2298,8 +2305,8 @@ appCtrl.controller('SubCommentCtrl', function($scope, $state, $stateParams, para
                     template: 'Something went wrong!'
                   });*/
 
-                  genericModalService.showToast('Something went wrong!', 'LCenter'); 
-          
+                  genericModalService.showToast('Something went wrong!', 'LCenter');
+
               }
 
           });
@@ -2313,15 +2320,15 @@ appCtrl.controller('SubCommentCtrl', function($scope, $state, $stateParams, para
 
         DatabaseSrv.initLocalDB().then(function(initdb){
 
-            var query = "INSERT INTO property_sub_feedback_general (prop_sub_feedback_general_id, item_id, comment ) VALUES (?,?,?)";
+            var query = "INSERT INTO property_sub_feedback_general (prop_sub_feedback_general_id, item_id, parent_id, comment ) VALUES (?,?,?,?)";
 
             var prop_sub_feedback_general_id = srvObjManipulation.generateUid();
 
-            var data = [prop_sub_feedback_general_id , $scope.prop_subitem_id, $scope.data.comment ];
+            var data = [prop_sub_feedback_general_id , $scope.prop_subitem_id, $scope.prop_master_id, $scope.data.comment ];
               DatabaseSrv.executeQuery(query, data ).then(function(result){
-      
+
                   if(result.status == 1){
-                      
+
                      /* var alertPopup = $ionicPopup.alert({
                         title: 'Saved!',
                         template: 'Successfully Saved!'
@@ -2341,8 +2348,8 @@ appCtrl.controller('SubCommentCtrl', function($scope, $state, $stateParams, para
                         title: 'Error!',
                         template: 'Something went wrong!'
                       });*/
-                      genericModalService.showToast('Something went wrong!', 'LCenter'); 
-              
+                      genericModalService.showToast('Something went wrong!', 'LCenter');
+
                   }
 
               });
@@ -2409,10 +2416,12 @@ appCtrl.controller('AddSubDetailsCtrl', function($scope, $state, $stateParams, c
       $scope.daleteImage = null;
 
       $scope.property_id =  $stateParams.property_id;
+      $scope.sub_id = $stateParams.sub_id;
+      $scope.type = $stateParams.type;
 
-      initLoadData();
+      $scope.master_id = '';
 
-      loadBreadCums();   
+      loadBreadCums();
 
 
   });
@@ -2432,7 +2441,7 @@ appCtrl.controller('AddSubDetailsCtrl', function($scope, $state, $stateParams, c
 
     //getting property info for breadcums
     PropInfoSrv.getPropInfo($scope.property_id).then(function(propinfo){
-      
+
       if(propinfo.hasOwnProperty('status')){
         if(propinfo.status == 1){
           var address = (propinfo.data.address_1.length > 9) ? propinfo.data.address_1.substring(0, 9) + '...' : propinfo.data.address_1;
@@ -2440,13 +2449,16 @@ appCtrl.controller('AddSubDetailsCtrl', function($scope, $state, $stateParams, c
           $scope.breadcums.push('Room..');
 
           if($stateParams.type == 'ITEM' ){
-              
+
 
               var query = "select property_masteritem_link.* from property_masteritem_link where property_masteritem_link.prop_master_id=?";
               var data = [$scope.sub_id];
-    
+
+              $scope.master_id = $scope.sub_id;
+              initLoadData();
+
               DatabaseSrv.executeQuery(query, data ).then(function(result){
-              
+
                 console.log('item length imtem name', result.data.rows.length);
                 if(result.data.rows.length > 0) {
                   $scope.data.viewName =result.data.rows.item(0).name;
@@ -2460,9 +2472,12 @@ appCtrl.controller('AddSubDetailsCtrl', function($scope, $state, $stateParams, c
 
               var query = "select property_meter_link.* from property_meter_link where property_meter_link.status=1 and property_meter_link.prop_meter_id =?";
               var data = [$scope.sub_id];
-    
+
+              $scope.master_id = $scope.sub_id;
+              initLoadData();
+
               DatabaseSrv.executeQuery(query, data ).then(function(result){
-              
+
                 console.log('item length imtem name', result.data.rows.length);
                 if(result.data.rows.length > 0) {
                   $scope.data.viewName = result.data.rows.item(0).meter_name;
@@ -2479,11 +2494,15 @@ appCtrl.controller('AddSubDetailsCtrl', function($scope, $state, $stateParams, c
 
               var query = "select property_subitem_link.*, property_subitem_link.item_name as sub_item_name, property_masteritem_link.prop_master_id, property_masteritem_link.name as master_item_name, company_subitem_link.com_master_id from property_subitem_link inner join company_subitem_link on property_subitem_link.com_subitem_id = company_subitem_link.com_subitem_id inner JOIN property_masteritem_link on company_subitem_link.com_master_id = property_masteritem_link.com_master_id  where property_subitem_link.status =1 and property_subitem_link.prop_subitem_id =? ";
               var data = [$scope.sub_id];
-    
+
               DatabaseSrv.executeQuery(query, data ).then(function(result){
-              
+
                 console.log('item length imtem name', result.data.rows.length);
                 if(result.data.rows.length > 0) {
+
+                  $scope.master_id = result.data.rows.item(0).prop_master_id;
+                  initLoadData();
+
                   $scope.data.viewName = result.data.rows.item(0).sub_item_name;
                   var master_item_name = (result.data.rows.item(0).master_item_name > 5) ? result.data.rows.item(0).master_item_name.substring(0, 5) + '..' : result.data.rows.item(0).master_item_name;
                   $scope.breadcums.push(master_item_name);
@@ -2495,7 +2514,7 @@ appCtrl.controller('AddSubDetailsCtrl', function($scope, $state, $stateParams, c
 
           }
 
-          
+
 
 
 
@@ -2509,21 +2528,17 @@ appCtrl.controller('AddSubDetailsCtrl', function($scope, $state, $stateParams, c
 
   function initLoadData(){
 
-    $scope.sub_id = $stateParams.sub_id;
-    $scope.type = $stateParams.type;
-
-
     DatabaseSrv.initLocalDB().then(function(initdb){
 
-        var query = "select property_feedback.* from property_feedback where property_feedback.item_id=? and property_feedback.type=?";
+        var query = "select property_feedback.* from property_feedback where property_feedback.item_id=? and property_feedback.parent_id=? and property_feedback.type=?";
 
-        var data = [$scope.sub_id, $scope.type];
-    
+        var data = [$scope.sub_id, $scope.master_id, $scope.type];
+
         DatabaseSrv.executeQuery(query, data ).then(function(result){
-          
+
           console.log('item length', result.data.rows.length);
             if(result.data.rows.length > 0) {
-              
+
                 var item = result.data.rows.item(0);
                 console.log('item ', item);
 
@@ -2533,15 +2548,15 @@ appCtrl.controller('AddSubDetailsCtrl', function($scope, $state, $stateParams, c
                 $scope.data.description = item.description;
 
             }
-          
+
         });
 
 
-        query = "select photos.* from photos where photos.item_id=? and photos.type=?";
-        data = [$scope.sub_id, $scope.type];
-    
+        query = "select photos.* from photos where photos.item_id=? and photos.parent_id=? and photos.type=?";
+        data = [$scope.sub_id, $scope.master_id, $scope.type];
+
         DatabaseSrv.executeQuery(query, data ).then(function(result){
-          
+
             console.log('item length', result.data.rows.length);
             if(result.data.rows.length > 0){
 
@@ -2553,7 +2568,7 @@ appCtrl.controller('AddSubDetailsCtrl', function($scope, $state, $stateParams, c
               }
 
             }
-          
+
         });
 
 
@@ -2562,23 +2577,23 @@ appCtrl.controller('AddSubDetailsCtrl', function($scope, $state, $stateParams, c
 
             query = "select property_meter_link.* from property_meter_link where property_meter_link.prop_meter_id=? ";
             data = [$scope.sub_id];
-        
+
             DatabaseSrv.executeQuery(query, data ).then(function(result){
-              
+
                 console.log('item length', result.data.rows.length);
                 if(result.data.rows.length > 0) {
-              
+
                     var item = result.data.rows.item(0);
                     console.log('item ', item);
                     $scope.data.reading_value = item.reading_value;
 
                 }
-              
+
             });
 
 
         }
-        
+
 
     });
 
@@ -2612,17 +2627,17 @@ appCtrl.controller('AddSubDetailsCtrl', function($scope, $state, $stateParams, c
 
           //$scope.data['reportImage'] = imageData;
 
-          console.log('file url ', imageData);          
+          console.log('file url ', imageData);
 
-          var query = "INSERT INTO photos (photo_id, item_id, type, img_url) VALUES (?,?,?,?) ";
+          var query = "INSERT INTO photos (photo_id, item_id, parent_id, type, img_url) VALUES (?,?,?,?,?) ";
           var photo_id  = srvObjManipulation.generateUid();
-          var data = [photo_id, $scope.sub_id, $scope.type, imageData ];
+          var data = [photo_id, $scope.sub_id, $scope.master_id, $scope.type, imageData ];
           $log.log('camera data saving');
           $log.log(data);
 
           DatabaseSrv.initLocalDB().then(function(initdb){
             DatabaseSrv.executeQuery(query, data).then(function(result){
-                
+
                 if(result.status == 1){
 
                   synSrv.update($scope.property_id, 'photos', photo_id , 'INSERT' );
@@ -2634,7 +2649,7 @@ appCtrl.controller('AddSubDetailsCtrl', function($scope, $state, $stateParams, c
 
                 }
                 else{
-                  $log.log('photo saving problem') ;           
+                  $log.log('photo saving problem') ;
                 }
 
             });
@@ -2643,7 +2658,7 @@ appCtrl.controller('AddSubDetailsCtrl', function($scope, $state, $stateParams, c
 
 
 
-          //-------------- 
+          //--------------
 
         var
             closeInSeconds = 3,
@@ -2651,12 +2666,12 @@ appCtrl.controller('AddSubDetailsCtrl', function($scope, $state, $stateParams, c
             timer;
 
         swal(
-              { 
+              {
                 title: "Do you want to take more photos?",
-                text: displayText.replace(/#1/, closeInSeconds),   
-                timer: closeInSeconds * 1000,   
+                text: displayText.replace(/#1/, closeInSeconds),
+                timer: closeInSeconds * 1000,
                 showConfirmButton: true,
-                confirmButtonColor: "#DD6B55",   
+                confirmButtonColor: "#DD6B55",
                 confirmButtonText: "Done!",
                 html: true,
                 animation: false
@@ -2670,7 +2685,7 @@ appCtrl.controller('AddSubDetailsCtrl', function($scope, $state, $stateParams, c
                     $log.log("normal cancel");
                     $scope.openCamera();
                   }
-                
+
               }
 
           );
@@ -2703,7 +2718,7 @@ appCtrl.controller('AddSubDetailsCtrl', function($scope, $state, $stateParams, c
     console.log('imkage url', $scope.imageUrl);
     $scope.showModal('templates/model/image-preview.html');
   };
-  
+
   //open image slide model
   $scope.showModal = function(templateUrl) {
 
@@ -2729,7 +2744,7 @@ appCtrl.controller('AddSubDetailsCtrl', function($scope, $state, $stateParams, c
 
     if($scope.daleteImage != null){
 
-      if($scope.daleteImage.hasOwnProperty('image_id') ){ // got image from database 
+      if($scope.daleteImage.hasOwnProperty('image_id') ){ // got image from database
 
         DatabaseSrv.initLocalDB().then(function(initdb){
 
@@ -2737,7 +2752,7 @@ appCtrl.controller('AddSubDetailsCtrl', function($scope, $state, $stateParams, c
             var data = [ $scope.daleteImage.image_id ];
 
             DatabaseSrv.executeQuery(query, data ).then(function(result){
-  
+
               if(result.status == 1){
 
                 synSrv.update($scope.property_id, 'photos', $scope.daleteImage.image_id , 'DELETE' );
@@ -2776,43 +2791,43 @@ appCtrl.controller('AddSubDetailsCtrl', function($scope, $state, $stateParams, c
   };
 
 
-  //save photos and comment and option section  
+  //save photos and comment and option section
   $scope.save = function(){
 
     DatabaseSrv.initLocalDB().then(function(initdb){
 
-        var query = "SELECT * from property_feedback where item_id=? and type=?";
-        var data = [$scope.sub_id, $scope.type ];
+        var query = "SELECT * from property_feedback where item_id=? and parent_id=? and type=?";
+        var data = [$scope.sub_id, $scope.master_id, $scope.type ];
 
         DatabaseSrv.executeQuery(query, data ).then(function(result){
-  
+
               if(result.status == 1 && result.data.rows.length > 0 ){
 
-                query = "UPDATE property_feedback set option=?, comment=?, description=? where item_id=? and type=?";
+                query = "UPDATE property_feedback set option=?, comment=?, description=? where item_id=? and parent_id=? and type=?";
 
 
                 //we got data exists
-                if($scope.type == 'SUB'){ //sub items details general items                   
-                  data = [$scope.searchOptSelected, $scope.data.comment,  $scope.data.description, $scope.sub_id,  $scope.type ];
+                if($scope.type == 'SUB'){ //sub items details general items
+                  data = [$scope.searchOptSelected, $scope.data.comment,  $scope.data.description, $scope.sub_id, $scope.master_id,  $scope.type ];
                 }
                 else if($scope.type == 'METER'){
-                  data = ['', $scope.data.comment, $scope.data.description, $scope.sub_id,  $scope.type ];
+                  data = ['', $scope.data.comment, $scope.data.description, $scope.sub_id, $scope.master_id,  $scope.type ];
                 }
                 else{
-                  data = [$scope.searchOptSelected, $scope.data.comment, $scope.data.description, $scope.sub_id,  $scope.type ];
+                  data = [$scope.searchOptSelected, $scope.data.comment, $scope.data.description, $scope.sub_id, $scope.master_id,  $scope.type ];
                 }
-            
+
                   DatabaseSrv.executeQuery(query, data ).then(function(result){
-                      
+
                     if($scope.newImages.length == 0 ){
                         if(result.status == 1 ){
 
-                          synSrv.update($scope.property_id, 'property_feedback', $scope.sub_id , 'UPDATE' );
+                          synSrv.update($scope.property_id, 'property_feedback',  result.data.rows.item(0).prop_feedback_id , 'UPDATE' );
 
-                          genericModalService.showToast('Successfully Saved!', 'LCenter');                       
+                          genericModalService.showToast('Successfully Saved!', 'LCenter');
                         }
                         else{
-                          genericModalService.showToast('Something went wrong!', 'LCenter');               
+                          genericModalService.showToast('Something went wrong!', 'LCenter');
                         }
                     }
 
@@ -2824,56 +2839,56 @@ appCtrl.controller('AddSubDetailsCtrl', function($scope, $state, $stateParams, c
 
                     query = "INSERT INTO photos (photo_id, item_id, type, img_url) ";
                     query += " SELECT '"+ srvObjManipulation.generateUid()+"' as photo_id, '"+ $scope.sub_id +"' as item_id, '"+ $scope.type +"' as type, '"+ $scope.newImages[0].link +"' as img_url ";
-                    
+
                     for(var i=1, l = $scope.newImages.length; i < l; i++ ){
                       query += " UNION ALL SELECT '"+ srvObjManipulation.generateUid()+"', '"+ $scope.sub_id +"', '"+ $scope.type +"', '"+ $scope.newImages[i].link +"' ";
                     }
-                      
+
                     DatabaseSrv.executeQuery(query, []).then(function(result){
-              
+
                         if(result.status == 1){
                           genericModalService.showToast('Successfully Saved!', 'LCenter');
                         }
                         else{
-                          genericModalService.showToast('Something went wrong!', 'LCenter');                  
+                          genericModalService.showToast('Something went wrong!', 'LCenter');
                         }
 
                     });
 
                   }*/
-               
+
 
               }
               else{
-                // add new entry 
-                query = "INSERT INTO property_feedback (prop_feedback_id, item_id, option, comment, description, type) VALUES (?,?,?,?,?)";
+                // add new entry
+                query = "INSERT INTO property_feedback (prop_feedback_id, item_id, parent_id, option, comment, description, type) VALUES (?,?,?,?,?,?,?)";
 
                 var prop_feedback_id =  srvObjManipulation.generateUid();
-                if($scope.type == 'SUB'){ //sub items details general items 
+                if($scope.type == 'SUB'){ //sub items details general items
 
-                    data = [prop_feedback_id, $scope.sub_id, $scope.searchOptSelected , $scope.data.comment, $scope.data.description,  $scope.type  ];
+                    data = [prop_feedback_id, $scope.sub_id, $scope.master_id, $scope.searchOptSelected , $scope.data.comment, $scope.data.description,  $scope.type  ];
                 }
                 else if($scope.type == 'METER'){
 
-                    data = [prop_feedback_id, $scope.sub_id, '' , $scope.data.comment, $scope.data.description,  $scope.type  ];
+                    data = [prop_feedback_id, $scope.sub_id, $scope.master_id, '' , $scope.data.comment, $scope.data.description,  $scope.type  ];
                 }
                 else{
 
-                     data = [prop_feedback_id, $scope.sub_id, $scope.searchOptSelected , $scope.data.comment, $scope.data.description,  $scope.type  ];
+                     data = [prop_feedback_id, $scope.sub_id, $scope.master_id, $scope.searchOptSelected , $scope.data.comment, $scope.data.description,  $scope.type  ];
                 }
-            
+
                     DatabaseSrv.executeQuery(query, data ).then(function(result){
-                        
+
                         if($scope.newImages.length == 0 ){
 
                           if(result.status == 1 ){
 
                             synSrv.update($scope.property_id, 'property_feedback', prop_feedback_id , 'INSERT' );
 
-                            genericModalService.showToast('Successfully Saved!', 'LCenter');                             
+                            genericModalService.showToast('Successfully Saved!', 'LCenter');
                           }
                           else{
-                            genericModalService.showToast('Something went wrong!', 'LCenter');                     
+                            genericModalService.showToast('Something went wrong!', 'LCenter');
                           }
 
                         }
@@ -2883,20 +2898,20 @@ appCtrl.controller('AddSubDetailsCtrl', function($scope, $state, $stateParams, c
 
                     /*if($scope.newImages.length > 0 ){ // this is where get insert new images database
 
-                        query = "INSERT INTO photos (photo_id, item_id, type, img_url) "; 
+                        query = "INSERT INTO photos (photo_id, item_id, type, img_url) ";
                         query += " select '"+ srvObjManipulation.generateUid()+"' as photo_id, '"+ $scope.sub_id +"' as item_id, '"+ $scope.type +"' as type, '"+ $scope.newImages[0].link +"' as img_url ";
-                        
+
                         for(var i=1, l = $scope.newImages.length; i < l; i++ ){
                           query += " UNION ALL SELECT '"+ srvObjManipulation.generateUid()+"', '"+ $scope.sub_id +"', '"+ $scope.type +"', '"+ $scope.newImages[i].link +"' ";
                         }
-                          
+
                         DatabaseSrv.executeQuery(query, [] ).then(function(result){
-                  
+
                             if(result.status == 1){
                               genericModalService.showToast('Successfully Saved!', 'LCenter');
                             }
                             else{
-                              genericModalService.showToast('Something went wrong!', 'LCenter');                      
+                              genericModalService.showToast('Something went wrong!', 'LCenter');
                             }
 
                         });
@@ -2907,7 +2922,7 @@ appCtrl.controller('AddSubDetailsCtrl', function($scope, $state, $stateParams, c
 
         }); // select man
 
-        
+
 
         if($scope.type == 'METER'){
 
@@ -2915,7 +2930,7 @@ appCtrl.controller('AddSubDetailsCtrl', function($scope, $state, $stateParams, c
             data = [ $scope.data.reading_value, $scope.sub_id ];
 
             DatabaseSrv.executeQuery(query, data ).then(function(result){
-                
+
               if($scope.newImages.length == 0 ){
 
                   if(result.status == 1 ){
@@ -2923,18 +2938,18 @@ appCtrl.controller('AddSubDetailsCtrl', function($scope, $state, $stateParams, c
                     synSrv.update($scope.property_id, 'property_meter_link', $scope.sub_id  , 'UPDATE' );
 
                       $log.log('updated meter value');
-                      
+
                       /*var alertPopup = $ionicPopup.alert({
                         title: 'Updated!',
                         template: 'Successfully Updated!'
-                      }); */                        
+                      }); */
                   }
                   else{
 
                       /*var alertPopup = $ionicPopup.alert({
                         title: 'Error!',
                         template: 'Something went wrong!'
-                      });        */          
+                      });        */
                   }
               }
 
@@ -2952,7 +2967,7 @@ appCtrl.controller('AddSubDetailsCtrl', function($scope, $state, $stateParams, c
 
 //voice recorder controller
 appCtrl.controller('RecordSoundCtrl', function($scope, $state, $stateParams, commonSrv, $log, $ionicPopup, DatabaseSrv, $ionicModal, $ionicPopup, srvObjManipulation, genericModalService, synSrv){
-    
+
   $scope.sound = {name: ""};
   $scope.sound.file = '';
   $scope.sound.filePath = '';
@@ -2973,10 +2988,10 @@ appCtrl.controller('RecordSoundCtrl', function($scope, $state, $stateParams, com
       $scope.sounds = [];
 
       $scope.prop_subitem_id = $stateParams.prop_subitem_id;
-       $scope.property_id = $stateParams.property_id;
+      $scope.property_id = $stateParams.property_id;
+      $scope.prop_master_id = $stateParams.prop_master_id;
 
-    
-      initLoadData();   
+      initLoadData();
 
   });
 
@@ -2986,12 +3001,12 @@ appCtrl.controller('RecordSoundCtrl', function($scope, $state, $stateParams, com
 
       DatabaseSrv.initLocalDB().then(function(initdb){
 
-          var query = "select property_sub_voice_general.* from property_sub_voice_general where property_sub_voice_general.item_id =?";
+          var query = "select property_sub_voice_general.* from property_sub_voice_general where property_sub_voice_general.item_id =? and property_sub_voice_general.parent_id=?";
 
-          var data = [$scope.prop_subitem_id];
-      
+          var data = [$scope.prop_subitem_id, $scope.prop_master_id];
+
           DatabaseSrv.executeQuery(query, data ).then(function(result){
-            
+
             console.log('item length', result.data.rows.length);
               if(result.data.rows.length > 0) {
 
@@ -3006,7 +3021,7 @@ appCtrl.controller('RecordSoundCtrl', function($scope, $state, $stateParams, com
 
               }
 
-            
+
           });
 
       });
@@ -3014,27 +3029,27 @@ appCtrl.controller('RecordSoundCtrl', function($scope, $state, $stateParams, com
 
   };
 
-  
+
   $scope.saveSound = function() {
-    
+
     $scope.sound.name = Date.now();
-      
+
     if(!$scope.sound.file) {
       var alertPopup = $ionicPopup.alert({
                                 title: 'Error!',
                                 template: 'Record a sound first!'
                               });
-      return;     
+      return;
     }
-    
+
     /*
     begin the copy to persist location
-    
+
     first, this path below is persistent on both ios and and
     */
     var loc = cordova.file.dataDirectory;
     /*
-    but now we have an issue with file name. so let's use the existing extension, 
+    but now we have an issue with file name. so let's use the existing extension,
     but a unique filename based on seconds since epoch
     */
     var extension = $scope.sound.file.split(".").pop();
@@ -3054,19 +3069,19 @@ appCtrl.controller('RecordSoundCtrl', function($scope, $state, $stateParams, com
           $log.log('success in copy sound file');
           $log.log(e);
           $scope.sound.file = e.nativeURL;
-          $scope.sound.path = e.fullPath;          
+          $scope.sound.path = e.fullPath;
 
           //get sounds file saved now save database
 
             DatabaseSrv.initLocalDB().then(function(initdb){
 
-              var query = "INSERT INTO property_sub_voice_general (prop_sub_feedback_general_id, item_id, voice_name, voice_url ) VALUES (?,?,?,?)";
+              var query = "INSERT INTO property_sub_voice_general (prop_sub_feedback_general_id, item_id, parent_id, voice_name, voice_url ) VALUES (?,?,?,?,?)";
               var pro_feed_id = srvObjManipulation.generateUid();
-              var data = [pro_feed_id, $scope.prop_subitem_id,  $scope.sound.name, $scope.sound.file ];
+              var data = [pro_feed_id, $scope.prop_subitem_id, $scope.prop_master_id,  $scope.sound.name, $scope.sound.file ];
                 DatabaseSrv.executeQuery(query, data ).then(function(result){
-        
+
                     if(result.status == 1){
-                        
+
                         /*var alertPopup = $ionicPopup.alert({
                           title: 'Saved!',
                           template: 'Successfully Saved!'
@@ -3075,10 +3090,10 @@ appCtrl.controller('RecordSoundCtrl', function($scope, $state, $stateParams, com
 
                         genericModalService.showToast('Successfully Saved!', 'LCenter');
 
-                        $scope.sounds.push({ prop_sub_feedback_general_id: pro_feed_id, item_id: $scope.prop_subitem_id, voice_name: $scope.sound.name, voice_url: $scope.sound.file, play: true });
+                        $scope.sounds.push({ prop_sub_feedback_general_id: pro_feed_id, item_id: $scope.prop_subitem_id, parent_id: $scope.prop_master_id, voice_name: $scope.sound.name, voice_url: $scope.sound.file, play: true });
 
                         $log.log($scope.sounds);
-                        
+
                     }
                     else{
 
@@ -3087,14 +3102,14 @@ appCtrl.controller('RecordSoundCtrl', function($scope, $state, $stateParams, com
                           template: 'Something went wrong!'
                         });*/
                         genericModalService.showToast('Something went wrong!', 'LCenter');
-                
+
                     }
 
                 });
 
             });
 
-          
+
         }, function(e) {
           $log.log('error in coipy');
           $log.log(e);
@@ -3105,20 +3120,20 @@ appCtrl.controller('RecordSoundCtrl', function($scope, $state, $stateParams, com
         $log.log("error in inner bullcrap");
         $log.log(e);
       });
-      
-      
+
+
     }, function(e) {
       $log.log('error in fs');
       $log.log(e);
     });
 
-    
+
   }
 
   var captureError = function(e) {
     $log.log('captureError' ,e);
   }
-  
+
   var captureSuccess = function(e) {
     $log.log('captureSuccess');
     $log.log(e);
@@ -3129,14 +3144,14 @@ appCtrl.controller('RecordSoundCtrl', function($scope, $state, $stateParams, com
     $scope.saveSound();
 
   }
-  
+
   $scope.record = function() {
     navigator.device.capture.captureAudio(
         captureSuccess,captureError,{duration:10});
   }
-  
 
-  // play the sound 
+
+  // play the sound
   $scope.play = function(sound) {
 
     if(!sound.voice_url) {
@@ -3165,7 +3180,7 @@ appCtrl.controller('RecordSoundCtrl', function($scope, $state, $stateParams, com
       media.stop();
       sound.play = true ;
     }
-    
+
   };
 
 
@@ -3174,10 +3189,11 @@ appCtrl.controller('RecordSoundCtrl', function($scope, $state, $stateParams, com
 
 //general photos controller
 appCtrl.controller('GeneralPhotosCtrl', function($scope, $state, $stateParams, commonSrv, $log, $ionicPopup, DatabaseSrv, $ionicModal, $ionicPopup, srvObjManipulation, genericModalService, synSrv, $cordovaCamera){
-   
+
 
    $scope.prop_subitem_id = '';
    $scope.property_id = '';
+   $scope.prop_master_id = '';
 
       $scope.images = [];
       $scope.newImages = [];
@@ -3185,18 +3201,30 @@ appCtrl.controller('GeneralPhotosCtrl', function($scope, $state, $stateParams, c
       $scope.searchOptSelected = null;
       $scope.daleteImage = null;
 
+      var options = {
+            quality: 75,
+            destinationType: Camera.DestinationType.FILE_URI,
+            sourceType: Camera.PictureSourceType.CAMERA,
+            allowEdit: false,
+            encodingType: Camera.EncodingType.JPEG,
+            targetWidth: 800,
+            targetHeight: 800,
+            popoverOptions: CameraPopoverOptions,
+            saveToPhotoAlbum: false,
+            correctOrientation:true
+          };
 
    $scope.$on('$ionicView.beforeEnter', function() {
 
       $scope.prop_subitem_id = $stateParams.prop_subitem_id;
       $scope.property_id = $stateParams.property_id;
-
+      $scope.prop_master_id =  $stateParams.prop_master_id;
       $scope.images = [];
       $scope.newImages = [];
       $scope.imageUrl = '';
       $scope.searchOptSelected = null;
       $scope.daleteImage = null;
-    
+
       initLoadData();
 
   });
@@ -3210,17 +3238,17 @@ appCtrl.controller('GeneralPhotosCtrl', function($scope, $state, $stateParams, c
 
           //$scope.data['reportImage'] = imageData;
 
-          console.log('file url ', imageData);          
+          console.log('file url ', imageData);
 
-          var query = "INSERT INTO photos (photo_id, item_id, type, img_url) VALUES (?,?,?,?) ";
+          var query = "INSERT INTO photos (photo_id, item_id, parent_id, type, img_url) VALUES (?,?,?,?,?) ";
           var photo_id  = srvObjManipulation.generateUid();
-          var data = [photo_id, $scope.prop_subitem_id, 'GENERAL', imageData ];
+          var data = [photo_id, $scope.prop_subitem_id, $scope.prop_master_id, 'GENERAL', imageData ];
           $log.log('camera data saving');
           $log.log(data);
 
           DatabaseSrv.initLocalDB().then(function(initdb){
             DatabaseSrv.executeQuery(query, data).then(function(result){
-                
+
                 if(result.status == 1){
 
                   synSrv.update($scope.property_id, 'photos', photo_id , 'INSERT' );
@@ -3232,7 +3260,7 @@ appCtrl.controller('GeneralPhotosCtrl', function($scope, $state, $stateParams, c
 
                 }
                 else{
-                  $log.log('photo saving problem') ;           
+                  $log.log('photo saving problem') ;
                 }
 
             });
@@ -3241,7 +3269,7 @@ appCtrl.controller('GeneralPhotosCtrl', function($scope, $state, $stateParams, c
 
 
 
-       //-------------- 
+       //--------------
 
         var
             closeInSeconds = 3,
@@ -3249,12 +3277,12 @@ appCtrl.controller('GeneralPhotosCtrl', function($scope, $state, $stateParams, c
             timer;
 
         swal(
-              { 
+              {
                 title: "Do you want to take more photos?",
-                text: displayText.replace(/#1/, closeInSeconds),   
-                timer: closeInSeconds * 1000,   
+                text: displayText.replace(/#1/, closeInSeconds),
+                timer: closeInSeconds * 1000,
                 showConfirmButton: true,
-                confirmButtonColor: "#DD6B55",   
+                confirmButtonColor: "#DD6B55",
                 confirmButtonText: "Done!",
                 html: true,
                 animation: false
@@ -3268,7 +3296,7 @@ appCtrl.controller('GeneralPhotosCtrl', function($scope, $state, $stateParams, c
                     $log.log("normal cancel");
                     $scope.openCamera();
                   }
-                
+
               }
 
           );
@@ -3293,15 +3321,15 @@ appCtrl.controller('GeneralPhotosCtrl', function($scope, $state, $stateParams, c
 
 
   function initLoadData(){
-    
+
     DatabaseSrv.initLocalDB().then(function(initdb){
 
-       
-        query = "select photos.* from photos where photos.item_id=? and photos.type=GENERAL";
-        data = [$scope.prop_subitem_id];
-    
+
+        query = "select photos.* from photos where photos.item_id=? and photos.parent_id=? and photos.type='GENERAL'";
+        data = [$scope.prop_subitem_id, $scope.prop_master_id];
+
         DatabaseSrv.executeQuery(query, data ).then(function(result){
-          
+
             console.log('item length', result.data.rows.length);
             if(result.data.rows.length > 0){
 
@@ -3313,9 +3341,9 @@ appCtrl.controller('GeneralPhotosCtrl', function($scope, $state, $stateParams, c
               }
 
             }
-          
+
         });
-        
+
 
     });
 
@@ -3331,7 +3359,7 @@ appCtrl.controller('GeneralPhotosCtrl', function($scope, $state, $stateParams, c
     console.log('imkage url', $scope.imageUrl);
     $scope.showModal('templates/model/image-preview.html');
   };
-  
+
   //open image slide model
   $scope.showModal = function(templateUrl) {
 
@@ -3357,7 +3385,7 @@ appCtrl.controller('GeneralPhotosCtrl', function($scope, $state, $stateParams, c
 
     if($scope.daleteImage != null){
 
-      if($scope.daleteImage.hasOwnProperty('image_id') ){ // got image from database 
+      if($scope.daleteImage.hasOwnProperty('image_id') ){ // got image from database
 
         DatabaseSrv.initLocalDB().then(function(initdb){
 
@@ -3365,7 +3393,7 @@ appCtrl.controller('GeneralPhotosCtrl', function($scope, $state, $stateParams, c
             var data = [ $scope.daleteImage.image_id ];
 
             DatabaseSrv.executeQuery(query, data ).then(function(result){
-  
+
               if(result.status == 1){
 
                 synSrv.update($scope.property_id, 'photos', $scope.daleteImage.image_id , 'DELETE' );
@@ -3416,7 +3444,7 @@ appCtrl.controller('GeneralPhotosCtrl', function($scope, $state, $stateParams, c
 
 
 appCtrl.controller('LoginCtrl', function(
-  $scope, 
+  $scope,
   $state,
   $log,
   AuthService,
@@ -3426,7 +3454,7 @@ appCtrl.controller('LoginCtrl', function(
 
 
     $scope.$on('$ionicView.afterEnter', function() {
-      $ionicHistory.clearHistory();    
+      $ionicHistory.clearHistory();
     });
 
     $scope.doLogin = function(data){
@@ -3435,11 +3463,11 @@ appCtrl.controller('LoginCtrl', function(
         if( data.username != undefined && data.password !=  undefined ){
 
             AuthService.login(data.username, data.password).then(function(authenticated) {
-              
+
               try{
-                genericModalService.showToast('Welcome to Property ground !', 'LBottom'); 
+                genericModalService.showToast('Welcome to Property ground !', 'LBottom');
                 data.username = '';
-                data.password = '';                         
+                data.password = '';
               }
               catch(e){
                 $log.error(e);
@@ -3448,7 +3476,7 @@ appCtrl.controller('LoginCtrl', function(
              // $scope.closeModal(null);
 
              $state.go('app.inspections');
-            
+
             }, function(err) {
               var alertPopup = $ionicPopup.alert({
                 title: 'Login failed!',

@@ -2,7 +2,7 @@ appFact = angular.module('PGApp.factories', []);
 
 //common serves for get data
 appFact.factory('commonSrv', function($http, PGAppConfig, $q, $ionicLoading, genericModalService, $log) {
-  //console.log('ApiEndpoint', ApiEndpoint) 
+  //console.log('ApiEndpoint', ApiEndpoint)
 
   var getApiData = function(url, loadingContent) {
 
@@ -12,7 +12,7 @@ appFact.factory('commonSrv', function($http, PGAppConfig, $q, $ionicLoading, gen
     }
 
     var q = $q.defer();
-    
+
     //set custom header to get pass through
     url = ( (PGAppConfig.APP=="DEV")?  PGAppConfig.apiDevEndPoint : PGAppConfig.apiEndPoint ) + url;
     var req = {
@@ -49,8 +49,8 @@ appFact.factory('commonSrv', function($http, PGAppConfig, $q, $ionicLoading, gen
     else if(loadingContent ==  'noloading' ){
 
     }
-    
-    $http(req).success(function(data) {      
+
+    $http(req).success(function(data) {
       $ionicLoading.hide();
       q.resolve(data);
     })
@@ -80,7 +80,7 @@ appFact.factory('commonSrv', function($http, PGAppConfig, $q, $ionicLoading, gen
          url: temp_url, //ApiEndpoint.url,
          data : data
     };
-    
+
     if(url != 'auth/authenticate'){
 
         req['headers'] =  {
@@ -88,8 +88,8 @@ appFact.factory('commonSrv', function($http, PGAppConfig, $q, $ionicLoading, gen
          };
     }
 
-    
-    
+
+
 
 
     if( loadingContent ==  'loading'){
@@ -114,7 +114,7 @@ appFact.factory('commonSrv', function($http, PGAppConfig, $q, $ionicLoading, gen
 
     }
     else if(loadingContent ==  'noloading' ){
-      
+
     }
 
 
@@ -137,9 +137,9 @@ appFact.factory('commonSrv', function($http, PGAppConfig, $q, $ionicLoading, gen
   var getOutSourceData = function(url) {
 
     // this to set custom ionic loading
-    
+
     var q = $q.defer();
-    
+
 
     var req = {
          method: 'GET',
@@ -154,10 +154,10 @@ appFact.factory('commonSrv', function($http, PGAppConfig, $q, $ionicLoading, gen
               maxWidth: 200,
               showDelay: 0
             });
-    
+
     $http(req)
     .success(function(data) {
-      
+
       $ionicLoading.hide();
       q.resolve(data);
     })
@@ -207,7 +207,7 @@ appFact.factory('genericModalService', function($rootScope, $q, $ionicModal, $co
               thisModal.currentScope.$destroy();
               thisModal.currentScope.modal.remove();
             });
-            
+
             modalScope.modal.show();
 
             deferred.resolve(modalScope);
@@ -217,7 +217,7 @@ appFact.factory('genericModalService', function($rootScope, $q, $ionicModal, $co
     };
 
     function showToast(text, position){
-      
+
       $log.log(text);
       if(position == undefined){
         position =  'LCenter';
@@ -228,7 +228,7 @@ appFact.factory('genericModalService', function($rootScope, $q, $ionicModal, $co
           if(position == 'LCenter'){
 
             try {
-              
+
               $cordovaToast.showLongCenter(text).then(function(success) {
                 // success
                 $log.log(success);
@@ -242,7 +242,7 @@ appFact.factory('genericModalService', function($rootScope, $q, $ionicModal, $co
               console.log(e);
             }
 
-              
+
 
           }
           else if(position == 'SBottom'){
@@ -260,7 +260,7 @@ appFact.factory('genericModalService', function($rootScope, $q, $ionicModal, $co
               console.log(e);
             }
 
-              
+
 
           }
           else if(position == 'LBottom'){
@@ -277,11 +277,11 @@ appFact.factory('genericModalService', function($rootScope, $q, $ionicModal, $co
               // statements
               console.log(e);
             }
-                        
+
 
           }
 
-          
+
       }
       catch(e){
         $log.error(e);
@@ -312,10 +312,10 @@ appFact.factory('appModalService', function($ionicModal, $rootScope, $q, $inject
             scope: modalScope,
             animation: 'none'//'slide-in-up'
         }).then(function (modal) {
-            modalScope.modal = modal;            
+            modalScope.modal = modal;
 
             modalScope.openModal = function () {
-                
+
                 modalScope.modal.show();
             };
             modalScope.closeModal = function (result) {
@@ -381,7 +381,7 @@ appFact.factory('appModalService', function($ionicModal, $rootScope, $q, $inject
     return {
         show: show
     };
-  
+
   }
 );
 
@@ -392,7 +392,7 @@ appFact.factory('myModals', function (appModalService, $log){
   var service = {
       showLogin: showLogin,
       gCommentBox: gCommentBox,
-      subCommentBox: subCommentBox 
+      subCommentBox: subCommentBox
   };
 
   function showLogin(userInfo){
@@ -454,9 +454,9 @@ appFact.factory('appHttpInterceptor', function ($q, PGAppConfig, $localstorage, 
   function checkCredentials(){
 
     var token = $localstorage.get(PGAppConfig.LOCAL_TOKEN_KEY);
-    
+
     if (token){
-      return token;      
+      return token;
     }
     else{
       return '';
@@ -478,14 +478,14 @@ appFact.factory('appHttpInterceptor', function ($q, PGAppConfig, $localstorage, 
               var token = checkCredentials();
             }
 
-          
+
 
           return config;
 
         },
 
         response: function (response) {
-           
+
             return response;
         },
         responseError: function (response) {
@@ -498,7 +498,7 @@ appFact.factory('appHttpInterceptor', function ($q, PGAppConfig, $localstorage, 
 });
 
 appFact.factory('DatabaseSrv', function($q, PGAppConfig, $cordovaSQLite, $ionicPlatform, $log, $ionicLoading){
- 
+
   var db_con = null;
   var db_name = "property_ground.db";
 
@@ -511,15 +511,15 @@ appFact.factory('DatabaseSrv', function($q, PGAppConfig, $cordovaSQLite, $ionicP
 
   function initLocalDB(){
 
-      var q = $q.defer();    
-    
+      var q = $q.defer();
+
       $ionicPlatform.ready(function(){
 
-        /*if (window.cordova && window.SQLitePlugin) { 
+        /*if (window.cordova && window.SQLitePlugin) {
           db_con = $cordovaSQLite.openDB( db_name , 1 );
           q.resolve({status: true, db: db_con});
-        } 
-        else { 
+        }
+        else {
           db_con = window.openDatabase('property_ground', '1.0', db_name, 100 * 1024 * 1024);
           q.resolve({status: true, db: db_con});
         } */
@@ -554,7 +554,7 @@ appFact.factory('DatabaseSrv', function($q, PGAppConfig, $cordovaSQLite, $ionicP
 
         /*if (!db_con) {
             if (window.sqlitePlugin !== undefined) {
-              db_con = $cordovaSQLite.openDB({ name: db_name, iosDatabaseLocation:'default'}); 
+              db_con = $cordovaSQLite.openDB({ name: db_name, iosDatabaseLocation:'default'});
               //db_con = window.sqlitePlugin.openDatabase({ name: db_name, location: 2, createFromLocation: 1 });
               q.resolve({status: true, db: db_con});
             } else {
@@ -562,7 +562,7 @@ appFact.factory('DatabaseSrv', function($q, PGAppConfig, $cordovaSQLite, $ionicP
               db_con = window.openDatabase(db_name , "1.0", "Database", 200000);
               q.resolve({status: true, db: db_con});
             }
-          }*/      
+          }*/
 
       });
 
@@ -574,7 +574,7 @@ appFact.factory('DatabaseSrv', function($q, PGAppConfig, $cordovaSQLite, $ionicP
   function setCompanyTemplate(){
 
      var q = $q.defer();
-    
+
     if(db_con){
 
       $cordovaSQLite.execute(db_con, "CREATE TABLE IF NOT EXISTS company_masteritem_link (com_master_id integer primary key, original_master_id integer, company_id integer, item_name text, type text, option text, priority integer, status integer)");
@@ -587,13 +587,13 @@ appFact.factory('DatabaseSrv', function($q, PGAppConfig, $cordovaSQLite, $ionicP
       createOtherTable();
 
       q.resolve({status: true});
-      
+
     }
     else{
       q.reject({status: false});
     }
 
-    
+
     $log.log('company template created...');
 
     return q.promise;
@@ -609,14 +609,14 @@ appFact.factory('DatabaseSrv', function($q, PGAppConfig, $cordovaSQLite, $ionicP
         $cordovaSQLite.execute(db_con, "CREATE TABLE IF NOT EXISTS property_masteritem_link (id integer primary key, prop_master_id text, property_id text, com_master_id integer, type text, com_type text, option text, self_prop_master_id text, name text, priority integer, total_num integer, status integer, createdAt DATETIME DEFAULT CURRENT_TIMESTAMP)");
         //$cordovaSQLite.execute(db_con, "CREATE TABLE IF NOT EXISTS property_master_num_link (id integer primary key, prop_num_id text, prop_master_id text, name text, description text, status integer, createdAt DATETIME DEFAULT CURRENT_TIMESTAMP)");
         $cordovaSQLite.execute(db_con, "CREATE TABLE IF NOT EXISTS property_subitem_link (id integer primary key, prop_subitem_id text, property_id text, com_subitem_id integer, item_name text, type text, priority integer, status integer, createdAt DATETIME DEFAULT CURRENT_TIMESTAMP)");
-        
+
         $cordovaSQLite.execute(db_con, "CREATE TABLE IF NOT EXISTS property_general_condition_link (id integer primary key, prop_general_id text, property_id text, com_general_id integer, item_name text, options text, type text, priority integer, user_input text, comment text, status integer, createdAt DATETIME DEFAULT CURRENT_TIMESTAMP)");
 
-        $cordovaSQLite.execute(db_con, "CREATE TABLE IF NOT EXISTS property_feedback (id integer primary key, prop_feedback_id text, item_id text, option text, comment text, type text, createdAt DATETIME DEFAULT CURRENT_TIMESTAMP)");
-        $cordovaSQLite.execute(db_con, "CREATE TABLE IF NOT EXISTS photos (id integer primary key, photo_id text, item_id text, type text, img_url text, createdAt DATETIME DEFAULT CURRENT_TIMESTAMP)");
-        
-        $cordovaSQLite.execute(db_con, "CREATE TABLE IF NOT EXISTS property_sub_feedback_general (id integer primary key, prop_sub_feedback_general_id text, item_id text, comment text, description text, createdAt DATETIME DEFAULT CURRENT_TIMESTAMP)");
-        $cordovaSQLite.execute(db_con, "CREATE TABLE IF NOT EXISTS property_sub_voice_general (id integer primary key, prop_sub_feedback_general_id text, item_id text, voice_name text, voice_url text, createdAt DATETIME DEFAULT CURRENT_TIMESTAMP)");
+        $cordovaSQLite.execute(db_con, "CREATE TABLE IF NOT EXISTS property_feedback (id integer primary key, prop_feedback_id text, item_id text, parent_id text, option text, comment text, type text, description text,createdAt DATETIME DEFAULT CURRENT_TIMESTAMP)");
+        $cordovaSQLite.execute(db_con, "CREATE TABLE IF NOT EXISTS photos (id integer primary key, photo_id text, item_id text, parent_id text, type text, img_url text, createdAt DATETIME DEFAULT CURRENT_TIMESTAMP)");
+
+        $cordovaSQLite.execute(db_con, "CREATE TABLE IF NOT EXISTS property_sub_feedback_general (id integer primary key, prop_sub_feedback_general_id text, item_id text, parent_id text, comment text, createdAt DATETIME DEFAULT CURRENT_TIMESTAMP)");
+        $cordovaSQLite.execute(db_con, "CREATE TABLE IF NOT EXISTS property_sub_voice_general (id integer primary key, prop_sub_feedback_general_id text, item_id text, parent_id text, voice_name text, voice_url text, createdAt DATETIME DEFAULT CURRENT_TIMESTAMP)");
 
         $cordovaSQLite.execute(db_con, "CREATE TABLE IF NOT EXISTS property_meter_link (id integer primary key, prop_meter_id text, property_id text, com_meter_id integer, meter_name text, reading_value text, status integer, createdAt DATETIME DEFAULT CURRENT_TIMESTAMP)");
         $log.log('tables created..');
@@ -628,12 +628,12 @@ appFact.factory('DatabaseSrv', function($q, PGAppConfig, $cordovaSQLite, $ionicP
   function executeQuery(query, data, params, loadingContent ){
 
     var q = $q.defer();
-    
+
     // this to set custom ionic loading
     if(loadingContent == undefined){
       loadingContent =  'loading';
     }
-    
+
     if( loadingContent ==  'loading'){
       $ionicLoading.show({
               content: 'Loading',
@@ -696,7 +696,7 @@ appFact.factory('DatabaseSrv', function($q, PGAppConfig, $cordovaSQLite, $ionicP
             $cordovaSQLite.deleteDB({ name: db_name , iosDatabaseLocation:'default' });
       }
       else if(ionic.Platform.isIOS() ){
-          $cordovaSQLite.deleteDB({ name: db_name ,  location: 2, createFromLocation: 1 });      
+          $cordovaSQLite.deleteDB({ name: db_name ,  location: 2, createFromLocation: 1 });
       }
   };
 
@@ -710,7 +710,7 @@ appFact.factory('DatabaseSrv', function($q, PGAppConfig, $cordovaSQLite, $ionicP
 //shared search data
 //used to share objects
 appFact.factory('roomObj', function(){
-   
+
    var myData = {};
 
     var setData = function(newObj) {
@@ -730,19 +730,19 @@ appFact.factory('roomObj', function(){
 
 // this service to get property info based on property id
 appFact.factory('PropInfoSrv', function(DatabaseSrv, $q, $log){
-  
+
   var propInfo = function(property_id){
 
       var propInfoData = {};
       var q = $q.defer();
 
       if(property_id){
-        
+
         DatabaseSrv.initLocalDB().then(function(initdb){
 
           var query = "select property_info.*, strftime('%d/%m/%Y', property_info.createdAt) as created_date, property.description from property_info inner join property on property_info.property_id = property.property_id where property.property_id=?";
           var data = [property_id];
-      
+
           DatabaseSrv.executeQuery(query, data ).then(function(result){
 
               if(result.status == 1 && result.data.rows.length > 0){
@@ -767,7 +767,7 @@ appFact.factory('PropInfoSrv', function(DatabaseSrv, $q, $log){
               }
               else{
                 q.resolve({data: propInfoData, status: 0});
-                $log.log('Could not find the property!'); 
+                $log.log('Could not find the property!');
               }
 
           });
@@ -785,7 +785,7 @@ appFact.factory('PropInfoSrv', function(DatabaseSrv, $q, $log){
   };
 
   return{
-      getPropInfo: propInfo 
+      getPropInfo: propInfo
   };
 
 });
@@ -803,31 +803,31 @@ appFact.factory('Sounds', function($q) {
       localStorage.mysoundboard = JSON.stringify(sounds);
       deferred.resolve();
     });
-  
-    return deferred.promise;      
-  
+
+    return deferred.promise;
+
   }
-  
+
   var getSounds = function() {
     var deferred = $q.defer();
     var sounds = [];
-    
+
     if(localStorage.mysoundboard) {
       sounds = JSON.parse(localStorage.mysoundboard);
     }
     deferred.resolve(sounds);
-  
+
     return deferred.promise;
   }
-  
+
   var playSound = function(x) {
     getSounds().then(function(sounds) {
       var sound = sounds[x];
 
-      
+
       Ok, so on Android, we just work.
       On iOS, we need to rewrite to ../Library/NoCloud/FILE'
-      
+
       var mediaUrl = sound.file;
       if(device.platform.indexOf("iOS") >= 0) {
         mediaUrl = "../Library/NoCloud/" + mediaUrl.split("/").pop();
@@ -838,9 +838,9 @@ appFact.factory('Sounds', function($q) {
         console.log("media err", err);
       });
       media.play();
-    });   
+    });
   }
-  
+
   var saveSound = function(s) {
     console.log("calling saveSound");
     var deferred = $q.defer();
@@ -849,8 +849,8 @@ appFact.factory('Sounds', function($q) {
       localStorage.mysoundboard = JSON.stringify(sounds);
       deferred.resolve();
     });
-  
-    return deferred.promise;      
+
+    return deferred.promise;
   }
 
   return {
@@ -865,33 +865,33 @@ appFact.factory('Sounds', function($q) {
 // $cordovaSQLite.execute(db_con, "CREATE TABLE IF NOT EXISTS sync (id integer primary key, syn_id text, property_id text, table_name text, key_id text, task text, status integer )");
  //task INSERT, UPDATE, DELETE
 appFact.factory('synSrv', function($log, DatabaseSrv, srvObjManipulation ){
-   
+
     var update = function(property_id, table, key_id, task) {
-      
+
           DatabaseSrv.initLocalDB().then(function(initdb){
 
             var query = "INSERT INTO sync (syn_id, property_id, table_name, key_id, task, status) VALUES (?,?,?,?,?,?)";
             var data = [srvObjManipulation.generateUid(), property_id, table, key_id, task, 1 ];
-            
+
             DatabaseSrv.executeQuery(query, data ).then(function(result){
-      
-                  if(result.status == 1){                   
+
+                  if(result.status == 1){
 
                       $log.log('Successfully Saved!');
                   }
                   else{
                       $log.log('Something went wrong!');
-              
+
                   }
 
             });
 
         });
-      
+
 
     };
 
-    
+
     return {
       update: update
     };

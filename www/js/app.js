@@ -6,7 +6,7 @@
 // 'starter.controllers' is found in controllers.js
 
 angular.module('PGApp', [
-  'ionic', 
+  'ionic',
   'ngCordova',
   'ionic-native-transitions',
   'PGApp.controllers',
@@ -34,7 +34,7 @@ angular.module('PGApp', [
       } else {
         StatusBar.styleLightContent();
       }
-      
+
     }
 
     console.log('creating ');
@@ -46,7 +46,7 @@ angular.module('PGApp', [
       db = $cordovaSQLite.openDB({ name: "property_ground.db" ,  location: 2, createFromLocation: 1 });
     }
 
-    
+
     $cordovaSQLite.execute(db, "CREATE TABLE IF NOT EXISTS company_masteritem_link (com_master_id integer primary key, original_master_id integer, company_id integer, item_name text, type text, option text, priority integer, status integer)");
     $cordovaSQLite.execute(db, "CREATE TABLE IF NOT EXISTS company_subitem_link (com_subitem_id integer primary key, com_master_id integer, company_id integer, item_name text, type text, priority integer, status integer)");
     $cordovaSQLite.execute(db, "CREATE TABLE IF NOT EXISTS company_meter_link (com_meter_id integer primary key, company_id integer, meter_name text, type text, status integer)");
@@ -63,7 +63,7 @@ angular.module('PGApp', [
   $ionicConfigProvider.backButton.previousTitleText(false);
   $ionicConfigProvider.views.transition('none'); // disable the slide animation
   $ionicConfigProvider.scrolling.jsScrolling(false); // enable the native scrolling
-   
+
   //$httpProvider.interceptors.push('appHttpInterceptor');
 
   $ionicNativeTransitionsProvider.setDefaultOptions({
@@ -208,7 +208,7 @@ angular.module('PGApp', [
     })
 
     .state('app.recordSound', {
-      url: '/recordSoundCtrl/:prop_subitem_id/:property_id',
+      url: '/recordSoundCtrl/:prop_subitem_id/:property_id/:master_id',
       views:{
         'menuContent': {
           templateUrl: 'templates/app/record-sound.html',
