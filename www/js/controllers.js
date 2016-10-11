@@ -1884,7 +1884,7 @@ appCtrl.controller('SubItemsListCtrl', function($scope, $state, $stateParams, co
 
         DatabaseSrv.initLocalDB().then(function(initdb){
 
-          var query = "select property_subitem_link.*, property_masteritem_link.prop_master_id, property_masteritem_link.name as master_item_name, company_subitem_link.com_master_id, (select count(photos.photo_id) from photos where photos.item_id = property_subitem_link.prop_subitem_id ) as image_count from property_subitem_link inner join company_subitem_link on property_subitem_link.com_subitem_id = company_subitem_link.com_subitem_id inner JOIN property_masteritem_link on company_subitem_link.com_master_id = property_masteritem_link.com_master_id where property_subitem_link.status =1 and property_masteritem_link.prop_master_id =? and property_subitem_link.property_id=? order by property_subitem_link.type";
+          var query = "select property_subitem_link.*, property_masteritem_link.prop_master_id, property_masteritem_link.name as master_item_name, company_subitem_link.com_master_id, (select count(photos.photo_id) from photos where photos.item_id = property_subitem_link.prop_subitem_id and photos.parent_id= property_masteritem_link.prop_master_id  ) as image_count from property_subitem_link inner join company_subitem_link on property_subitem_link.com_subitem_id = company_subitem_link.com_subitem_id inner JOIN property_masteritem_link on company_subitem_link.com_master_id = property_masteritem_link.com_master_id where property_subitem_link.status =1 and property_masteritem_link.prop_master_id =? and property_subitem_link.property_id=? order by property_subitem_link.type";
 
           var data = [$scope.prop_master_id, $scope.property_id];
 
@@ -1936,7 +1936,7 @@ appCtrl.controller('SubItemsListCtrl', function($scope, $state, $stateParams, co
                     });
 
                     //----------------------------------------------------------------------
-                    query = "select property_sub_feedback_general.* from property_sub_feedback_general where property_sub_feedback_general.item_id=? and photos.parent_id=?";
+                    query = "select property_sub_feedback_general.* from property_sub_feedback_general where property_sub_feedback_general.item_id=? and property_sub_feedback_general.parent_id=?";
                     data = [general_sub_item_id, $scope.prop_master_id];
                     DatabaseSrv.executeQuery(query, data ).then(function(result){
                       console.log('item length', result.data.rows.length);
@@ -1946,7 +1946,7 @@ appCtrl.controller('SubItemsListCtrl', function($scope, $state, $stateParams, co
                     });
 
                     //----------------------------------------------------------------------
-                    query = "select count(property_sub_voice_general.prop_sub_feedback_general_id) as voice_count from property_sub_voice_general where property_sub_voice_general.item_id =? and photos.parent_id=?";
+                    query = "select count(property_sub_voice_general.prop_sub_feedback_general_id) as voice_count from property_sub_voice_general where property_sub_voice_general.item_id =? and property_sub_voice_general.parent_id=?";
                     data = [general_sub_item_id, $scope.prop_master_id];
                     DatabaseSrv.executeQuery(query, data ).then(function(result){
                         if(result.data.rows.length > 0) {
@@ -2147,7 +2147,7 @@ appCtrl.controller('SubItemsListCtrl', function($scope, $state, $stateParams, co
 
                                       $log.log('copy GENERAL feedback');
                                       var prop_sub_feedback_general_id = srvObjManipulation.generateUid();
-                                      query = "INSERT INTO property_sub_feedback_general (prop_sub_feedback_general_id, item_id, parent_id, comment ) select '"+ prop_sub_feedback_general_id +"' item_id,'"+ property_masteritem_link_id +"' , comment from property_sub_feedback_general where property_sub_feedback_general.item_id='" + sub_items.data.rows.item(i).prop_subitem_id +"'";
+                                      query = "INSERT INTO property_sub_feedback_general (prop_sub_feedback_general_id, item_id, parent_id, comment ) select '"+ prop_sub_feedback_general_id +"', item_id,'"+ property_masteritem_link_id +"' , comment from property_sub_feedback_general where property_sub_feedback_general.item_id='" + sub_items.data.rows.item(i).prop_subitem_id +"' and property_sub_feedback_general.parent_id='" + $scope.prop_master_id + "'";
                                       var params = {
                                         prop_sub_feedback_general_id: prop_sub_feedback_general_id
                                       };
@@ -2166,7 +2166,7 @@ appCtrl.controller('SubItemsListCtrl', function($scope, $state, $stateParams, co
                                         prop_feedback_id: prop_feedback_id
                                       };
 
-                                      query = "INSERT INTO property_feedback (prop_feedback_id, item_id, parent_id, option, comment, description, type) select '" + prop_feedback_id + "', item_id, '" + property_masteritem_link_id + "', option, comment, description, type from property_feedback where property_feedback.item_id='"+ sub_items.data.rows.item(i).prop_subitem_id + "'";
+                                      query = "INSERT INTO property_feedback (prop_feedback_id, item_id, parent_id, option, comment, description, type) select '" + prop_feedback_id + "', item_id, '" + property_masteritem_link_id + "', option, comment, description, type from property_feedback where property_feedback.item_id='"+ sub_items.data.rows.item(i).prop_subitem_id + "' and property_feedback.parent_id='" + $scope.prop_master_id + "'";
                                       DatabaseSrv.executeQuery(query, [], params).then(function(nar_feed){
                                           $log.log('copied normalL feedback');
                                           synSrv.update($scope.property_id, 'property_sub_feedback_general', nar_feed.params.prop_sub_feedback_general_id, 'INSERT' );
