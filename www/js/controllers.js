@@ -2151,6 +2151,7 @@ appCtrl.controller('SubItemsListCtrl', function($scope, $state, $stateParams, co
                                       var params = {
                                         prop_sub_feedback_general_id: prop_sub_feedback_general_id
                                       };
+
                                       DatabaseSrv.executeQuery(query, [], params).then(function(gen_feed){
                                         $log.log('copied GENERAL feedback');
                                         synSrv.update($scope.property_id, 'property_sub_feedback_general', gen_feed.params.prop_sub_feedback_general_id, 'INSERT' );
@@ -2158,11 +2159,13 @@ appCtrl.controller('SubItemsListCtrl', function($scope, $state, $stateParams, co
 
                                     }
                                     else{
+
                                       $log.log('copy other feedback');
                                       var prop_feedback_id = srvObjManipulation.generateUid();
                                       var params = {
                                         prop_feedback_id: prop_feedback_id
                                       };
+
                                       query = "INSERT INTO property_feedback (prop_feedback_id, item_id, parent_id, option, comment, description, type) select '" + prop_feedback_id + "', item_id, '" + property_masteritem_link_id + "', option, comment, description, type from property_feedback where property_feedback.item_id='"+ sub_items.data.rows.item(i).prop_subitem_id + "'";
                                       DatabaseSrv.executeQuery(query, [], params).then(function(nar_feed){
                                           $log.log('copied normalL feedback');
@@ -2825,17 +2828,19 @@ appCtrl.controller('AddSubDetailsCtrl', function($scope, $state, $stateParams, c
 
                   DatabaseSrv.executeQuery(query, data ).then(function(result){
 
-                    if($scope.newImages.length == 0 ){
+                    //if($scope.newImages.length == 0 ){
+
                         if(result.status == 1 ){
 
                           synSrv.update($scope.property_id, 'property_feedback',  result.data.rows.item(0).prop_feedback_id , 'UPDATE' );
-
                           genericModalService.showToast('Successfully Saved!', 'LCenter');
+
                         }
                         else{
                           genericModalService.showToast('Something went wrong!', 'LCenter');
                         }
-                    }
+
+                    //}
 
                   });
 
@@ -2885,7 +2890,7 @@ appCtrl.controller('AddSubDetailsCtrl', function($scope, $state, $stateParams, c
 
                     DatabaseSrv.executeQuery(query, data ).then(function(result){
 
-                        if($scope.newImages.length == 0 ){
+                        //if($scope.newImages.length == 0 ){
 
                           if(result.status == 1 ){
 
@@ -2897,7 +2902,7 @@ appCtrl.controller('AddSubDetailsCtrl', function($scope, $state, $stateParams, c
                             genericModalService.showToast('Something went wrong!', 'LCenter');
                           }
 
-                        }
+                        //}
 
                     });
 
