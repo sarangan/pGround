@@ -198,7 +198,7 @@ angular.module('PGApp', [
     })
 
     .state('app.addSubDetails', {
-      url: '/addSubDetails/:sub_id/:type/:property_id',
+      url: '/addSubDetails/:sub_id/:master_id/:type/:property_id',
       views: {
         'menuContent': {
           templateUrl: 'templates/app/add-sub-item-items.html',
@@ -218,7 +218,7 @@ angular.module('PGApp', [
     })
 
     .state('app.generalPhotos', {
-      url: '/generalPhotosCtrl/:prop_subitem_id/:property_id',
+      url: '/generalPhotosCtrl/:prop_subitem_id/:master_id/:property_id',
       views:{
         'menuContent': {
           templateUrl: 'templates/app/general-photos.html',

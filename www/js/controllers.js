@@ -1884,7 +1884,7 @@ appCtrl.controller('SubItemsListCtrl', function($scope, $state, $stateParams, co
 
         DatabaseSrv.initLocalDB().then(function(initdb){
 
-          var query = "select property_subitem_link.*, property_masteritem_link.prop_master_id, property_masteritem_link.name as master_item_name, company_subitem_link.com_master_id, (select count(photos.photo_id) from photos where photos.item_id = property_subitem_link.prop_subitem_id and photos.parent_id = property_masteritem_link.prop_master_id ) as image_count from property_subitem_link inner join company_subitem_link on property_subitem_link.com_subitem_id = company_subitem_link.com_subitem_id inner JOIN property_masteritem_link on company_subitem_link.com_master_id = property_masteritem_link.com_master_id where property_subitem_link.status =1 and property_masteritem_link.prop_master_id =? and property_subitem_link.property_id=? order by property_subitem_link.type";
+          var query = "select property_subitem_link.*, property_masteritem_link.prop_master_id, property_masteritem_link.name as master_item_name, company_subitem_link.com_master_id, (select count(photos.photo_id) from photos where photos.item_id = property_subitem_link.prop_subitem_id ) as image_count from property_subitem_link inner join company_subitem_link on property_subitem_link.com_subitem_id = company_subitem_link.com_subitem_id inner JOIN property_masteritem_link on company_subitem_link.com_master_id = property_masteritem_link.com_master_id where property_subitem_link.status =1 and property_masteritem_link.prop_master_id =? and property_subitem_link.property_id=? order by property_subitem_link.type";
 
           var data = [$scope.prop_master_id, $scope.property_id];
 
@@ -1926,7 +1926,7 @@ appCtrl.controller('SubItemsListCtrl', function($scope, $state, $stateParams, co
 
 
                    //-----------------------------------------------------------------------
-                    query = "select count(photos.photo_id) as image_count from photos where photos.item_id =? and photos.parent_id =? and photos.type='GENERAL' ";
+                    query = "select count(photos.photo_id) as image_count from photos where photos.item_id =? and photos.parent_id=? and photos.type='GENERAL' ";
                     data = [general_sub_item_id, $scope.prop_master_id];
                     DatabaseSrv.executeQuery(query, data ).then(function(result){
                       console.log('item length', result.data.rows.length);
@@ -1936,7 +1936,7 @@ appCtrl.controller('SubItemsListCtrl', function($scope, $state, $stateParams, co
                     });
 
                     //----------------------------------------------------------------------
-                    query = "select property_sub_feedback_general.* from property_sub_feedback_general where property_sub_feedback_general.item_id=? and property_sub_feedback_general.parent_id=?";
+                    query = "select property_sub_feedback_general.* from property_sub_feedback_general where property_sub_feedback_general.item_id=? and photos.parent_id=?";
                     data = [general_sub_item_id, $scope.prop_master_id];
                     DatabaseSrv.executeQuery(query, data ).then(function(result){
                       console.log('item length', result.data.rows.length);
@@ -1946,7 +1946,7 @@ appCtrl.controller('SubItemsListCtrl', function($scope, $state, $stateParams, co
                     });
 
                     //----------------------------------------------------------------------
-                    query = "select count(property_sub_voice_general.prop_sub_feedback_general_id) as voice_count from property_sub_voice_general where property_sub_voice_general.item_id =? and property_sub_feedback_general.parent_id=?";
+                    query = "select count(property_sub_voice_general.prop_sub_feedback_general_id) as voice_count from property_sub_voice_general where property_sub_voice_general.item_id =? and photos.parent_id=?";
                     data = [general_sub_item_id, $scope.prop_master_id];
                     DatabaseSrv.executeQuery(query, data ).then(function(result){
                         if(result.data.rows.length > 0) {
@@ -2115,44 +2115,44 @@ appCtrl.controller('SubItemsListCtrl', function($scope, $state, $stateParams, co
 
                       $log.log(master_item);
 
-                      $log.log('copping master something wrong');
+                      $log.log('copping master');
 
-                        query = "select property_subitem_link.*, property_masteritem_link.prop_master_id, property_masteritem_link.name as master_item_name, company_subitem_link.com_master_id from property_subitem_link inner join company_subitem_link on property_subitem_link.com_subitem_id = company_subitem_link.com_subitem_id inner JOIN property_masteritem_link on company_subitem_link.com_master_id = property_masteritem_link.com_master_id where property_subitem_link.status =1 and property_masteritem_link.prop_master_id =? order by property_subitem_link.type";
-                        var data = [$scope.prop_master_id];
+                         query = "select property_subitem_link.*, property_masteritem_link.prop_master_id, property_masteritem_link.name as master_item_name, company_subitem_link.com_master_id from property_subitem_link inner join company_subitem_link on property_subitem_link.com_subitem_id = company_subitem_link.com_subitem_id inner JOIN property_masteritem_link on company_subitem_link.com_master_id = property_masteritem_link.com_master_id where property_subitem_link.status =1 and property_masteritem_link.prop_master_id =? order by property_subitem_link.type";
+                         var data = [$scope.prop_master_id];
 
-                        DatabaseSrv.executeQuery(query, data).then(function(sub_items){
+                         DatabaseSrv.executeQuery(query, data).then(function(sub_items){
 
                             if(sub_items.status == 1 && sub_items.data.rows.length > 0){
 
-                              query = "INSERT INTO property_subitem_link (prop_subitem_id, property_id, com_subitem_id, item_name, type, priority, status) VALUES (?,?,?,?,?,?,?)";
+                          //    query = "INSERT INTO property_subitem_link (prop_subitem_id, property_id, com_subitem_id, item_name, type, priority, status) VALUES (?,?,?,?,?,?,?)";
 
                               for (var i = 0; i < sub_items.data.rows.length; i++) {
 
-                                var property_subitem_link_id = srvObjManipulation.generateUid();
-                                data = [property_subitem_link_id, sub_items.data.rows.item(i).property_id , sub_items.data.rows.item(i).com_subitem_id, sub_items.data.rows.item(i).item_name, sub_items.data.rows.item(i).type, sub_items.data.rows.item(i).priority, 1 ];
-                                var params = {
-                                  property_subitem_link_id : property_subitem_link_id,
-                                  type: sub_items.data.rows.item(i).type,
-                                  master_sub_item_id:  sub_items.data.rows.item(i).prop_subitem_id
-                                };
+                                // var property_subitem_link_id = srvObjManipulation.generateUid();
+                                // data = [property_subitem_link_id, sub_items.data.rows.item(i).property_id , sub_items.data.rows.item(i).com_subitem_id, sub_items.data.rows.item(i).item_name, sub_items.data.rows.item(i).type, sub_items.data.rows.item(i).priority, 1 ];
+                                // var params = {
+                                //   property_subitem_link_id : property_subitem_link_id,
+                                //   type: sub_items.data.rows.item(i).type,
+                                //   master_sub_item_id:  sub_items.data.rows.item(i).prop_subitem_id
+                                // };
 
-                                DatabaseSrv.executeQuery(query, data, params).then(function(prop_subs){
-                                  $log.log('copy property sub item!');
+                              //  DatabaseSrv.executeQuery(query, data, params).then(function(prop_subs){
+                                //  $log.log('copy property sub item!');
 
-                                  if(prop_subs.status == 1){
+                                //  if(prop_subs.status == 1){
 
-                                    synSrv.update($scope.property_id, 'property_subitem_link', prop_subs.params.property_subitem_link_id, 'INSERT' );
+                                  //  synSrv.update($scope.property_id, 'property_subitem_link', prop_subs.params.property_subitem_link_id, 'INSERT' );
 
-                                    if(prop_subs.params.type =='GENERAL' ){
+                                    if(sub_items.data.rows.item(i).type =='GENERAL' ){
 
                                       $log.log('copy GENERAL feedback');
                                       var prop_sub_feedback_general_id = srvObjManipulation.generateUid();
-                                      query = "INSERT INTO property_sub_feedback_general (prop_sub_feedback_general_id, item_id, parent_id, comment ) select '"+ prop_sub_feedback_general_id +"' item_id, parent_id, comment from property_sub_feedback_general where property_sub_feedback_general.item_id='" + prop_subs.params.master_sub_item_id +"'";
+                                      query = "INSERT INTO property_sub_feedback_general (prop_sub_feedback_general_id, item_id, parent_id, comment ) select '"+ prop_sub_feedback_general_id +"' item_id,'"+ property_masteritem_link_id +"' , comment from property_sub_feedback_general where property_sub_feedback_general.item_id='" + sub_items.data.rows.item(i).prop_subitem_id +"'";
                                       var params = {
                                         prop_sub_feedback_general_id: prop_sub_feedback_general_id
                                       };
                                       DatabaseSrv.executeQuery(query, [], params).then(function(gen_feed){
-                                          $log.log('copied GENERAL feedback');
+                                        $log.log('copied GENERAL feedback');
                                         synSrv.update($scope.property_id, 'property_sub_feedback_general', gen_feed.params.prop_sub_feedback_general_id, 'INSERT' );
                                       });
 
@@ -2163,7 +2163,7 @@ appCtrl.controller('SubItemsListCtrl', function($scope, $state, $stateParams, co
                                       var params = {
                                         prop_feedback_id: prop_feedback_id
                                       };
-                                      query = "INSERT INTO property_feedback (prop_feedback_id, item_id, parent_id, option, comment, description, type) select '" + prop_feedback_id + "', item_id, parent_id, option, comment, description, type from property_feedback where property_feedback.item_id='"+ prop_subs.params.master_sub_item_id + "'";
+                                      query = "INSERT INTO property_feedback (prop_feedback_id, item_id, parent_id, option, comment, description, type) select '" + prop_feedback_id + "', item_id, '" + property_masteritem_link_id + "', option, comment, description, type from property_feedback where property_feedback.item_id='"+ sub_items.data.rows.item(i).prop_subitem_id + "'";
                                       DatabaseSrv.executeQuery(query, [], params).then(function(nar_feed){
                                           $log.log('copied normalL feedback');
                                           synSrv.update($scope.property_id, 'property_sub_feedback_general', nar_feed.params.prop_sub_feedback_general_id, 'INSERT' );
@@ -2172,10 +2172,10 @@ appCtrl.controller('SubItemsListCtrl', function($scope, $state, $stateParams, co
                                     }
 
 
-                                  }
+                                  //}
 
 
-                                });
+                                //});
 
 
 
@@ -2189,7 +2189,7 @@ appCtrl.controller('SubItemsListCtrl', function($scope, $state, $stateParams, co
                               $log.log('Could not load sub items !');
                             }
 
-                        });
+                       });
 
 
 
@@ -2418,11 +2418,10 @@ appCtrl.controller('AddSubDetailsCtrl', function($scope, $state, $stateParams, c
       $scope.property_id =  $stateParams.property_id;
       $scope.sub_id = $stateParams.sub_id;
       $scope.type = $stateParams.type;
-
-      $scope.master_id = '';
+      $scope.master_id =  $stateParams.master_id;
 
       loadBreadCums();
-
+      initLoadData();
 
   });
 
@@ -2436,8 +2435,6 @@ appCtrl.controller('AddSubDetailsCtrl', function($scope, $state, $stateParams, c
     $scope.breadcums = [];
     $scope.viewName = 'item';
 
-        //initLoadData();
-    $scope.property_id =  $stateParams.property_id;
 
     //getting property info for breadcums
     PropInfoSrv.getPropInfo($scope.property_id).then(function(propinfo){
@@ -2454,8 +2451,8 @@ appCtrl.controller('AddSubDetailsCtrl', function($scope, $state, $stateParams, c
               var query = "select property_masteritem_link.* from property_masteritem_link where property_masteritem_link.prop_master_id=?";
               var data = [$scope.sub_id];
 
-              $scope.master_id = $scope.sub_id;
-              initLoadData();
+              //$scope.master_id = $scope.sub_id;
+
 
               DatabaseSrv.executeQuery(query, data ).then(function(result){
 
@@ -2473,8 +2470,8 @@ appCtrl.controller('AddSubDetailsCtrl', function($scope, $state, $stateParams, c
               var query = "select property_meter_link.* from property_meter_link where property_meter_link.status=1 and property_meter_link.prop_meter_id =?";
               var data = [$scope.sub_id];
 
-              $scope.master_id = $scope.sub_id;
-              initLoadData();
+              //$scope.master_id = $scope.sub_id;
+
 
               DatabaseSrv.executeQuery(query, data ).then(function(result){
 
@@ -2491,20 +2488,25 @@ appCtrl.controller('AddSubDetailsCtrl', function($scope, $state, $stateParams, c
           }
           else if($stateParams.type == 'SUB'){
 
+              $log.log('logging sub id from');
+              $log.log($scope.sub_id);
 
-              var query = "select property_subitem_link.*, property_subitem_link.item_name as sub_item_name, property_masteritem_link.prop_master_id, property_masteritem_link.name as master_item_name, company_subitem_link.com_master_id from property_subitem_link inner join company_subitem_link on property_subitem_link.com_subitem_id = company_subitem_link.com_subitem_id inner JOIN property_masteritem_link on company_subitem_link.com_master_id = property_masteritem_link.com_master_id  where property_subitem_link.status =1 and property_subitem_link.prop_subitem_id =? ";
-              var data = [$scope.sub_id];
+              var query = "select property_subitem_link.*, property_subitem_link.item_name as sub_item_name, property_masteritem_link.prop_master_id, property_masteritem_link.name as master_item_name from property_subitem_link inner join company_subitem_link on property_subitem_link.com_subitem_id = company_subitem_link.com_subitem_id inner JOIN property_masteritem_link on company_subitem_link.com_master_id = property_masteritem_link.com_master_id  where property_subitem_link.status =1 and property_subitem_link.prop_subitem_id =? and property_masteritem_link.prop_master_id=?";
+              var data = [$scope.sub_id, $scope.master_id];
 
               DatabaseSrv.executeQuery(query, data ).then(function(result){
 
                 console.log('item length imtem name', result.data.rows.length);
                 if(result.data.rows.length > 0) {
 
-                  $scope.master_id = result.data.rows.item(0).prop_master_id;
-                  initLoadData();
+                  //$scope.master_id = result.data.rows.item(0).prop_master_id;
+
 
                   $scope.data.viewName = result.data.rows.item(0).sub_item_name;
                   var master_item_name = (result.data.rows.item(0).master_item_name > 5) ? result.data.rows.item(0).master_item_name.substring(0, 5) + '..' : result.data.rows.item(0).master_item_name;
+
+                  $log.log('mster name ', master_item_name);
+
                   $scope.breadcums.push(master_item_name);
                   var sub_item_name = (result.data.rows.item(0).sub_item_name.length > 5) ? result.data.rows.item(0).sub_item_name.substring(0, 5) + '..' : result.data.rows.item(0).sub_item_name;
                   $scope.breadcums.push(sub_item_name);
@@ -2533,6 +2535,10 @@ appCtrl.controller('AddSubDetailsCtrl', function($scope, $state, $stateParams, c
         var query = "select property_feedback.* from property_feedback where property_feedback.item_id=? and property_feedback.parent_id=? and property_feedback.type=?";
 
         var data = [$scope.sub_id, $scope.master_id, $scope.type];
+
+        $log.log('----------------------------------------------');
+        $log.log(data);
+        $log.log('----------------------------------------------');
 
         DatabaseSrv.executeQuery(query, data ).then(function(result){
 
