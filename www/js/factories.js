@@ -604,22 +604,22 @@ appFact.factory('DatabaseSrv', function($q, PGAppConfig, $cordovaSQLite, $ionicP
   function createOtherTable(){
     if(db_con){
 
-        $cordovaSQLite.execute(db_con, "CREATE TABLE IF NOT EXISTS property (id integer primary key, property_id text, company_id integer, description text, status integer, createdAt DATETIME DEFAULT CURRENT_TIMESTAMP)");
-        $cordovaSQLite.execute(db_con, "CREATE TABLE IF NOT EXISTS property_info (property_id text, address_1 text, address_2 text, city text, postalcode text, report_type text, report_date DATETIME, image_url text, createdAt DATETIME DEFAULT CURRENT_TIMESTAMP)");
-        $cordovaSQLite.execute(db_con, "CREATE TABLE IF NOT EXISTS property_masteritem_link (id integer primary key, prop_master_id text, property_id text, com_master_id integer, type text, com_type text, option text, self_prop_master_id text, name text, priority integer, total_num integer, status integer, createdAt DATETIME DEFAULT CURRENT_TIMESTAMP)");
-        //$cordovaSQLite.execute(db_con, "CREATE TABLE IF NOT EXISTS property_master_num_link (id integer primary key, prop_num_id text, prop_master_id text, name text, description text, status integer, createdAt DATETIME DEFAULT CURRENT_TIMESTAMP)");
-        $cordovaSQLite.execute(db_con, "CREATE TABLE IF NOT EXISTS property_subitem_link (id integer primary key, prop_subitem_id text, property_id text, com_subitem_id integer, item_name text, type text, priority integer, status integer, createdAt DATETIME DEFAULT CURRENT_TIMESTAMP)");
+      $cordovaSQLite.execute(db_con, "CREATE TABLE IF NOT EXISTS property (id integer primary key, property_id text, company_id integer, description text, status integer, createdAt DATETIME DEFAULT CURRENT_TIMESTAMP)");
+      $cordovaSQLite.execute(db_con, "CREATE TABLE IF NOT EXISTS property_info (property_id text, address_1 text, address_2 text, city text, postalcode text, report_type text, report_date DATETIME, image_url text, createdAt DATETIME DEFAULT CURRENT_TIMESTAMP)");
+      $cordovaSQLite.execute(db_con, "CREATE TABLE IF NOT EXISTS property_masteritem_link (id integer primary key, prop_master_id text, property_id text, com_master_id integer, type text, com_type text, option text, self_prop_master_id text, name text, priority integer, total_num integer, status integer, createdAt DATETIME DEFAULT CURRENT_TIMESTAMP)");
+      //$cordovaSQLite.execute(db_con, "CREATE TABLE IF NOT EXISTS property_master_num_link (id integer primary key, prop_num_id text, prop_master_id text, name text, description text, status integer, createdAt DATETIME DEFAULT CURRENT_TIMESTAMP)");
+      $cordovaSQLite.execute(db_con, "CREATE TABLE IF NOT EXISTS property_subitem_link (id integer primary key, prop_subitem_id text, property_id text, com_subitem_id integer, item_name text, type text, priority integer, status integer, createdAt DATETIME DEFAULT CURRENT_TIMESTAMP)");
 
-        $cordovaSQLite.execute(db_con, "CREATE TABLE IF NOT EXISTS property_general_condition_link (id integer primary key, prop_general_id text, property_id text, com_general_id integer, item_name text, options text, type text, priority integer, user_input text, comment text, status integer, createdAt DATETIME DEFAULT CURRENT_TIMESTAMP)");
+      $cordovaSQLite.execute(db_con, "CREATE TABLE IF NOT EXISTS property_general_condition_link (id integer primary key, prop_general_id text, property_id text, com_general_id integer, item_name text, options text, type text, priority integer, user_input text, comment text, status integer, createdAt DATETIME DEFAULT CURRENT_TIMESTAMP)");
 
-        $cordovaSQLite.execute(db_con, "CREATE TABLE IF NOT EXISTS property_feedback (id integer primary key, prop_feedback_id text, item_id text, parent_id text, option text, comment text, type text, description text,createdAt DATETIME DEFAULT CURRENT_TIMESTAMP)");
-        $cordovaSQLite.execute(db_con, "CREATE TABLE IF NOT EXISTS photos (id integer primary key, photo_id text, item_id text, parent_id text, type text, img_url text, createdAt DATETIME DEFAULT CURRENT_TIMESTAMP)");
+      $cordovaSQLite.execute(db_con, "CREATE TABLE IF NOT EXISTS property_feedback (id integer primary key, prop_feedback_id text, item_id text, parent_id text, option text, comment text, type text, description text,createdAt DATETIME DEFAULT CURRENT_TIMESTAMP)");
+      $cordovaSQLite.execute(db_con, "CREATE TABLE IF NOT EXISTS photos (id integer primary key, photo_id text, item_id text, parent_id text, type text, img_url text, createdAt DATETIME DEFAULT CURRENT_TIMESTAMP)");
 
-        $cordovaSQLite.execute(db_con, "CREATE TABLE IF NOT EXISTS property_sub_feedback_general (id integer primary key, prop_sub_feedback_general_id text, item_id text, parent_id text, comment text, createdAt DATETIME DEFAULT CURRENT_TIMESTAMP)");
-        $cordovaSQLite.execute(db_con, "CREATE TABLE IF NOT EXISTS property_sub_voice_general (id integer primary key, prop_sub_feedback_general_id text, item_id text, parent_id text, voice_name text, voice_url text, createdAt DATETIME DEFAULT CURRENT_TIMESTAMP)");
+      $cordovaSQLite.execute(db_con, "CREATE TABLE IF NOT EXISTS property_sub_feedback_general (id integer primary key, prop_sub_feedback_general_id text, item_id text, parent_id text, comment text, createdAt DATETIME DEFAULT CURRENT_TIMESTAMP)");
+      $cordovaSQLite.execute(db_con, "CREATE TABLE IF NOT EXISTS property_sub_voice_general (id integer primary key, prop_sub_feedback_general_id text, item_id text, parent_id text, voice_name text, voice_url text, createdAt DATETIME DEFAULT CURRENT_TIMESTAMP)");
 
-        $cordovaSQLite.execute(db_con, "CREATE TABLE IF NOT EXISTS property_meter_link (id integer primary key, prop_meter_id text, property_id text, com_meter_id integer, meter_name text, reading_value text, status integer, createdAt DATETIME DEFAULT CURRENT_TIMESTAMP)");
-        $log.log('tables created..');
+      $cordovaSQLite.execute(db_con, "CREATE TABLE IF NOT EXISTS property_meter_link (id integer primary key, prop_meter_id text, property_id text, com_meter_id integer, meter_name text, reading_value text, status integer, createdAt DATETIME DEFAULT CURRENT_TIMESTAMP)");
+      $log.log('tables created..');
      }
 
   }

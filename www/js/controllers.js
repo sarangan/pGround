@@ -2213,6 +2213,131 @@ appCtrl.controller('SubItemsListCtrl', function($scope, $state, $stateParams, co
   };
 
 
+  //this is to delete room
+  $scope.delete = function(){
+
+    var confirmPopup = $ionicPopup.confirm({
+     title: 'Delete a room',
+     template: 'Are you sure you want to delete this room?'
+   });
+
+   confirmPopup.then(function(res) {
+     if(res) {
+       $log.log('deleting room');
+
+       DatabaseSrv.initLocalDB().then(function(initdb){
+
+         //--------------------- feedback general deleting
+         var query = "select property_sub_feedback_general.prop_sub_feedback_general_id from property_sub_feedback_general where property_sub_feedback_general.parent_id=?";
+         var data = [ $scope.prop_master_id ];
+         DatabaseSrv.executeQuery(query, data ).then(function(result){
+           if(result.status == 1 && result.data.rows.length > 0){
+
+             query = "delete from property_sub_feedback_general where prop_sub_feedback_general_id=?";
+             var prop_sub_feedback_general_id = result.data.rows.item(0).prop_sub_feedback_general_id ;
+             data = [ prop_sub_feedback_general_id ];
+
+             DatabaseSrv.executeQuery(query, []).then(function(nar_feed){
+                 $log.log('deleted general feedback items');
+                 synSrv.update($scope.property_id, 'property_sub_feedback_general', prop_sub_feedback_general_id, 'DELETE' );
+             });
+           }
+         });
+
+         //---------------------- recorded voice deleting
+         var query = "select property_sub_voice_general.prop_sub_feedback_general_id from property_sub_voice_general where property_sub_voice_general.parent_id=?";
+         var data = [$scope.prop_master_id];
+
+         DatabaseSrv.executeQuery(query, data).then(function(result){
+             if(result.data.rows.length > 0) {
+               for (var i = 0; i < result.data.rows.length; i++) {
+                 var item = result.data.rows.item(i);
+                 query = "delete from property_sub_voice_general where property_sub_voice_general.prop_sub_feedback_general_id=?";
+                 var prop_sub_feedback_general_id = item.prop_sub_feedback_general_id ;
+                 data = [ prop_sub_feedback_general_id ];
+                 var params =  {
+                   prop_sub_feedback_general_id: prop_sub_feedback_general_id
+                 };
+                 DatabaseSrv.executeQuery(query, [], params).then(function(voice_feed){
+                     $log.log('deleted voice feed');
+                     synSrv.update($scope.property_id, 'property_sub_voice_general', voice_feed.params.prop_sub_feedback_general_id, 'DELETE' );
+                 });
+
+               }
+             }
+         });
+
+         //--------------- feedback deleting
+         var query = "select property_feedback.prop_feedback_id from property_feedback where property_feedback.parent_id=?";
+         var data = [$scope.prop_master_id];
+
+         DatabaseSrv.executeQuery(query, data).then(function(result){
+             if(result.data.rows.length > 0) {
+               for (var i = 0; i < result.data.rows.length; i++) {
+                 var item = result.data.rows.item(i);
+                 query = "delete from property_feedback where property_feedback.prop_feedback_id=?";
+                 var prop_feedback_id = item.prop_feedback_id ;
+                 data = [ prop_feedback_id ];
+                 var params =  {
+                   prop_feedback_id: prop_feedback_id
+                 };
+                 DatabaseSrv.executeQuery(query, [], params).then(function(feed){
+                     $log.log('deleted voice feed');
+                     synSrv.update($scope.property_id, 'property_feedback', feed.params.prop_feedback_id, 'DELETE' );
+                 });
+
+               }
+             }
+         });
+
+
+         //-------------- deleting photos
+         var query = "select photos.photo_id from photos where photos.parent_id=?";
+         var data = [$scope.prop_master_id];
+
+         DatabaseSrv.executeQuery(query, data).then(function(result){
+             if(result.data.rows.length > 0) {
+               for (var i = 0; i < result.data.rows.length; i++) {
+                 var item = result.data.rows.item(i);
+                 query = "delete from photos where photos.photo_id=?";
+                 var photo_id = item.photo_id ;
+                 data = [ photo_id ];
+                 var params =  {
+                   photo_id: photo_id
+                 };
+                 DatabaseSrv.executeQuery(query, [], params).then(function(photos_results){
+                     $log.log('deleted voice feed');
+                     synSrv.update($scope.property_id, 'photos', photos_results.params.photo_id, 'DELETE' );
+                 });
+
+               }
+             }
+         });
+
+
+         //-------------- deleting photos
+        var query = "delete from property_masteritem_link where property_masteritem_link.prop_master_id=?";
+        var data = [$scope.prop_master_id];
+
+         DatabaseSrv.executeQuery(query, []).then(function(nar_feed){
+             $log.log('deleted general feedback items');
+             synSrv.update($scope.property_id, 'property_masteritem_link', $scope.prop_master_id, 'DELETE' );
+         });
+
+
+
+       });
+
+
+     } else {
+       $log.log('delete room false');
+     }
+   });
+
+
+  };
+
+
 });
 
 
