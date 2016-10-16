@@ -693,10 +693,10 @@ appFact.factory('DatabaseSrv', function($q, PGAppConfig, $cordovaSQLite, $ionicP
   function deleteDB(){
 
       if( ionic.Platform.isAndroid() ){
-            $cordovaSQLite.deleteDB({ name: db_name , iosDatabaseLocation:'default' });
+        $cordovaSQLite.deleteDB({ name: db_name , iosDatabaseLocation:'default' });
       }
       else if(ionic.Platform.isIOS() ){
-          $cordovaSQLite.deleteDB({ name: db_name ,  location: 2, createFromLocation: 1 });
+        $cordovaSQLite.deleteDB({ name: db_name ,  location: 2, createFromLocation: 1 });
       }
   };
 
@@ -864,7 +864,7 @@ appFact.factory('Sounds', function($q) {
 
 // $cordovaSQLite.execute(db_con, "CREATE TABLE IF NOT EXISTS sync (id integer primary key, syn_id text, property_id text, table_name text, key_id text, task text, status integer )");
  //task INSERT, UPDATE, DELETE
-appFact.factory('synSrv', function($log, DatabaseSrv, srvObjManipulation ){
+appFact.factory('synSrv', function($log, DatabaseSrv, srvObjManipulation, commonSrv ){
 
     var update = function(property_id, table, key_id, task) {
 
@@ -892,8 +892,39 @@ appFact.factory('synSrv', function($log, DatabaseSrv, srvObjManipulation ){
     };
 
 
+    var synProperty = function(property_id){
+
+      var query = "select * from sync where property_id=?";
+      var data = [property_id];
+
+      var syncData = {};
+
+
+      DatabaseSrv.executeQuery(query, data ).then(function(result){
+          if(result.data.rows.length > 0) {
+            //$scope.data.voice_count = result.data.rows.item(0).voice_count;
+
+            syncData['data'] =  result.data.rows.item(0);
+
+            console.log(syncData['data']);
+
+            commonSrv.postData( 'property/syncmob', syncData).then(function(result) {
+
+              $log.log('logs for sync details');
+              $log.log(result);
+
+            });
+
+
+          }
+      });
+
+    };
+
+
     return {
-      update: update
+      update: update,
+      synProperty: synProperty
     };
 
 });

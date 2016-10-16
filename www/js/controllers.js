@@ -1146,6 +1146,13 @@ appCtrl.controller('ProplistCtrl', function($scope, $state, $stateParams, common
   };
 
 
+  $scope.syncProperty = function(){
+
+
+    synSrv.synProperty($scope.property_id );
+
+  };
+
 
 });
 
