@@ -63,7 +63,7 @@ angular.module('PGApp', [
   $ionicConfigProvider.backButton.previousTitleText(false);
   $ionicConfigProvider.views.transition('none'); // disable the slide animation
   $ionicConfigProvider.scrolling.jsScrolling(false); // enable the native scrolling
-
+  $ionicConfigProvider.backButton.text('Back');
   //$httpProvider.interceptors.push('appHttpInterceptor');
 
   $ionicNativeTransitionsProvider.setDefaultOptions({

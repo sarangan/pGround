@@ -922,9 +922,15 @@ appFact.factory('synSrv', function($log, DatabaseSrv, srvObjManipulation, common
     };
 
 
+    var syncAll = function(props){
+      $log.log(props);
+    }
+
+
     return {
       update: update,
-      synProperty: synProperty
+      synProperty: synProperty,
+      syncAll: syncAll
     };
 
 });

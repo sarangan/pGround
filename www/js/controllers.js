@@ -25,7 +25,8 @@ appCtrl.controller('InspectionListCtrl', function(
   commonSrv,
   AuthService,
   DatabaseSrv,
-  $log){
+  $log,
+  synSrv){
 
     $scope.shouldShowDelete = false;
     $scope.shouldShowReorder = false;
@@ -155,9 +156,12 @@ appCtrl.controller('InspectionListCtrl', function(
 
         });
 
-
-
     };
+
+    $scope.syncAll = function(){
+
+        synSrv.syncAll($scope.items);
+    }
 
 
 });
