@@ -3365,7 +3365,7 @@ appCtrl.controller('GeneralPhotosCtrl', function($scope, $state, $stateParams, c
 
       $scope.prop_subitem_id = $stateParams.prop_subitem_id;
       $scope.property_id = $stateParams.property_id;
-      $scope.prop_master_id =  $stateParams.prop_master_id;
+      $scope.prop_master_id =  $stateParams.master_id;
       $scope.images = [];
       $scope.newImages = [];
       $scope.imageUrl = '';
