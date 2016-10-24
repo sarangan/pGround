@@ -582,7 +582,9 @@ appFact.factory('DatabaseSrv', function($q, PGAppConfig, $cordovaSQLite, $ionicP
       $cordovaSQLite.execute(db_con, "CREATE TABLE IF NOT EXISTS company_meter_link (com_meter_id integer primary key, company_id integer, meter_name text, type text, status integer)");
       $cordovaSQLite.execute(db_con, "CREATE TABLE IF NOT EXISTS company_general_condition_link (com_general_id integer primary key, company_id integer, item_name text, options text, priority integer, type text, status integer)");
 
-      $cordovaSQLite.execute(db_con, "CREATE TABLE IF NOT EXISTS sync (id integer primary key, syn_id text, property_id text, table_name text, key_id text, task text, status integer )"); //task INSERT, UPDATE, DELETE
+      $cordovaSQLite.execute(db_con, "CREATE TABLE IF NOT EXISTS sync (id integer primary key, syn_id text, property_id text, table_name text, key_id text, task text, pk_name text, status integer )"); //task INSERT, UPDATE, DELETE
+
+      $cordovaSQLite.execute(db_con, "CREATE TABLE IF NOT EXISTS current_sync(id integer primary key, property_id text, status integer) ");
 
       createOtherTable();
 
@@ -604,21 +606,20 @@ appFact.factory('DatabaseSrv', function($q, PGAppConfig, $cordovaSQLite, $ionicP
   function createOtherTable(){
     if(db_con){
 
-      $cordovaSQLite.execute(db_con, "CREATE TABLE IF NOT EXISTS property (id integer primary key, property_id text, company_id integer, description text, status integer, createdAt DATETIME DEFAULT CURRENT_TIMESTAMP)");
-      $cordovaSQLite.execute(db_con, "CREATE TABLE IF NOT EXISTS property_info (property_id text, address_1 text, address_2 text, city text, postalcode text, report_type text, report_date DATETIME, image_url text, createdAt DATETIME DEFAULT CURRENT_TIMESTAMP)");
-      $cordovaSQLite.execute(db_con, "CREATE TABLE IF NOT EXISTS property_masteritem_link (id integer primary key, prop_master_id text, property_id text, com_master_id integer, type text, com_type text, option text, self_prop_master_id text, name text, priority integer, total_num integer, status integer, createdAt DATETIME DEFAULT CURRENT_TIMESTAMP)");
-      //$cordovaSQLite.execute(db_con, "CREATE TABLE IF NOT EXISTS property_master_num_link (id integer primary key, prop_num_id text, prop_master_id text, name text, description text, status integer, createdAt DATETIME DEFAULT CURRENT_TIMESTAMP)");
-      $cordovaSQLite.execute(db_con, "CREATE TABLE IF NOT EXISTS property_subitem_link (id integer primary key, prop_subitem_id text, property_id text, com_subitem_id integer, item_name text, type text, priority integer, status integer, createdAt DATETIME DEFAULT CURRENT_TIMESTAMP)");
+      $cordovaSQLite.execute(db_con, "CREATE TABLE IF NOT EXISTS property (id integer primary key, property_id text, company_id integer, description text, status integer, mb_createdAt DATETIME DEFAULT CURRENT_TIMESTAMP)");
+      $cordovaSQLite.execute(db_con, "CREATE TABLE IF NOT EXISTS property_info (property_id text, address_1 text, address_2 text, city text, postalcode text, report_type text, report_date DATETIME, image_url text, mb_createdAt DATETIME DEFAULT CURRENT_TIMESTAMP)");
+      $cordovaSQLite.execute(db_con, "CREATE TABLE IF NOT EXISTS property_masteritem_link (id integer primary key, prop_master_id text, property_id text, com_master_id integer, type text, com_type text, option text, self_prop_master_id text, name text, priority integer, total_num integer, status integer, mb_createdAt DATETIME DEFAULT CURRENT_TIMESTAMP)");
+      $cordovaSQLite.execute(db_con, "CREATE TABLE IF NOT EXISTS property_subitem_link (id integer primary key, prop_subitem_id text, property_id text, com_subitem_id integer, item_name text, type text, priority integer, status integer, mb_createdAt DATETIME DEFAULT CURRENT_TIMESTAMP)");
 
-      $cordovaSQLite.execute(db_con, "CREATE TABLE IF NOT EXISTS property_general_condition_link (id integer primary key, prop_general_id text, property_id text, com_general_id integer, item_name text, options text, type text, priority integer, user_input text, comment text, status integer, createdAt DATETIME DEFAULT CURRENT_TIMESTAMP)");
+      $cordovaSQLite.execute(db_con, "CREATE TABLE IF NOT EXISTS property_general_condition_link (id integer primary key, prop_general_id text, property_id text, com_general_id integer, item_name text, options text, type text, priority integer, user_input text, comment text, status integer, mb_createdAt DATETIME DEFAULT CURRENT_TIMESTAMP)");
 
-      $cordovaSQLite.execute(db_con, "CREATE TABLE IF NOT EXISTS property_feedback (id integer primary key, prop_feedback_id text, item_id text, parent_id text, option text, comment text, type text, description text,createdAt DATETIME DEFAULT CURRENT_TIMESTAMP)");
-      $cordovaSQLite.execute(db_con, "CREATE TABLE IF NOT EXISTS photos (id integer primary key, photo_id text, item_id text, parent_id text, type text, img_url text, createdAt DATETIME DEFAULT CURRENT_TIMESTAMP)");
+      $cordovaSQLite.execute(db_con, "CREATE TABLE IF NOT EXISTS property_feedback (id integer primary key, prop_feedback_id text, item_id text, parent_id text, option text, comment text, type text, description text, mb_createdAt DATETIME DEFAULT CURRENT_TIMESTAMP)");
+      $cordovaSQLite.execute(db_con, "CREATE TABLE IF NOT EXISTS photos (id integer primary key, photo_id text, item_id text, parent_id text, type text, img_url text, mb_createdAt DATETIME DEFAULT CURRENT_TIMESTAMP)");
 
-      $cordovaSQLite.execute(db_con, "CREATE TABLE IF NOT EXISTS property_sub_feedback_general (id integer primary key, prop_sub_feedback_general_id text, item_id text, parent_id text, comment text, createdAt DATETIME DEFAULT CURRENT_TIMESTAMP)");
-      $cordovaSQLite.execute(db_con, "CREATE TABLE IF NOT EXISTS property_sub_voice_general (id integer primary key, prop_sub_feedback_general_id text, item_id text, parent_id text, voice_name text, voice_url text, createdAt DATETIME DEFAULT CURRENT_TIMESTAMP)");
+      $cordovaSQLite.execute(db_con, "CREATE TABLE IF NOT EXISTS property_sub_feedback_general (id integer primary key, prop_sub_feedback_general_id text, item_id text, parent_id text, comment text, mb_createdAt DATETIME DEFAULT CURRENT_TIMESTAMP)");
+      $cordovaSQLite.execute(db_con, "CREATE TABLE IF NOT EXISTS property_sub_voice_general (id integer primary key, prop_sub_feedback_general_id text, item_id text, parent_id text, voice_name text, voice_url text, mb_createdAt DATETIME DEFAULT CURRENT_TIMESTAMP)");
 
-      $cordovaSQLite.execute(db_con, "CREATE TABLE IF NOT EXISTS property_meter_link (id integer primary key, prop_meter_id text, property_id text, com_meter_id integer, meter_name text, reading_value text, status integer, createdAt DATETIME DEFAULT CURRENT_TIMESTAMP)");
+      $cordovaSQLite.execute(db_con, "CREATE TABLE IF NOT EXISTS property_meter_link (id integer primary key, prop_meter_id text, property_id text, com_meter_id integer, meter_name text, reading_value text, status integer, mb_createdAt DATETIME DEFAULT CURRENT_TIMESTAMP)");
       $log.log('tables created..');
      }
 
@@ -740,7 +741,7 @@ appFact.factory('PropInfoSrv', function(DatabaseSrv, $q, $log){
 
         DatabaseSrv.initLocalDB().then(function(initdb){
 
-          var query = "select property_info.*, strftime('%d/%m/%Y', property_info.createdAt) as created_date, property.description from property_info inner join property on property_info.property_id = property.property_id where property.property_id=?";
+          var query = "select property_info.*, strftime('%d/%m/%Y', property_info.mb_createdAt) as created_date, property.description from property_info inner join property on property_info.property_id = property.property_id where property.property_id=?";
           var data = [property_id];
 
           DatabaseSrv.executeQuery(query, data ).then(function(result){
@@ -863,15 +864,61 @@ appFact.factory('Sounds', function($q) {
 
 
 // $cordovaSQLite.execute(db_con, "CREATE TABLE IF NOT EXISTS sync (id integer primary key, syn_id text, property_id text, table_name text, key_id text, task text, status integer )");
+//$cordovaSQLite.execute(db_con, "CREATE TABLE IF NOT EXISTS current_sync(id integer primary key, property_id text, status integer) ");
  //task INSERT, UPDATE, DELETE
-appFact.factory('synSrv', function($log, DatabaseSrv, srvObjManipulation, commonSrv ){
 
-    var update = function(property_id, table, key_id, task) {
+ // "CREATE TABLE IF NOT EXISTS sync (id integer primary key, syn_id text, property_id text, table_name text, key_id text, task text, status integer )"); //task INSERT, UPDATE, DELETE
+ /*$cordovaSQLite.execute(db_con, "CREATE TABLE IF NOT EXISTS property (id integer primary key, property_id text, company_id integer, description text, status integer, createdAt DATETIME DEFAULT CURRENT_TIMESTAMP)");
+ $cordovaSQLite.execute(db_con, "CREATE TABLE IF NOT EXISTS property_info (property_id text, address_1 text, address_2 text, city text, postalcode text, report_type text, report_date DATETIME, image_url text, createdAt DATETIME DEFAULT CURRENT_TIMESTAMP)");
+ $cordovaSQLite.execute(db_con, "CREATE TABLE IF NOT EXISTS property_masteritem_link (id integer primary key, prop_master_id text, property_id text, com_master_id integer, type text, com_type text, option text, self_prop_master_id text, name text, priority integer, total_num integer, status integer, createdAt DATETIME DEFAULT CURRENT_TIMESTAMP)");
+ $cordovaSQLite.execute(db_con, "CREATE TABLE IF NOT EXISTS property_subitem_link (id integer primary key, prop_subitem_id text, property_id text, com_subitem_id integer, item_name text, type text, priority integer, status integer, createdAt DATETIME DEFAULT CURRENT_TIMESTAMP)");
+ $cordovaSQLite.execute(db_con, "CREATE TABLE IF NOT EXISTS property_general_condition_link (id integer primary key, prop_general_id text, property_id text, com_general_id integer, item_name text, options text, type text, priority integer, user_input text, comment text, status integer, createdAt DATETIME DEFAULT CURRENT_TIMESTAMP)");
+ $cordovaSQLite.execute(db_con, "CREATE TABLE IF NOT EXISTS property_feedback (id integer primary key, prop_feedback_id text, item_id text, parent_id text, option text, comment text, type text, description text,createdAt DATETIME DEFAULT CURRENT_TIMESTAMP)");
+ $cordovaSQLite.execute(db_con, "CREATE TABLE IF NOT EXISTS photos (id integer primary key, photo_id text, item_id text, parent_id text, type text, img_url text, createdAt DATETIME DEFAULT CURRENT_TIMESTAMP)");
+ $cordovaSQLite.execute(db_con, "CREATE TABLE IF NOT EXISTS property_sub_feedback_general (id integer primary key, prop_sub_feedback_general_id text, item_id text, parent_id text, comment text, createdAt DATETIME DEFAULT CURRENT_TIMESTAMP)");
+ $cordovaSQLite.execute(db_con, "CREATE TABLE IF NOT EXISTS property_sub_voice_general (id integer primary key, prop_sub_feedback_general_id text, item_id text, parent_id text, voice_name text, voice_url text, createdAt DATETIME DEFAULT CURRENT_TIMESTAMP)");
+ $cordovaSQLite.execute(db_con, "CREATE TABLE IF NOT EXISTS property_meter_link (id integer primary key, prop_meter_id text, property_id text, com_meter_id integer, meter_name text, reading_value text, status integer, createdAt DATETIME DEFAULT CURRENT_TIMESTAMP)");
+ */
+
+appFact.factory('synSrv', function($log, DatabaseSrv, srvObjManipulation, commonSrv, genericModalService ){
+
+  var init = function(){
+
+     ionic.Platform.ready(function(){
+
+        DatabaseSrv.initLocalDB().then(function(initdb){
+
+          var query = "select * from current_sync status =?";
+          var data = [1];
+
+          DatabaseSrv.executeQuery(query, data ).then(function(result){
+
+              if(result.data.rows.length > 0 && result.status == 1) {
+
+                for (var i = 0; i < result.data.rows.length; i++) {
+                    var item = result.data.rows.item(i);
+
+                    var property_id = item.property_id;
+                    $log.log('Init starting :: sync ', property_id);
+                    syncProp(property_id);
+
+                  }
+              }
+
+            });
+
+        });
+
+     });
+
+   };
+
+    var update = function(property_id, table, key_id, task, pk_name) {
 
           DatabaseSrv.initLocalDB().then(function(initdb){
 
-            var query = "INSERT INTO sync (syn_id, property_id, table_name, key_id, task, status) VALUES (?,?,?,?,?,?)";
-            var data = [srvObjManipulation.generateUid(), property_id, table, key_id, task, 1 ];
+            var query = "INSERT INTO sync (syn_id, property_id, table_name, key_id, task, pk_name, status) VALUES (?,?,?,?,?,?,?)";
+            var data = [srvObjManipulation.generateUid(), property_id, table, key_id, task, pk_name, 1 ];
 
             DatabaseSrv.executeQuery(query, data ).then(function(result){
 
@@ -892,74 +939,195 @@ appFact.factory('synSrv', function($log, DatabaseSrv, srvObjManipulation, common
     };
 
 
-    var synProperty = function(property_id){
+    function sendServer(syncData){
 
-      var query = "select * from sync where property_id=?";
-      var data = [property_id];
+      commonSrv.postData('property/syncmob', syncData, 'noloading').then(function(result) {
 
-      var syncData = {};
+        $log.log('logs for sync details');
+        $log.log(result);
 
-
-      DatabaseSrv.executeQuery(query, data ).then(function(result){
-          if(result.data.rows.length > 0) {
-            //$scope.data.voice_count = result.data.rows.item(0).voice_count; (syn_id, property_id, table_name, key_id, task, status)
-
-            syncData['data'] =  result.data.rows.item(0);
-
-            console.log(syncData['data']);
-
-            for (var i = 0; i < result.data.rows.length; i++) {
-                var item = result.data.rows.item(i);
-
-                if(item.table_name.length > 0 ){
-
-                  query = "select * from " + item.table_name + " where ";
-
-                  /*$cordovaSQLite.execute(db_con, "CREATE TABLE IF NOT EXISTS property (id integer primary key, property_id text, company_id integer, description text, status integer, createdAt DATETIME DEFAULT CURRENT_TIMESTAMP)");
-                  $cordovaSQLite.execute(db_con, "CREATE TABLE IF NOT EXISTS property_info (property_id text, address_1 text, address_2 text, city text, postalcode text, report_type text, report_date DATETIME, image_url text, createdAt DATETIME DEFAULT CURRENT_TIMESTAMP)");
-                  $cordovaSQLite.execute(db_con, "CREATE TABLE IF NOT EXISTS property_masteritem_link (id integer primary key, prop_master_id text, property_id text, com_master_id integer, type text, com_type text, option text, self_prop_master_id text, name text, priority integer, total_num integer, status integer, createdAt DATETIME DEFAULT CURRENT_TIMESTAMP)");
-                  //$cordovaSQLite.execute(db_con, "CREATE TABLE IF NOT EXISTS property_master_num_link (id integer primary key, prop_num_id text, prop_master_id text, name text, description text, status integer, createdAt DATETIME DEFAULT CURRENT_TIMESTAMP)");
-                  $cordovaSQLite.execute(db_con, "CREATE TABLE IF NOT EXISTS property_subitem_link (id integer primary key, prop_subitem_id text, property_id text, com_subitem_id integer, item_name text, type text, priority integer, status integer, createdAt DATETIME DEFAULT CURRENT_TIMESTAMP)");
-
-                  $cordovaSQLite.execute(db_con, "CREATE TABLE IF NOT EXISTS property_general_condition_link (id integer primary key, prop_general_id text, property_id text, com_general_id integer, item_name text, options text, type text, priority integer, user_input text, comment text, status integer, createdAt DATETIME DEFAULT CURRENT_TIMESTAMP)");
-
-                  $cordovaSQLite.execute(db_con, "CREATE TABLE IF NOT EXISTS property_feedback (id integer primary key, prop_feedback_id text, item_id text, parent_id text, option text, comment text, type text, description text,createdAt DATETIME DEFAULT CURRENT_TIMESTAMP)");
-                  $cordovaSQLite.execute(db_con, "CREATE TABLE IF NOT EXISTS photos (id integer primary key, photo_id text, item_id text, parent_id text, type text, img_url text, createdAt DATETIME DEFAULT CURRENT_TIMESTAMP)");
-
-                  $cordovaSQLite.execute(db_con, "CREATE TABLE IF NOT EXISTS property_sub_feedback_general (id integer primary key, prop_sub_feedback_general_id text, item_id text, parent_id text, comment text, createdAt DATETIME DEFAULT CURRENT_TIMESTAMP)");
-                  $cordovaSQLite.execute(db_con, "CREATE TABLE IF NOT EXISTS property_sub_voice_general (id integer primary key, prop_sub_feedback_general_id text, item_id text, parent_id text, voice_name text, voice_url text, createdAt DATETIME DEFAULT CURRENT_TIMESTAMP)");
-
-                  $cordovaSQLite.execute(db_con, "CREATE TABLE IF NOT EXISTS property_meter_link (id integer primary key, prop_meter_id text, property_id text, com_meter_id integer, meter_name text, reading_value text, status integer, createdAt DATETIME DEFAULT CURRENT_TIMESTAMP)");
-                  $log.log('tables created..');*/
+        if(result.status == 1){
+          if(result.synid){
 
 
-                }
+            DatabaseSrv.initLocalDB().then(function(initdb){
 
-            }
+                var query = "UPDATE sync SET status=? WHERE syn_id=?";
+                var data = [ 2 , result.synid];
+                DatabaseSrv.executeQuery(query, data ).then(function(result){
+                  $log.log('Sync successfull', result.synid );
+                });
 
-            commonSrv.postData( 'property/syncmob', syncData).then(function(result) {
+              });
 
-              $log.log('logs for sync details');
-              $log.log(result);
-
-            });
 
 
           }
+
+        }
+
       });
 
     };
 
 
-    var syncAll = function(props){
-      $log.log(props);
+    function pullData(sql_query, sql_data, params){
+
+        DatabaseSrv.executeQuery(sql_query, sql_data,  params).then(function(result_insert){
+
+          if(result_insert.data.rows.length > 0 && result_insert.status == 1) {
+
+            $log.log(result_insert.params.task + '::' , result_insert.params.table_name );
+            var insert_item = result_insert.data.rows.item(0);
+            $log.log(result_insert.params.task + '::' ,  insert_item );
+
+            var syncData = {
+              sync: result_insert.params.sync ,
+              data: insert_item,
+              task: result_insert.params.task,
+              table: result_insert.params.table_name
+            };
+
+             sendServer(syncData);
+
+          }
+
+        });
+
+    };
+
+
+    var synProperty = function(property_id){
+
+      syncStart(property_id);
+
+    };
+
+
+    function syncStart(property_id){
+
+      var query = "select * from current_sync where property_id=? and status=?";
+      var data = [property_id, 1];
+
+        DatabaseSrv.initLocalDB().then(function(initdb){
+
+            DatabaseSrv.executeQuery(query, data ).then(function(result){
+
+                console.log('item length', result.data.rows.length);
+                if(result.data.rows.length <= 0){
+
+                  var query = "INSERT INTO current_sync (property_id, status) VALUES (?,?)";
+                  var data = [property_id, 1 ];
+
+                  DatabaseSrv.executeQuery(query, data ).then(function(result){
+
+                      if(result.data.rows.length > 0 && result.status == 1) {
+                        syncProp(property_id);
+                      }
+
+                  });
+
+                }
+                else{
+                  syncProp(property_id);
+                }
+
+            });
+
+        });
+
+    };
+
+
+    function syncProp(property_id){
+
+      var query = "select * from sync where property_id=? and status =? order by id ASC";
+      var data = [property_id, 1];
+
+      DatabaseSrv.initLocalDB().then(function(initdb){
+
+        DatabaseSrv.executeQuery(query, data ).then(function(result){
+
+            if(result.data.rows.length > 0 && result.status == 1) {
+
+              for (var i = 0; i < result.data.rows.length; i++) {
+                  var item = result.data.rows.item(i);
+
+                  if(item.table_name.length > 0  ){
+
+                        if(item.task == 'INSERT' || item.task == 'UPDATE'  ){
+
+                          var sql_query = "select * from " + item.table_name + " where " +  item.pk_name + "=?";
+                          var sql_data = [item.key_id];
+                          var params = {task: item.task, table_name: item.table_name, sync: item.syn_id };
+
+                          pullData(sql_query, sql_data, params);
+
+                        }
+                        else if(item.task == 'DELETE' ){
+
+                          var syncData = {
+                            sync: item.syn_id,
+                            data: {item_id: item.key_id},
+                            task: item.task,
+                            table: item.table_name
+                          };
+
+                            sendServer(syncData);
+                        }
+
+                  } // end if table check
+
+              }// end for loop
+
+
+            }
+            else{ // no more status 1
+
+                  query = "delete from sync where property_id=?";
+                  data = [property_id];
+
+                  DatabaseSrv.executeQuery(query, data ).then(function(result){
+
+                    if(result.status == 1){
+                      $log.log('DELETING sync table, guess it almost sync');
+
+                      query = "delete from current_sync where property_id=?";
+                      data = [property_id];
+
+                        DatabaseSrv.executeQuery(query, data ).then(function(result){
+                          $log.log('DELETING starter sync table, guess it almost sync');
+
+                            genericModalService.showToast('Sync finished!', 'LCenter');
+                        });
+
+                    }
+
+                  });
+            }
+
+        });
+
+
+      });
+
+
     }
 
+
+    var syncAll = function(props){
+      $log.log(props);
+
+        for (var i = 0; i < props.length; i++) {
+          syncStart(props[i]);
+        }
+    };
 
     return {
       update: update,
       synProperty: synProperty,
-      syncAll: syncAll
+      syncAll: syncAll,
+      init: init
     };
 
 });

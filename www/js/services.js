@@ -7,16 +7,16 @@ appSrv.service('srvObjManipulation', function(){
 
   //check the object is empty or not
   this.isEmpty = function (obj) {
-    
-    for(var i in obj){ 
+
+    for(var i in obj){
         return true;
     }
     return false;
-  };  
+  };
 
   //check the object is length
   this.ObjLength = function (obj) {
-    
+
     var count = 0;
     for (var k in obj) {
         if (obj.hasOwnProperty(k)) {
@@ -32,7 +32,7 @@ appSrv.service('srvObjManipulation', function(){
       ///    Creates a unique id for identification purposes.
       /// </summary>
       /// <param name="separator" type="String" optional="true">
-      /// The optional separator for grouping the generated segmants: default "-".    
+      /// The optional separator for grouping the generated segmants: default "-".
       /// </param>
 
       var delim = separator || "-";
@@ -52,7 +52,7 @@ appSrv.service('srvObjManipulation', function(){
 
   var escapebiguni = function(str) {
     if (typeof(str) != 'string') return str;
-    
+
     //http://stackoverflow.com/questions/1354064/how-to-convert-characters-to-html-entities-using-plain-javascript
     var _escape_overrides = {
       0x00:'\uFFFD', 0x80:'\u20AC', 0x82:'\u201A', 0x83:'\u0192', 0x84:'\u201E',
@@ -67,24 +67,24 @@ appSrv.service('srvObjManipulation', function(){
       // ascii character, use override or escape
       if( c1 <= 0xFF ) return (c1=_escape_overrides[c1])?c1:escape(c).replace(/%(..)/g,"&#x$1;");
       // utf8/16 character
-      else if( c.length == 1 ) return "&#" + c1 + ";"; 
+      else if( c.length == 1 ) return "&#" + c1 + ";";
       // surrogate pair
       else if( c.length == 2 && c1 >= 0xD800 && c1 <= 0xDBFF ) return "&#" + ((c1-0xD800)*0x400 + c.charCodeAt(1) - 0xDC00 + 0x10000) + ';';
-      // no clue .. 
+      // no clue ..
       else return "";
     });
   };
 
   this.urlencode = function(text){
-    
+
     try {
       text = escapebiguni(text);//for emojis or large unicode range
     } catch(e) {
       console.log(e);
     }
-    
+
     text = escape(text.toString()).replace(/\+/g, "%2B");
-    
+
     // this escapes 128 - 255, as JS uses the unicode code points for them.
     // This causes problems with submitting text via AJAX with the UTF-8 charset.
     var matches = text.match(/(%([0-9A-F]{2}))/gi);
@@ -181,7 +181,7 @@ appSrv.service('ModalService', function($ionicModal, $rootScope) {
 });
 
 //this is for login auth service
-appSrv.service('AuthService', function($q, $http, PGAppConfig, $localstorage, commonSrv, $log, myModals, genericModalService, DatabaseSrv) {
+appSrv.service('AuthService', function($q, $http, PGAppConfig, $localstorage, commonSrv, $log, myModals, genericModalService, DatabaseSrv, synSrv) {
 
   var LOCAL_TOKEN_KEY = PGAppConfig.LOCAL_TOKEN_KEY;//'HMZAPPAUTHKEY';
   var USER_DETAILS_KEY = 'PGAPPAUTHUSER';
@@ -190,7 +190,7 @@ appSrv.service('AuthService', function($q, $http, PGAppConfig, $localstorage, co
   var authToken;
   var userDetails = {};
 
- 
+
   (function loadUserCredentials() {
 
     $log.log('Auth init config');
@@ -199,7 +199,9 @@ appSrv.service('AuthService', function($q, $http, PGAppConfig, $localstorage, co
     if (token) {
 
       useCredentials(token);
-      
+
+      synSrv.init();
+
     }
     else
     {
@@ -209,9 +211,9 @@ appSrv.service('AuthService', function($q, $http, PGAppConfig, $localstorage, co
 
 
   })();
- 
+
   function storeUserCredentials(token, user) {
-    
+
     $localstorage.set(LOCAL_TOKEN_KEY, token); //store tokon
 
      userDetails = {
@@ -229,7 +231,7 @@ appSrv.service('AuthService', function($q, $http, PGAppConfig, $localstorage, co
 
     useCredentials(token);
   }
- 
+
   function useCredentials(token) {
 
     userDetails = $localstorage.getObject(USER_DETAILS_KEY);
@@ -238,14 +240,14 @@ appSrv.service('AuthService', function($q, $http, PGAppConfig, $localstorage, co
     authToken = token;
 
     username = userDetails.first_name + ' ' +  userDetails.last_name;
- 
+
     PGAppConfig['TOKEN_KEY'] = token;
 
     //Set the token as header for your requests!
     //$http.defaults.headers.common['X-Auth-Token'] = token;
     //$http.defaults.headers.common.Authorization = token;
   }
- 
+
   function destroyUserCredentials() {
     authToken = undefined;
     username = '';
@@ -253,12 +255,12 @@ appSrv.service('AuthService', function($q, $http, PGAppConfig, $localstorage, co
     //$http.defaults.headers.common['X-Auth-Token'] = undefined;
     //delete $http.defaults.headers.common.Authorization;
 
-    $localstorage.remove(USER_DETAILS_KEY);   
+    $localstorage.remove(USER_DETAILS_KEY);
 
     $localstorage.remove(LOCAL_TOKEN_KEY);
-    
+
   }
- 
+
   var login = function(username, password) {
 
     return $q(function(resolve, reject) {
@@ -273,7 +275,7 @@ appSrv.service('AuthService', function($q, $http, PGAppConfig, $localstorage, co
 
               if(result != undefined){
 
-                var keys = Object.keys(result).map(function(x){ return x.toUpperCase() }) //$.map( Object.keys(result) , String.toUpperCase);            
+                var keys = Object.keys(result).map(function(x){ return x.toUpperCase() }) //$.map( Object.keys(result) , String.toUpperCase);
 
                 if( keys.indexOf( ("token").toUpperCase() )  != -1 ){
                   //login success
@@ -309,7 +311,7 @@ appSrv.service('AuthService', function($q, $http, PGAppConfig, $localstorage, co
 
           });
 
-      
+
 
 
 
@@ -328,7 +330,7 @@ appSrv.service('AuthService', function($q, $http, PGAppConfig, $localstorage, co
 
             if(result.status == 1){
 
-              console.log('success');    
+              console.log('success');
 
               DatabaseSrv.initLocalDB().then(function(initdb){
 
@@ -405,7 +407,7 @@ appSrv.service('AuthService', function($q, $http, PGAppConfig, $localstorage, co
                       for(var i =0, l= general_items.length; i < l; i++){
 
                         DatabaseSrv.executeQuery(query, [general_items[i].com_general_id , general_items[i].company_id, general_items[i].item_name,  general_items[i].options,  general_items[i].priority,  general_items[i].type, general_items[i].status ] ).then(function(generalitems){
-                        }); 
+                        });
                        /* $cordovaSQLite.execute(db, query, [general_items[i].com_general_id , general_items[i].company_id, general_items[i].item_name,  general_items[i].options,  general_items[i].priority,  general_items[i].type, general_items[i].status ]).then(function(res) {
                             console.log("INSERT general item ID -> " + res.insertId);
                         }, function (err) {
@@ -436,17 +438,17 @@ appSrv.service('AuthService', function($q, $http, PGAppConfig, $localstorage, co
     $localstorage.set(LOCAL_TOKEN_KEY, token); //store tokon
   };
 
- 
-  var logout = function(){     
+
+  var logout = function(){
 
   	destroyUserCredentials();
     //myModals.showLogin({state: 'tab.settings' });
 
     DatabaseSrv.deleteDB();
-    
+
   };
- 
-  
+
+
   var isChkAuthenticated = function(){
 
     var token = $localstorage.get(LOCAL_TOKEN_KEY);
@@ -458,7 +460,7 @@ appSrv.service('AuthService', function($q, $http, PGAppConfig, $localstorage, co
       isAuthenticated = false;
     }
     return isAuthenticated;
-   
+
   };
 
 
@@ -476,9 +478,9 @@ appSrv.service('AuthService', function($q, $http, PGAppConfig, $localstorage, co
      return userDetails.company_id;
 
   }
- 
+
   /*loadUserCredentials();*/
- 
+
   return {
     login: login,
     logout: logout,

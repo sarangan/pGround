@@ -13,8 +13,7 @@ angular.module('PGApp', [
   'PGApp.factories',
   'PGApp.services',
   'PGApp.directives',
-  'ion-floating-menu'
-  ])
+  'ion-floating-menu' ])
 
 .run(function($ionicPlatform) {
   $ionicPlatform.ready(function() {
@@ -52,7 +51,6 @@ angular.module('PGApp', [
     $cordovaSQLite.execute(db, "CREATE TABLE IF NOT EXISTS company_meter_link (com_meter_id integer primary key, company_id integer, meter_name text, type text, status integer)");
     $cordovaSQLite.execute(db, "CREATE TABLE IF NOT EXISTS company_general_condition_link (com_general_id integer primary key, company_id integer, item_name text, options text, priority integer, type text, status integer)");
 */
-
 
   });
 })
