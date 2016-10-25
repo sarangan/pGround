@@ -54,9 +54,9 @@ appCtrl.controller('InspectionListCtrl', function(
         //commonSrv.getResult('property/inspections').then(function(result){
 
          DatabaseSrv.initLocalDB().then(function(initdb){
-
+           //select * from current_sync where property_id=? and status=?
           //var query = "select property_info.*, strftime('%d/%m/%Y', property_info.createdAt) as created_date from property_info inner join property on property_info.property_id = property.property_id where property.company_id=?";
-          var query = "select property_info.*, strftime('%d/%m/%Y', property_info.mb_createdAt) as created_date from property_info";
+          var query = "select property_info.*, strftime('%d/%m/%Y', property_info.mb_createdAt) as created_date, current_sync.status as sync from property_info left join current_sync on property_info.property_id = current_sync.property_id ";
 
           var data = [AuthService.getCompanyId()];
 
@@ -160,7 +160,12 @@ appCtrl.controller('InspectionListCtrl', function(
 
     $scope.syncAll = function(){
 
-        synSrv.syncAll($scope.items);
+      var properties = [];
+
+      for(var i =0, l = $scope.items.length; i < l ; i++){
+        properties.push($scope.items[i].property_id );
+      }
+      synSrv.syncAll(properties);
     }
 
 
@@ -2180,7 +2185,7 @@ appCtrl.controller('SubItemsListCtrl', function($scope, $state, $stateParams, co
                                       query = "INSERT INTO property_feedback (prop_feedback_id, item_id, parent_id, option, comment, description, type) select '" + prop_feedback_id + "', item_id, '" + property_masteritem_link_id + "', option, comment, description, type from property_feedback where property_feedback.item_id='"+ sub_items.data.rows.item(i).prop_subitem_id + "' and property_feedback.parent_id='" + $scope.prop_master_id + "'";
                                       DatabaseSrv.executeQuery(query, [], params).then(function(nar_feed){
                                           $log.log('copied normalL feedback');
-                                          synSrv.update($scope.property_id, 'property_sub_feedback_general', nar_feed.params.prop_sub_feedback_general_id, 'INSERT', 'prop_feedback_id' );
+                                          synSrv.update($scope.property_id, 'property_feedback', nar_feed.params.prop_feedback_id, 'INSERT', 'prop_feedback_id' );
                                       });
 
                                     }

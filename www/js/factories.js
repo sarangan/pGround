@@ -982,7 +982,7 @@ appFact.factory('synSrv', function($log, DatabaseSrv, srvObjManipulation, common
             $log.log(result_insert.params.task + '::' ,  insert_item );
 
             var syncData = {
-              sync: result_insert.params.sync ,
+              sync: result_insert.params.sync,
               data: insert_item,
               task: result_insert.params.task,
               table: result_insert.params.table_name
@@ -1083,7 +1083,7 @@ appFact.factory('synSrv', function($log, DatabaseSrv, srvObjManipulation, common
 
             }
             else{ // no more status 1
-
+                  $log.log('::::::almost sync');
                   query = "delete from sync where property_id=?";
                   data = [property_id];
 
@@ -1092,11 +1092,14 @@ appFact.factory('synSrv', function($log, DatabaseSrv, srvObjManipulation, common
                     if(result.status == 1){
                       $log.log('DELETING sync table, guess it almost sync');
 
-                      query = "delete from current_sync where property_id=?";
-                      data = [property_id];
+                      // query = "delete from current_sync where property_id=?";
+                      // data = [property_id];
+
+                      query = "update current_sync set status=? where property_id=?";
+                      data = [2, property_id];
 
                         DatabaseSrv.executeQuery(query, data ).then(function(result){
-                          $log.log('DELETING starter sync table, guess it almost sync');
+                          $log.log('updating starter sync table, guess it almost sync');
 
                             genericModalService.showToast('Sync finished!', 'LCenter');
                         });
@@ -1118,7 +1121,7 @@ appFact.factory('synSrv', function($log, DatabaseSrv, srvObjManipulation, common
     var syncAll = function(props){
       $log.log(props);
 
-        for (var i = 0; i < props.length; i++) {
+        for (var i = 0, l = props.length ; i < l; i++) {
           syncStart(props[i]);
         }
     };
