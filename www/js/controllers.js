@@ -2163,7 +2163,7 @@ appCtrl.controller('SubItemsListCtrl', function($scope, $state, $stateParams, co
 
                                       $log.log('copy GENERAL feedback');
                                       var prop_sub_feedback_general_id = srvObjManipulation.generateUid();
-                                      query = "INSERT INTO property_sub_feedback_general (prop_sub_feedback_general_id, item_id, parent_id, comment ) select '"+ prop_sub_feedback_general_id +"', item_id,'"+ property_masteritem_link_id +"' , comment from property_sub_feedback_general where property_sub_feedback_general.item_id='" + sub_items.data.rows.item(i).prop_subitem_id +"' and property_sub_feedback_general.parent_id='" + $scope.prop_master_id + "'";
+                                      query = "INSERT INTO property_sub_feedback_general (prop_sub_feedback_general_id, property_id, item_id, parent_id, comment ) select '"+ prop_sub_feedback_general_id +"','"+ $scope.property_id +"', item_id,'"+ property_masteritem_link_id +"' , comment from property_sub_feedback_general where property_sub_feedback_general.item_id='" + sub_items.data.rows.item(i).prop_subitem_id +"' and property_sub_feedback_general.parent_id='" + $scope.prop_master_id + "'";
                                       var params = {
                                         prop_sub_feedback_general_id: prop_sub_feedback_general_id
                                       };
@@ -2182,7 +2182,7 @@ appCtrl.controller('SubItemsListCtrl', function($scope, $state, $stateParams, co
                                         prop_feedback_id: prop_feedback_id
                                       };
 
-                                      query = "INSERT INTO property_feedback (prop_feedback_id, item_id, parent_id, option, comment, description, type) select '" + prop_feedback_id + "', item_id, '" + property_masteritem_link_id + "', option, comment, description, type from property_feedback where property_feedback.item_id='"+ sub_items.data.rows.item(i).prop_subitem_id + "' and property_feedback.parent_id='" + $scope.prop_master_id + "'";
+                                      query = "INSERT INTO property_feedback (prop_feedback_id, property_id, item_id, parent_id, option, comment, description, type) select '" + prop_feedback_id + "','" + $scope.property_id + "', item_id, '" + property_masteritem_link_id + "', option, comment, description, type from property_feedback where property_feedback.item_id='"+ sub_items.data.rows.item(i).prop_subitem_id + "' and property_feedback.parent_id='" + $scope.prop_master_id + "'";
                                       DatabaseSrv.executeQuery(query, [], params).then(function(nar_feed){
                                           $log.log('copied normalL feedback');
                                           synSrv.update($scope.property_id, 'property_feedback', nar_feed.params.prop_feedback_id, 'INSERT', 'prop_feedback_id' );
@@ -2464,11 +2464,11 @@ appCtrl.controller('SubCommentCtrl', function($scope, $state, $stateParams, para
 
         DatabaseSrv.initLocalDB().then(function(initdb){
 
-            var query = "INSERT INTO property_sub_feedback_general (prop_sub_feedback_general_id, item_id, parent_id, comment ) VALUES (?,?,?,?)";
+            var query = "INSERT INTO property_sub_feedback_general (prop_sub_feedback_general_id, property_id, item_id, parent_id, comment ) VALUES (?,?,?,?,?)";
 
             var prop_sub_feedback_general_id = srvObjManipulation.generateUid();
 
-            var data = [prop_sub_feedback_general_id , $scope.prop_subitem_id, $scope.prop_master_id, $scope.data.comment ];
+            var data = [prop_sub_feedback_general_id, $scope.property_id, $scope.prop_subitem_id, $scope.prop_master_id, $scope.data.comment ];
               DatabaseSrv.executeQuery(query, data ).then(function(result){
 
                   if(result.status == 1){
@@ -2779,9 +2779,9 @@ appCtrl.controller('AddSubDetailsCtrl', function($scope, $state, $stateParams, c
 
           console.log('file url ', imageData);
 
-          var query = "INSERT INTO photos (photo_id, item_id, parent_id, type, img_url) VALUES (?,?,?,?,?) ";
+          var query = "INSERT INTO photos (photo_id, property_id, item_id, parent_id, type, img_url) VALUES (?,?,?,?,?,?) ";
           var photo_id  = srvObjManipulation.generateUid();
-          var data = [photo_id, $scope.sub_id, $scope.master_id, $scope.type, imageData ];
+          var data = [photo_id,$scope.property_id, $scope.sub_id, $scope.master_id, $scope.type, imageData ];
           $log.log('camera data saving');
           $log.log(data);
 
@@ -2811,7 +2811,7 @@ appCtrl.controller('AddSubDetailsCtrl', function($scope, $state, $stateParams, c
           //--------------
 
         var
-            closeInSeconds = 3,
+            closeInSeconds = 2,
             displayText = "<span id='timer_id_camera'>Close in #1 seconds.</span>",
             timer;
 
@@ -3013,20 +3013,20 @@ appCtrl.controller('AddSubDetailsCtrl', function($scope, $state, $stateParams, c
               }
               else{
                 // add new entry
-                query = "INSERT INTO property_feedback (prop_feedback_id, item_id, parent_id, option, comment, description, type) VALUES (?,?,?,?,?,?,?)";
+                query = "INSERT INTO property_feedback (prop_feedback_id, property_id, item_id, parent_id, option, comment, description, type) VALUES (?,?,?,?,?,?,?,?)";
 
                 var prop_feedback_id =  srvObjManipulation.generateUid();
                 if($scope.type == 'SUB'){ //sub items details general items
 
-                    data = [prop_feedback_id, $scope.sub_id, $scope.master_id, $scope.searchOptSelected , $scope.data.comment, $scope.data.description,  $scope.type  ];
+                    data = [prop_feedback_id, $scope.property_id, $scope.sub_id, $scope.master_id, $scope.searchOptSelected , $scope.data.comment, $scope.data.description,  $scope.type  ];
                 }
                 else if($scope.type == 'METER'){
 
-                    data = [prop_feedback_id, $scope.sub_id, $scope.master_id, '' , $scope.data.comment, $scope.data.description,  $scope.type  ];
+                    data = [prop_feedback_id, $scope.property_id, $scope.sub_id, $scope.master_id, '' , $scope.data.comment, $scope.data.description,  $scope.type  ];
                 }
                 else{
 
-                     data = [prop_feedback_id, $scope.sub_id, $scope.master_id, $scope.searchOptSelected , $scope.data.comment, $scope.data.description,  $scope.type  ];
+                     data = [prop_feedback_id, $scope.property_id, $scope.sub_id, $scope.master_id, $scope.searchOptSelected , $scope.data.comment, $scope.data.description,  $scope.type  ];
                 }
 
                     DatabaseSrv.executeQuery(query, data ).then(function(result){
@@ -3227,9 +3227,9 @@ appCtrl.controller('RecordSoundCtrl', function($scope, $state, $stateParams, com
 
             DatabaseSrv.initLocalDB().then(function(initdb){
 
-              var query = "INSERT INTO property_sub_voice_general (prop_sub_feedback_general_id, item_id, parent_id, voice_name, voice_url ) VALUES (?,?,?,?,?)";
+              var query = "INSERT INTO property_sub_voice_general (prop_sub_feedback_general_id, property_id, item_id, parent_id, voice_name, voice_url ) VALUES (?,?,?,?,?,?)";
               var pro_feed_id = srvObjManipulation.generateUid();
-              var data = [pro_feed_id, $scope.prop_subitem_id, $scope.prop_master_id,  $scope.sound.name, $scope.sound.file ];
+              var data = [pro_feed_id, $scope.property_id, $scope.prop_subitem_id, $scope.prop_master_id,  $scope.sound.name, $scope.sound.file ];
                 DatabaseSrv.executeQuery(query, data ).then(function(result){
 
                     if(result.status == 1){
@@ -3392,9 +3392,9 @@ appCtrl.controller('GeneralPhotosCtrl', function($scope, $state, $stateParams, c
 
           console.log('file url ', imageData);
 
-          var query = "INSERT INTO photos (photo_id, item_id, parent_id, type, img_url) VALUES (?,?,?,?,?) ";
+          var query = "INSERT INTO photos (photo_id, property_id, item_id, parent_id, type, img_url) VALUES (?,?,?,?,?,?) ";
           var photo_id  = srvObjManipulation.generateUid();
-          var data = [photo_id, $scope.prop_subitem_id, $scope.prop_master_id, 'GENERAL', imageData ];
+          var data = [photo_id, $scope.property_id, $scope.prop_subitem_id, $scope.prop_master_id, 'GENERAL', imageData ];
           $log.log('camera data saving');
           $log.log(data);
 
@@ -3424,7 +3424,7 @@ appCtrl.controller('GeneralPhotosCtrl', function($scope, $state, $stateParams, c
        //--------------
 
         var
-            closeInSeconds = 3,
+            closeInSeconds = 2,
             displayText = "<span id='timer_id_camera'>Close in #1 seconds.</span>",
             timer;
 

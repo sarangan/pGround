@@ -606,20 +606,20 @@ appFact.factory('DatabaseSrv', function($q, PGAppConfig, $cordovaSQLite, $ionicP
   function createOtherTable(){
     if(db_con){
 
-      $cordovaSQLite.execute(db_con, "CREATE TABLE IF NOT EXISTS property (id integer primary key, property_id text, company_id integer, description text, status integer, mb_createdAt DATETIME DEFAULT CURRENT_TIMESTAMP)");
-      $cordovaSQLite.execute(db_con, "CREATE TABLE IF NOT EXISTS property_info (property_id text, address_1 text, address_2 text, city text, postalcode text, report_type text, report_date DATETIME, image_url text, mb_createdAt DATETIME DEFAULT CURRENT_TIMESTAMP)");
-      $cordovaSQLite.execute(db_con, "CREATE TABLE IF NOT EXISTS property_masteritem_link (id integer primary key, prop_master_id text, property_id text, com_master_id integer, type text, com_type text, option text, self_prop_master_id text, name text, priority integer, total_num integer, status integer, mb_createdAt DATETIME DEFAULT CURRENT_TIMESTAMP)");
-      $cordovaSQLite.execute(db_con, "CREATE TABLE IF NOT EXISTS property_subitem_link (id integer primary key, prop_subitem_id text, property_id text, com_subitem_id integer, item_name text, type text, priority integer, status integer, mb_createdAt DATETIME DEFAULT CURRENT_TIMESTAMP)");
+      $cordovaSQLite.execute(db_con, "CREATE TABLE IF NOT EXISTS property (id integer primary key, property_id text, company_id integer, description text, status integer, mb_createdAt DATETIME DEFAULT CURRENT_TIMESTAMP, sync integer DEFAULT 1 )");
+      $cordovaSQLite.execute(db_con, "CREATE TABLE IF NOT EXISTS property_info (property_id text, address_1 text, address_2 text, city text, postalcode text, report_type text, report_date DATETIME, image_url text, mb_createdAt DATETIME DEFAULT CURRENT_TIMESTAMP, sync integer DEFAULT 1)");
+      $cordovaSQLite.execute(db_con, "CREATE TABLE IF NOT EXISTS property_masteritem_link (id integer primary key, prop_master_id text, property_id text, com_master_id integer, type text, com_type text, option text, self_prop_master_id text, name text, priority integer, total_num integer, status integer, mb_createdAt DATETIME DEFAULT CURRENT_TIMESTAMP, sync integer DEFAULT 1)");
+      $cordovaSQLite.execute(db_con, "CREATE TABLE IF NOT EXISTS property_subitem_link (id integer primary key, prop_subitem_id text, property_id text, com_subitem_id integer, item_name text, type text, priority integer, status integer, mb_createdAt DATETIME DEFAULT CURRENT_TIMESTAMP, sync integer DEFAULT 1)");
 
-      $cordovaSQLite.execute(db_con, "CREATE TABLE IF NOT EXISTS property_general_condition_link (id integer primary key, prop_general_id text, property_id text, com_general_id integer, item_name text, options text, type text, priority integer, user_input text, comment text, status integer, mb_createdAt DATETIME DEFAULT CURRENT_TIMESTAMP)");
+      $cordovaSQLite.execute(db_con, "CREATE TABLE IF NOT EXISTS property_general_condition_link (id integer primary key, prop_general_id text, property_id text, com_general_id integer, item_name text, options text, type text, priority integer, user_input text, comment text, status integer, mb_createdAt DATETIME DEFAULT CURRENT_TIMESTAMP, sync integer DEFAULT 1)");
 
-      $cordovaSQLite.execute(db_con, "CREATE TABLE IF NOT EXISTS property_feedback (id integer primary key, prop_feedback_id text, item_id text, parent_id text, option text, comment text, type text, description text, mb_createdAt DATETIME DEFAULT CURRENT_TIMESTAMP)");
-      $cordovaSQLite.execute(db_con, "CREATE TABLE IF NOT EXISTS photos (id integer primary key, photo_id text, item_id text, parent_id text, type text, img_url text, mb_createdAt DATETIME DEFAULT CURRENT_TIMESTAMP)");
+      $cordovaSQLite.execute(db_con, "CREATE TABLE IF NOT EXISTS property_feedback (id integer primary key, prop_feedback_id text, property_id text, item_id text, parent_id text, option text, comment text, type text, description text, mb_createdAt DATETIME DEFAULT CURRENT_TIMESTAMP, sync integer DEFAULT 1)");
+      $cordovaSQLite.execute(db_con, "CREATE TABLE IF NOT EXISTS photos (id integer primary key, photo_id text, property_id text, item_id text, parent_id text, type text, img_url text, mb_createdAt DATETIME DEFAULT CURRENT_TIMESTAMP, sync integer DEFAULT 1)");
 
-      $cordovaSQLite.execute(db_con, "CREATE TABLE IF NOT EXISTS property_sub_feedback_general (id integer primary key, prop_sub_feedback_general_id text, item_id text, parent_id text, comment text, mb_createdAt DATETIME DEFAULT CURRENT_TIMESTAMP)");
-      $cordovaSQLite.execute(db_con, "CREATE TABLE IF NOT EXISTS property_sub_voice_general (id integer primary key, prop_sub_feedback_general_id text, item_id text, parent_id text, voice_name text, voice_url text, mb_createdAt DATETIME DEFAULT CURRENT_TIMESTAMP)");
+      $cordovaSQLite.execute(db_con, "CREATE TABLE IF NOT EXISTS property_sub_feedback_general (id integer primary key, prop_sub_feedback_general_id text, property_id text, item_id text, parent_id text, comment text, mb_createdAt DATETIME DEFAULT CURRENT_TIMESTAMP, sync integer DEFAULT 1)");
+      $cordovaSQLite.execute(db_con, "CREATE TABLE IF NOT EXISTS property_sub_voice_general (id integer primary key, prop_sub_feedback_general_id text, property_id text, item_id text, parent_id text, voice_name text, voice_url text, mb_createdAt DATETIME DEFAULT CURRENT_TIMESTAMP, sync integer DEFAULT 1)");
 
-      $cordovaSQLite.execute(db_con, "CREATE TABLE IF NOT EXISTS property_meter_link (id integer primary key, prop_meter_id text, property_id text, com_meter_id integer, meter_name text, reading_value text, status integer, mb_createdAt DATETIME DEFAULT CURRENT_TIMESTAMP)");
+      $cordovaSQLite.execute(db_con, "CREATE TABLE IF NOT EXISTS property_meter_link (id integer primary key, prop_meter_id text, property_id text, com_meter_id integer, meter_name text, reading_value text, status integer, mb_createdAt DATETIME DEFAULT CURRENT_TIMESTAMP, sync integer DEFAULT 1)");
       $log.log('tables created..');
      }
 
@@ -880,15 +880,30 @@ appFact.factory('Sounds', function($q) {
  $cordovaSQLite.execute(db_con, "CREATE TABLE IF NOT EXISTS property_meter_link (id integer primary key, prop_meter_id text, property_id text, com_meter_id integer, meter_name text, reading_value text, status integer, createdAt DATETIME DEFAULT CURRENT_TIMESTAMP)");
  */
 
-appFact.factory('synSrv', function($log, DatabaseSrv, srvObjManipulation, commonSrv, genericModalService ){
+appFact.factory('synSrv', function($log, DatabaseSrv, srvObjManipulation, commonSrv, genericModalService, $q, $timeout ){
+
+  var tables = [
+    {table_name: 'property', pk_name: 'property_id'},
+    {table_name: 'property_info', pk_name: 'property_id'},
+    {table_name: 'property_masteritem_link', pk_name: 'prop_master_id'},
+    {table_name: 'property_subitem_link', pk_name: 'prop_subitem_id'},
+    {table_name: 'property_general_condition_link', pk_name: 'prop_general_id'},
+    {table_name: 'property_feedback', pk_name: 'prop_feedback_id'},
+    {table_name: 'property_sub_feedback_general', pk_name: 'prop_sub_feedback_general_id'},
+    {table_name: 'property_sub_voice_general', pk_name: 'prop_sub_feedback_general_id'},
+    {table_name: 'property_meter_link', pk_name: 'prop_meter_id'},
+    {table_name: 'photos', pk_name: 'photo_id'}
+  ];
 
   var init = function(){
+
+    $log.log('::Checking the sync tables ::');
 
      ionic.Platform.ready(function(){
 
         DatabaseSrv.initLocalDB().then(function(initdb){
 
-          var query = "select * from current_sync status =?";
+          var query = "select * from current_sync where status =?";
           var data = [1];
 
           DatabaseSrv.executeQuery(query, data ).then(function(result){
@@ -915,31 +930,32 @@ appFact.factory('synSrv', function($log, DatabaseSrv, srvObjManipulation, common
 
     var update = function(property_id, table, key_id, task, pk_name) {
 
-          DatabaseSrv.initLocalDB().then(function(initdb){
-
-            var query = "INSERT INTO sync (syn_id, property_id, table_name, key_id, task, pk_name, status) VALUES (?,?,?,?,?,?,?)";
-            var data = [srvObjManipulation.generateUid(), property_id, table, key_id, task, pk_name, 1 ];
-
-            DatabaseSrv.executeQuery(query, data ).then(function(result){
-
-                  if(result.status == 1){
-
-                      $log.log('Successfully Saved!');
-                  }
-                  else{
-                      $log.log('Something went wrong!');
-
-                  }
-
-            });
-
-        });
+        //   DatabaseSrv.initLocalDB().then(function(initdb){
+        //
+        //     var query = "INSERT INTO sync (syn_id, property_id, table_name, key_id, task, pk_name, status) VALUES (?,?,?,?,?,?,?)";
+        //     var data = [srvObjManipulation.generateUid(), property_id, table, key_id, task, pk_name, 1 ];
+        //
+        //     DatabaseSrv.executeQuery(query, data ).then(function(result){
+        //
+        //           if(result.status == 1){
+        //
+        //               $log.log('Successfully Saved!');
+        //           }
+        //           else{
+        //               $log.log('Something went wrong!');
+        //
+        //           }
+        //
+        //     });
+        //
+        // });
 
 
     };
 
 
     function sendServer(syncData){
+
 
       commonSrv.postData('property/syncmob', syncData, 'noloading').then(function(result) {
 
@@ -952,10 +968,10 @@ appFact.factory('synSrv', function($log, DatabaseSrv, srvObjManipulation, common
 
             DatabaseSrv.initLocalDB().then(function(initdb){
 
-                var query = "UPDATE sync SET status=? WHERE syn_id=?";
+                var query = "UPDATE " + result.table + "  SET sync=? WHERE " + result.key + " =?";
                 var data = [ 2 , result.synid];
-                DatabaseSrv.executeQuery(query, data ).then(function(result){
-                  $log.log('Sync successfull', result.synid );
+                DatabaseSrv.executeQuery(query, data ).then(function(resuls_db){
+                  $log.log('Sync successfull ' + result.table  , result.synid );
                 });
 
               });
@@ -971,30 +987,7 @@ appFact.factory('synSrv', function($log, DatabaseSrv, srvObjManipulation, common
     };
 
 
-    function pullData(sql_query, sql_data, params){
 
-        DatabaseSrv.executeQuery(sql_query, sql_data,  params).then(function(result_insert){
-
-          if(result_insert.data.rows.length > 0 && result_insert.status == 1) {
-
-            $log.log(result_insert.params.task + '::' , result_insert.params.table_name );
-            var insert_item = result_insert.data.rows.item(0);
-            $log.log(result_insert.params.task + '::' ,  insert_item );
-
-            var syncData = {
-              sync: result_insert.params.sync,
-              data: insert_item,
-              task: result_insert.params.task,
-              table: result_insert.params.table_name
-            };
-
-             sendServer(syncData);
-
-          }
-
-        });
-
-    };
 
 
     var synProperty = function(property_id){
@@ -1007,7 +1000,7 @@ appFact.factory('synSrv', function($log, DatabaseSrv, srvObjManipulation, common
     function syncStart(property_id){
 
       var query = "select * from current_sync where property_id=? and status=?";
-      var data = [property_id, 1];
+      var data = [property_id, 1]; // 1 is currently on process
 
         DatabaseSrv.initLocalDB().then(function(initdb){
 
@@ -1021,7 +1014,7 @@ appFact.factory('synSrv', function($log, DatabaseSrv, srvObjManipulation, common
 
                   DatabaseSrv.executeQuery(query, data ).then(function(result){
 
-                      if(result.data.rows.length > 0 && result.status == 1) {
+                      if(result.status == 1) {
                         syncProp(property_id);
                       }
 
@@ -1041,81 +1034,112 @@ appFact.factory('synSrv', function($log, DatabaseSrv, srvObjManipulation, common
 
     function syncProp(property_id){
 
-      var query = "select * from sync where property_id=? and status =? order by id ASC";
-      var data = [property_id, 1];
+      for (var i = 0; i < tables.length; i++) {
 
-      DatabaseSrv.initLocalDB().then(function(initdb){
+        var sql_query = "select * from " + tables[i].table_name + " where property_id=? and sync=?";
+        var sql_data = [property_id, 1];
+        var params = {task: 'INSERT', table_name: tables[i].table_name, pk_name: tables[i].pk_name };
 
-        DatabaseSrv.executeQuery(query, data ).then(function(result){
+        pullData(sql_query, sql_data, params);
 
-            if(result.data.rows.length > 0 && result.status == 1) {
-
-              for (var i = 0; i < result.data.rows.length; i++) {
-                  var item = result.data.rows.item(i);
-
-                  if(item.table_name.length > 0  ){
-
-                        if(item.task == 'INSERT' || item.task == 'UPDATE'  ){
-
-                          var sql_query = "select * from " + item.table_name + " where " +  item.pk_name + "=?";
-                          var sql_data = [item.key_id];
-                          var params = {task: item.task, table_name: item.table_name, sync: item.syn_id };
-
-                          pullData(sql_query, sql_data, params);
-
-                        }
-                        else if(item.task == 'DELETE' ){
-
-                          var syncData = {
-                            sync: item.syn_id,
-                            data: {item_id: item.key_id},
-                            task: item.task,
-                            table: item.table_name
-                          };
-
-                            sendServer(syncData);
-                        }
-
-                  } // end if table check
-
-              }// end for loop
+      }
 
 
-            }
-            else{ // no more status 1
+      $timeout(function(){
+        checkSyncProcess(property_id);
+      }, 3000);
+
+    }
+
+
+    function checkSyncProcess(property_id){
+
+      finishedSyncCheck(property_id).then(function(res){
+
+        $log.log('SYNC checking after timing ::::', res);
+
+        if(res != undefined){
+
+          if(res.notSync == true){
+            // still not sync yet
+
+            $log.log('::::::NOT YET MAN sync');
+          }
+          else{
+                  //no more syn data
+                  // no more status 1
                   $log.log('::::::almost sync');
-                  query = "delete from sync where property_id=?";
-                  data = [property_id];
+                  var query = "update current_sync set status=? where property_id=?";
+                  var data = [2, property_id];
 
                   DatabaseSrv.executeQuery(query, data ).then(function(result){
+                      $log.log('updating starter sync table, guess it almost sync');
 
-                    if(result.status == 1){
-                      $log.log('DELETING sync table, guess it almost sync');
-
-                      // query = "delete from current_sync where property_id=?";
-                      // data = [property_id];
-
-                      query = "update current_sync set status=? where property_id=?";
-                      data = [2, property_id];
-
-                        DatabaseSrv.executeQuery(query, data ).then(function(result){
-                          $log.log('updating starter sync table, guess it almost sync');
-
-                            genericModalService.showToast('Sync finished!', 'LCenter');
-                        });
-
-                    }
-
+                      genericModalService.showToast('Sync finished!', 'LCenter');
                   });
-            }
+          }
+
+        }
+      });
+
+    }
+
+    function finishedSyncCheck(property_id){
+
+      var q = $q.defer();
+      var notSync = false;
+
+      for (var i = 0; i < tables.length; i++) {
+
+        var sql_query = "select * from " + tables[i].table_name + " where property_id=? and sync=?";
+        var sql_data = [property_id, 1];
+        var params = {task: 'INSERT', table_name: tables[i].table_name, pk_name: tables[i].pk_name };
+
+        DatabaseSrv.executeQuery(sql_query, sql_data,  params).then(function(result_insert){
+
+          if(result_insert.data.rows.length > 0 && result_insert.status == 1) {
+            notSync = true;
+            q.resolve( {notSync: notSync } );
+          }
 
         });
 
+      }
 
-      });
-
+      return q.promise;
 
     }
+
+
+    function pullData(sql_query, sql_data, params){
+
+          DatabaseSrv.executeQuery(sql_query, sql_data,  params).then(function(result_insert){
+
+            if(result_insert.data.rows.length > 0 && result_insert.status == 1) {
+
+              for (var i = 0, l = result_insert.data.rows.length; i < l; i++) {
+
+                  var item = result_insert.data.rows.item(i);
+                  $log.log('::pulling data for sync::', result_insert.params.table_name);
+                  $log.log(':::DATA:::' ,  item );
+
+                  var syncData = {
+                    sync: item[result_insert.params.pk_name],
+                    data: item,
+                    task: 'INSERT',
+                    table: result_insert.params.table_name,
+                    key:  result_insert.params.pk_name
+                  };
+
+                  sendServer(syncData);
+
+              }
+
+            }
+
+          });
+
+      };
 
 
     var syncAll = function(props){
