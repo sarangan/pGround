@@ -56,7 +56,7 @@ appCtrl.controller('InspectionListCtrl', function(
          DatabaseSrv.initLocalDB().then(function(initdb){
            //select * from current_sync where property_id=? and status=?
           //var query = "select property_info.*, strftime('%d/%m/%Y', property_info.createdAt) as created_date from property_info inner join property on property_info.property_id = property.property_id where property.company_id=?";
-          var query = "select property_info.*, strftime('%d/%m/%Y', property_info.mb_createdAt) as created_date, current_sync.status as sync from property_info left join current_sync on property_info.property_id = current_sync.property_id ";
+          var query = "select property_info.*, strftime('%d/%m/%Y', property_info.mb_createdAt) as created_date, current_sync.status as sync1 from property_info left join current_sync on property_info.property_id = current_sync.property_id ";
 
           var data = [AuthService.getCompanyId()];
 
