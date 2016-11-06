@@ -880,7 +880,7 @@ appFact.factory('Sounds', function($q) {
  $cordovaSQLite.execute(db_con, "CREATE TABLE IF NOT EXISTS property_meter_link (id integer primary key, prop_meter_id text, property_id text, com_meter_id integer, meter_name text, reading_value text, status integer, createdAt DATETIME DEFAULT CURRENT_TIMESTAMP)");
  */
 
-appFact.factory('synSrv', function($log, DatabaseSrv, srvObjManipulation, commonSrv, genericModalService, $q, $timeout ){
+appFact.factory('synSrv', function($log, DatabaseSrv, srvObjManipulation, commonSrv, genericModalService, $q, $timeout, $cordovaFileTransfer, PGAppConfig ){
 
   var tables = [
     {table_name: 'property', pk_name: 'property_id'},
@@ -956,33 +956,108 @@ appFact.factory('synSrv', function($log, DatabaseSrv, srvObjManipulation, common
 
     function sendServer(syncData){
 
-
-      commonSrv.postData('property/syncmob', syncData, 'noloading').then(function(result) {
-
-        $log.log('logs for sync details');
-        $log.log(result);
-
-        if(result.status == 1){
-          if(result.synid){
+      //found photos table
+      // "CREATE TABLE IF NOT EXISTS photos (id integer primary key, photo_id text, property_id text, item_id text, parent_id text, type text, img_url text, mb_createdAt DATETIME DEFAULT CURRENT_TIMESTAMP, sync integer DEFAULT 1)");
+      // "CREATE TABLE IF NOT EXISTS property_sub_voice_general (id integer primary key, prop_sub_feedback_general_id text, property_id text, item_id text, parent_id text, voice_name text, voice_url text, mb_createdAt DATETIME DEFAULT CURRENT_TIMESTAMP, sync integer DEFAULT 1)");
 
 
-            DatabaseSrv.initLocalDB().then(function(initdb){
+      if(syncData.table == 'photos' ){
 
-                var query = "UPDATE " + result.table + "  SET sync=? WHERE " + result.key + " =?";
-                var data = [ 2 , result.synid];
+        $log.log('::: UPLOADING PHOTO :::');
+
+        var options = {
+            fileKey: "photo",
+            fileName: syncData.data.photo_id + '.jpg',
+            chunkedMode: false,
+            mimeType: "multipart/form-data"
+        };
+        var server = ( (PGAppConfig.APP=="DEV")? PGAppConfig.apiDevEndPoint : PGAppConfig.apiEndPoint ) +  'property/uploadphoto';
+        var filePath = syncData.data.img_url;
+
+       /* var params = {};
+        params['Authorization'] = 'Bearer ' +  PGAppConfig.TOKEN_KEY;
+        options.params = params;*/
+
+        var params = {};
+        params.headers = {Authorization: 'Bearer ' +  PGAppConfig.TOKEN_KEY };
+        params.data = syncData.data;
+        options.params = params;
+
+         /*   $log.log('Beffore logs for sync details');
+          $log.log(syncData.data);*/
+
+
+        $cordovaFileTransfer.upload(server, filePath, options).then(function(result) {
+            $log.log("SUCCESS: " , result.response );
+
+            $log.log("data: ");
+            var photoObj = JSON.parse(result.response).data;
+            $log.log(photoObj);
+
+            if(photoObj){
+
+              DatabaseSrv.initLocalDB().then(function(initdb){
+
+                var query = "UPDATE photos SET sync=? WHERE photo_id =?";
+                var data = [ 2 , photoObj.photo_id];
                 DatabaseSrv.executeQuery(query, data ).then(function(resuls_db){
-                  $log.log('Sync successfull ' + result.table  , result.synid );
+                  $log.log('Sync successfull Photos '  , result.photo_id );
                 });
 
               });
 
 
+            }
 
-          }
 
-        }
 
-      });
+
+        }, function(err) {
+            $log.log("ERROR: " , err );
+            //alert(JSON.stringify(err));
+        });
+
+
+
+      }
+
+      /*
+      else if(table == 'property_sub_voice_general' ){
+          syncData.data['voice_url'] = 'NOURL';
+      }*/
+      else{
+
+
+              commonSrv.postData('property/syncmob', syncData, 'noloading').then(function(result){
+
+                $log.log('logs for sync details');
+                $log.log(result);
+
+                if(result.status == 1){
+                  if(result.synid){
+
+
+                      DatabaseSrv.initLocalDB().then(function(initdb){
+
+                        var query = "UPDATE " + result.table + "  SET sync=? WHERE " + result.key + " =?";
+                        var data = [ 2 , result.synid];
+                        DatabaseSrv.executeQuery(query, data ).then(function(resuls_db){
+                          $log.log('Sync successfull ' + result.table  , result.synid );
+                        });
+
+                      });
+
+                  }
+
+                }
+
+            });
+
+
+
+      }
+
+
 
     };
 

@@ -2811,7 +2811,7 @@ appCtrl.controller('AddSubDetailsCtrl', function($scope, $state, $stateParams, c
           //--------------
 
         var
-            closeInSeconds = 2,
+            closeInSeconds = 3,
             displayText = "<span id='timer_id_camera'>Close in #1 seconds.</span>",
             timer;
 
@@ -3424,7 +3424,7 @@ appCtrl.controller('GeneralPhotosCtrl', function($scope, $state, $stateParams, c
        //--------------
 
         var
-            closeInSeconds = 2,
+            closeInSeconds = 3,
             displayText = "<span id='timer_id_camera'>Close in #1 seconds.</span>",
             timer;
 
