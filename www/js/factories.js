@@ -622,7 +622,7 @@ appFact.factory('DatabaseSrv', function($q, PGAppConfig, $cordovaSQLite, $ionicP
       $cordovaSQLite.execute(db_con, "CREATE TABLE IF NOT EXISTS property_meter_link (id integer primary key, prop_meter_id text, property_id text, com_meter_id integer, meter_name text, reading_value text, status integer, mb_createdAt DATETIME DEFAULT CURRENT_TIMESTAMP, sync integer DEFAULT 1)");
       $log.log('tables created..');
      }
-
+     
   }
 
 
@@ -958,9 +958,7 @@ appFact.factory('synSrv', function($log, DatabaseSrv, srvObjManipulation, common
 
       //found photos table
       // "CREATE TABLE IF NOT EXISTS photos (id integer primary key, photo_id text, property_id text, item_id text, parent_id text, type text, img_url text, mb_createdAt DATETIME DEFAULT CURRENT_TIMESTAMP, sync integer DEFAULT 1)");
-      // "CREATE TABLE IF NOT EXISTS property_sub_voice_general (id integer primary key, prop_sub_feedback_general_id text, property_id text, item_id text, parent_id text, voice_name text, voice_url text, mb_createdAt DATETIME DEFAULT CURRENT_TIMESTAMP, sync integer DEFAULT 1)");
-
-
+      
       if(syncData.table == 'photos' ){
 
         $log.log('::: UPLOADING PHOTO :::');
@@ -1009,9 +1007,6 @@ appFact.factory('synSrv', function($log, DatabaseSrv, srvObjManipulation, common
 
             }
 
-
-
-
         }, function(err) {
             $log.log("ERROR: " , err );
             //alert(JSON.stringify(err));
@@ -1019,12 +1014,65 @@ appFact.factory('synSrv', function($log, DatabaseSrv, srvObjManipulation, common
 
 
 
-      }
-
-      /*
+      }      
       else if(table == 'property_sub_voice_general' ){
-          syncData.data['voice_url'] = 'NOURL';
-      }*/
+          
+        // "CREATE TABLE IF NOT EXISTS property_sub_voice_general (id integer primary key, prop_sub_feedback_general_id text, property_id text, item_id text, parent_id text, voice_name text, voice_url text, mb_createdAt DATETIME DEFAULT CURRENT_TIMESTAMP, sync integer DEFAULT 1)");
+
+          $log.log('::: UPLOADING Voice files :::');
+
+          var options = {
+              fileKey: "photo",
+              fileName: syncData.data.prop_sub_feedback_general_id + '.m4a',
+              chunkedMode: false,
+              mimeType: "multipart/form-data"
+          };
+          var server = ( (PGAppConfig.APP=="DEV")? PGAppConfig.apiDevEndPoint : PGAppConfig.apiEndPoint ) +  'property/uploadVoice';
+          var filePath = syncData.data.img_url;
+
+         /* var params = {};
+          params['Authorization'] = 'Bearer ' +  PGAppConfig.TOKEN_KEY;
+          options.params = params;*/
+
+          var params = {};
+          params.headers = {Authorization: 'Bearer ' +  PGAppConfig.TOKEN_KEY };
+          params.data = syncData.data;
+          options.params = params;
+
+           /*   $log.log('Beffore logs for sync details');
+            $log.log(syncData.data);*/
+
+
+          $cordovaFileTransfer.upload(server, filePath, options).then(function(result) {
+              $log.log("SUCCESS: " , result.response );
+
+              $log.log("data: ");
+              var voiceObj = JSON.parse(result.response).data;
+              $log.log(voiceObj);
+
+              if(voiceObj){
+
+                DatabaseSrv.initLocalDB().then(function(initdb){
+
+                  var query = "UPDATE property_sub_voice_general SET sync=? WHERE prop_sub_feedback_general_id =?";
+                  var data = [ 2 , voiceObj.prop_sub_feedback_general_id];
+                  DatabaseSrv.executeQuery(query, data ).then(function(resuls_db){
+                    $log.log('Sync successfull voice '  , result.prop_sub_feedback_general_id );
+                  });
+
+                });
+
+
+              }
+
+          }, function(err) {
+              $log.log("ERROR: " , err );
+              //alert(JSON.stringify(err));
+          });
+
+
+
+      }
       else{
 
 

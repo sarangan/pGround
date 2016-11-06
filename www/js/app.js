@@ -93,6 +93,18 @@ angular.module('PGApp', [
     controller: 'LoginCtrl'
   })
 
+   $stateProvider.state('main', {
+    url: '/main',
+    templateUrl: 'templates/app/main.html',
+    controller: 'MainCtrl'
+  })
+
+   $stateProvider.state('how', {
+    url: '/how',
+    templateUrl: 'templates/app/how.html',
+    controller: 'HowCtrl'
+  })
+
 
   $stateProvider
 

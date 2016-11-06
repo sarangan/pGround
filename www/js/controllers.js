@@ -9,6 +9,27 @@ appCtrl.controller('AppCtrl', function($scope, $state, $ionicModal, $timeout, Au
 
 });
 
+appCtrl.controller('MainCtrl', function($scope, $state, $ionicModal, $timeout, AuthService) {
+
+  $scope.login = function(){
+    $state.go('login');
+  }
+
+  $scope.signUp = function(){
+    $state.go('login');
+  }
+
+  $scope.how = function(){
+    $state.go('how');
+  }
+
+});
+
+
+appCtrl.controller('HowCtrl', function($scope, $state, $ionicModal, $timeout, AuthService) {
+
+});
+
 
 //-----------------------------Inspections list control -------------------------------------------------
 
@@ -26,7 +47,8 @@ appCtrl.controller('InspectionListCtrl', function(
   AuthService,
   DatabaseSrv,
   $log,
-  synSrv){
+  synSrv,
+  $ionicPopup){
 
     $scope.shouldShowDelete = false;
     $scope.shouldShowReorder = false;
@@ -47,7 +69,7 @@ appCtrl.controller('InspectionListCtrl', function(
 
       if (!AuthService.isAuthenticated()) {
         //myModals.showLogin({state: $state.current.name });
-        $state.go('login');
+        $state.go('main');
       }
       else{
 
@@ -160,12 +182,29 @@ appCtrl.controller('InspectionListCtrl', function(
 
     $scope.syncAll = function(){
 
-      var properties = [];
+        var confirmPopup = $ionicPopup.confirm({
+          title: 'Finishing up reports?',
+          template: 'Are you sure you want to finish all reports?'
+        });
 
-      for(var i =0, l = $scope.items.length; i < l ; i++){
-        properties.push($scope.items[i].property_id );
-      }
-      synSrv.syncAll(properties);
+       confirmPopup.then(function(res) {
+         if(res) {
+           $log.log('deleting room');
+
+
+            var properties = [];
+
+            for(var i =0, l = $scope.items.length; i < l ; i++){
+              properties.push($scope.items[i].property_id );
+            }
+            synSrv.syncAll(properties);
+
+
+         }
+
+       });
+
+     
     }
 
 
@@ -1158,8 +1197,26 @@ appCtrl.controller('ProplistCtrl', function($scope, $state, $stateParams, common
   $scope.syncProperty = function(){
 
 
-    synSrv.synProperty($scope.property_id );
+    var confirmPopup = $ionicPopup.confirm({
+          title: 'Finishing up report?',
+          template: 'Are you sure you want to finish this report?'
+        });
 
+       confirmPopup.then(function(res) {
+         if(res) {
+           $log.log('deleting room');
+
+
+            synSrv.synProperty($scope.property_id );
+            
+
+         }
+
+       });
+
+
+
+    
   };
 
 
