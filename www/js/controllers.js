@@ -1108,7 +1108,7 @@ appCtrl.controller('ProplistCtrl', function($scope, $state, $stateParams, common
 
         DatabaseSrv.initLocalDB().then(function(initdb){
 
-          var query = "select property_masteritem_link.*,  property_masteritem_link.com_type as template_type from property_masteritem_link where NOT(property_masteritem_link.option ='NUM' and property_masteritem_link.type ='DEFAULT') and property_masteritem_link.property_id =? and property_masteritem_link.status = 1 order by property_masteritem_link.priority, property_masteritem_link.prop_master_id, property_masteritem_link.option,  property_masteritem_link.name";
+          var query = "select property_masteritem_link.*,  property_masteritem_link.com_type as template_type, (select count(photos.photo_id) from photos where photos.parent_id = property_masteritem_link.prop_master_id) as image_count from property_masteritem_link where NOT(property_masteritem_link.option ='NUM' and property_masteritem_link.type ='DEFAULT') and property_masteritem_link.property_id =? and property_masteritem_link.status = 1 order by property_masteritem_link.priority, property_masteritem_link.prop_master_id, property_masteritem_link.option,  property_masteritem_link.name";
 
           var data = [$scope.property_id];
 
@@ -2047,7 +2047,7 @@ appCtrl.controller('SubItemsListCtrl', function($scope, $state, $stateParams, co
 
   //general camera function
   $scope.generalCamera = function(prop_subitem_id){
-    $state.go('app.generalPhotos', {prop_subitem_id: prop_subitem_id, property_id: $scope.property_id, prop_master_id: $scope.prop_master_id})
+    $state.go('app.generalPhotos', {prop_subitem_id: prop_subitem_id, property_id: $scope.property_id, master_id: $scope.prop_master_id})
   };
 
   $scope.generalComment = function(prop_subitem_id){
@@ -2058,7 +2058,7 @@ appCtrl.controller('SubItemsListCtrl', function($scope, $state, $stateParams, co
 
   $scope.generalVoiceRecorder = function(prop_subitem_id){
 
-    $state.go('app.recordSound', {prop_subitem_id: prop_subitem_id, property_id: $scope.property_id, prop_master_id: $scope.prop_master_id});
+    $state.go('app.recordSound', {prop_subitem_id: prop_subitem_id, property_id: $scope.property_id, master_id: $scope.prop_master_id});
   };
 
   $scope.rename = function(){
@@ -3198,7 +3198,7 @@ appCtrl.controller('RecordSoundCtrl', function($scope, $state, $stateParams, com
 
       $scope.prop_subitem_id = $stateParams.prop_subitem_id;
       $scope.property_id = $stateParams.property_id;
-      $scope.prop_master_id = $stateParams.prop_master_id;
+      $scope.prop_master_id = $stateParams.master_id;
 
       initLoadData();
 

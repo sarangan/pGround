@@ -625,7 +625,6 @@ appFact.factory('DatabaseSrv', function($q, PGAppConfig, $cordovaSQLite, $ionicP
      
   }
 
-
   function executeQuery(query, data, params, loadingContent ){
 
     var q = $q.defer();

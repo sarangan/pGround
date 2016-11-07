@@ -426,3 +426,8 @@
 .breadcrumb a:last-child:after {
 	content: none;
 }
+
+.item p, .input-label, .item{
+    color: #000000 !important;
+    font-weight: bold;
+}

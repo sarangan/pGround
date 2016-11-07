@@ -125,6 +125,16 @@ angular.module('PGApp', [
       }
     })
 
+  .state('app.howtodo', {
+      url: '/howtodo',
+      views: {
+        'menuContent': {
+          templateUrl: 'templates/app/how.html',
+          controller: 'HowCtrl'
+        }
+      }
+    })
+
   .state('app.newPropertyinfo', {
       url: '/newPropertyinfo/:property_id',
       views: {

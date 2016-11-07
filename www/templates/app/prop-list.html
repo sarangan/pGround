@@ -30,11 +30,19 @@
 		    	<p style="font-size:16px;">General Condition</p>
 		  	</ion-item>
 
-		  	<ion-item ng-repeat="item in items | orderBy: 'priority' track by $index"  ng-click="openLink(item)">
+		  	<!-- <ion-item > -->
 			    <!-- <p style="font-size:16px;" ng-if="item.type == 'DEFAULT'">{{item.item_name}}</p>
 			  	<p style="font-size:16px;" ng-if="item.type == 'SELF'">{{item.name}}</p>  -->
-			  	<p style="font-size:16px;">{{item.name}}</p>
-			 </ion-item>
+			  	<!-- <p style="font-size:16px;">{{item.name}}</p>
+			  	<span class="item-note"> {{item.image_count}} {{ item.image_count > 1? 'Images': 'Image' }} <i class="icon ion-ios-arrow-right"></i></span> -->
+
+				<a class="item" ng-repeat="item in items | orderBy: 'priority' track by $index"  ng-click="openLink(item)">
+			  		{{item.name}}
+				    <span class="item-note"> {{item.image_count}} {{ item.image_count > 1? 'Images': 'Image' }} <i class="icon ion-ios-arrow-right"></i></span>
+				</a>
+
+
+			 <!-- </ion-item> -->
 
 		</ion-list>
 
