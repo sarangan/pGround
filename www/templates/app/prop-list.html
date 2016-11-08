@@ -1,5 +1,5 @@
 <ion-view view-title="Room list">
-	
+
 	<ion-nav-bar class="bar-calm pg-theme">
 	    <ion-nav-back-button>
 	    </ion-nav-back-button>
@@ -12,6 +12,12 @@
         	</button>
 	    </ion-nav-buttons>
 	</ion-nav-bar>
+
+	<ion-floating-menu has-footer="false" button-color="#009AF2" icon="ion-plus" iconColor="#fff">
+	    <ion-floating-item icon="ion-funnel" button-color="#009AF2" ui-sref="app.proplistsort({property_id: property_id })"></ion-floating-item>
+	    <ion-floating-item icon="ion-android-sync" button-color="#009AF2" click="syncProperty()"></ion-floating-item>
+	    <ion-floating-item icon="ion-ios-compose" button-color="#009AF2" click="openSign()"></ion-floating-item>
+	</ion-floating-menu>
 
 	<ion-content overflow-scroll="true">
 
@@ -41,6 +47,9 @@
 				    <span class="item-note"> {{item.image_count}} {{ item.image_count > 1? 'Images': 'Image' }} <i class="icon ion-ios-arrow-right"></i></span>
 				</a>
 
+				<a class="item"  ng-click="openSign()" style="background-color: #D3DCE3;">
+						Customer Signature
+				</a>
 
 			 <!-- </ion-item> -->
 

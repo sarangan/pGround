@@ -1,0 +1,20 @@
+<ion-view view-title="Signature Pad">
+
+<ion-nav-bar class="bar-calm pg-theme" >
+    <ion-nav-back-button>
+    </ion-nav-back-button>
+</ion-nav-bar>
+
+  <ion-content overflow-scroll="true" class='has-header padding' style="text-align:center; padding-top: 50px;">
+
+    <canvas id='signatureCanvas' width='320' height='200' style='border: 1px solid black;'></canvas>
+        <div class='button-bar'>
+            <a class='button button-energized' ng-click='clearCanvas()'>Clear</a>
+            <a class='button button-positive' ng-click='saveCanvas()'>Save</a>
+        </div>
+        <br>
+        <img ng-src='{{signature}}'/>
+
+  </ion-content>
+
+</ion-view>

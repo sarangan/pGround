@@ -99,11 +99,11 @@ angular.module('PGApp', [
     controller: 'MainCtrl'
   })
 
-   $stateProvider.state('how', {
-    url: '/how',
-    templateUrl: 'templates/app/how.html',
-    controller: 'HowCtrl'
-  })
+  //  $stateProvider.state('how', {
+  //   url: '/how',
+  //   templateUrl: 'templates/app/how.html',
+  //   controller: 'HowCtrl'
+  // })
 
 
   $stateProvider
@@ -125,12 +125,12 @@ angular.module('PGApp', [
       }
     })
 
-  .state('app.howtodo', {
-      url: '/howtodo',
+  .state('app.draw', {
+      url: '/draw/:property_id',
       views: {
         'menuContent': {
-          templateUrl: 'templates/app/how.html',
-          controller: 'HowCtrl'
+          templateUrl: 'templates/app/draw.html',
+          controller: 'SignPadCtrl'
         }
       }
     })

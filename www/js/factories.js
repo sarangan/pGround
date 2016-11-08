@@ -392,7 +392,8 @@ appFact.factory('myModals', function (appModalService, $log){
   var service = {
       showLogin: showLogin,
       gCommentBox: gCommentBox,
-      subCommentBox: subCommentBox
+      subCommentBox: subCommentBox,
+      help: help
   };
 
   function showLogin(userInfo){
@@ -416,6 +417,12 @@ appFact.factory('myModals', function (appModalService, $log){
 
       return appModalService.show('templates/model/sub-comment.html', 'SubCommentCtrl', commentInfo);
   };
+
+  function help(helpInfo){
+
+      return appModalService.show('templates/model/how.html', 'HowCtrl', helpInfo);
+  };
+
 
   return service;
 
@@ -607,7 +614,7 @@ appFact.factory('DatabaseSrv', function($q, PGAppConfig, $cordovaSQLite, $ionicP
     if(db_con){
 
       $cordovaSQLite.execute(db_con, "CREATE TABLE IF NOT EXISTS property (id integer primary key, property_id text, company_id integer, description text, status integer, mb_createdAt DATETIME DEFAULT CURRENT_TIMESTAMP, sync integer DEFAULT 1 )");
-      $cordovaSQLite.execute(db_con, "CREATE TABLE IF NOT EXISTS property_info (property_id text, address_1 text, address_2 text, city text, postalcode text, report_type text, report_date DATETIME, image_url text, mb_createdAt DATETIME DEFAULT CURRENT_TIMESTAMP, sync integer DEFAULT 1)");
+      $cordovaSQLite.execute(db_con, "CREATE TABLE IF NOT EXISTS property_info (property_id text, address_1 text, address_2 text, city text, postalcode text, report_type text, report_date DATETIME, image_url text, mb_createdAt DATETIME DEFAULT CURRENT_TIMESTAMP, sign_url text, locked integer DEFAULT 0, sync integer DEFAULT 1)");
       $cordovaSQLite.execute(db_con, "CREATE TABLE IF NOT EXISTS property_masteritem_link (id integer primary key, prop_master_id text, property_id text, com_master_id integer, type text, com_type text, option text, self_prop_master_id text, name text, priority integer, total_num integer, status integer, mb_createdAt DATETIME DEFAULT CURRENT_TIMESTAMP, sync integer DEFAULT 1)");
       $cordovaSQLite.execute(db_con, "CREATE TABLE IF NOT EXISTS property_subitem_link (id integer primary key, prop_subitem_id text, property_id text, com_subitem_id integer, item_name text, type text, priority integer, status integer, mb_createdAt DATETIME DEFAULT CURRENT_TIMESTAMP, sync integer DEFAULT 1)");
 
@@ -622,7 +629,7 @@ appFact.factory('DatabaseSrv', function($q, PGAppConfig, $cordovaSQLite, $ionicP
       $cordovaSQLite.execute(db_con, "CREATE TABLE IF NOT EXISTS property_meter_link (id integer primary key, prop_meter_id text, property_id text, com_meter_id integer, meter_name text, reading_value text, status integer, mb_createdAt DATETIME DEFAULT CURRENT_TIMESTAMP, sync integer DEFAULT 1)");
       $log.log('tables created..');
      }
-     
+
   }
 
   function executeQuery(query, data, params, loadingContent ){
@@ -757,6 +764,7 @@ appFact.factory('PropInfoSrv', function(DatabaseSrv, $q, $log){
                 propInfoData.description = result.data.rows.item(0).description;
 
                 propInfoData.image_url = result.data.rows.item(0).image_url;
+                propInfoData.sign_url = result.data.rows.item(0).sign_url;
 
                 if( propInfoData.image_url.length == 0 || propInfoData.image_url.indexOf('list_icon.png') ){
                   propInfoData.image_url =  "img/photo-camera.png";
@@ -957,7 +965,7 @@ appFact.factory('synSrv', function($log, DatabaseSrv, srvObjManipulation, common
 
       //found photos table
       // "CREATE TABLE IF NOT EXISTS photos (id integer primary key, photo_id text, property_id text, item_id text, parent_id text, type text, img_url text, mb_createdAt DATETIME DEFAULT CURRENT_TIMESTAMP, sync integer DEFAULT 1)");
-      
+
       if(syncData.table == 'photos' ){
 
         $log.log('::: UPLOADING PHOTO :::');
@@ -1013,33 +1021,30 @@ appFact.factory('synSrv', function($log, DatabaseSrv, srvObjManipulation, common
 
 
 
-      }      
-      else if(table == 'property_sub_voice_general' ){
-          
-        // "CREATE TABLE IF NOT EXISTS property_sub_voice_general (id integer primary key, prop_sub_feedback_general_id text, property_id text, item_id text, parent_id text, voice_name text, voice_url text, mb_createdAt DATETIME DEFAULT CURRENT_TIMESTAMP, sync integer DEFAULT 1)");
+      }
+      /*else if(syncData.table == 'property_sub_voice_general' && (syncData.data.voice_url.length > 0) ){
 
-          $log.log('::: UPLOADING Voice files :::');
+            $log.log('::: UPLOADING Voice files :::');
+          var mine = "multipart/form-data";
+          if(syncData.data.voice_url.substr(syncData.data.voice_url.lastIndexOf('.')+1) == 'm4a'){
+            mine = 'audio/m4a';
+          }
+
 
           var options = {
-              fileKey: "photo",
-              fileName: syncData.data.prop_sub_feedback_general_id + '.m4a',
+              fileKey: "voice",
+              fileName: syncData.data.prop_sub_feedback_general_id + '.'+  syncData.data.voice_url.substr(syncData.data.voice_url.lastIndexOf('.')+1),
               chunkedMode: false,
-              mimeType: "multipart/form-data"
+              mimeType: mine
           };
-          var server = ( (PGAppConfig.APP=="DEV")? PGAppConfig.apiDevEndPoint : PGAppConfig.apiEndPoint ) +  'property/uploadVoice';
-          var filePath = syncData.data.img_url;
 
-         /* var params = {};
-          params['Authorization'] = 'Bearer ' +  PGAppConfig.TOKEN_KEY;
-          options.params = params;*/
+          var server = ( (PGAppConfig.APP=="DEV")? PGAppConfig.apiDevEndPoint : PGAppConfig.apiEndPoint ) +  'property/uploadvoice';
+          var filePath = syncData.data.voice_url;
 
           var params = {};
           params.headers = {Authorization: 'Bearer ' +  PGAppConfig.TOKEN_KEY };
           params.data = syncData.data;
           options.params = params;
-
-           /*   $log.log('Beffore logs for sync details');
-            $log.log(syncData.data);*/
 
 
           $cordovaFileTransfer.upload(server, filePath, options).then(function(result) {
@@ -1071,9 +1076,8 @@ appFact.factory('synSrv', function($log, DatabaseSrv, srvObjManipulation, common
 
 
 
-      }
+      }*/
       else{
-
 
               commonSrv.postData('property/syncmob', syncData, 'noloading').then(function(result){
 
@@ -1083,14 +1087,63 @@ appFact.factory('synSrv', function($log, DatabaseSrv, srvObjManipulation, common
                 if(result.status == 1){
                   if(result.synid){
 
-
                       DatabaseSrv.initLocalDB().then(function(initdb){
 
                         var query = "UPDATE " + result.table + "  SET sync=? WHERE " + result.key + " =?";
                         var data = [ 2 , result.synid];
-                        DatabaseSrv.executeQuery(query, data ).then(function(resuls_db){
-                          $log.log('Sync successfull ' + result.table  , result.synid );
+
+                        var params = {
+                          data:  result.data,
+                          table:  result.table,
+                          synid: result.synid
+                        };
+
+                        DatabaseSrv.executeQuery(query, data, params ).then(function(resuls_db){
+                          $log.log('Sync successfull ' + resuls_db.params.table ,  resuls_db.params.synid );
+
+
+                              if( resuls_db.params.table == 'property_info' && ( resuls_db.params.data.image_url.length > 0) ){
+                                  // we got to update the url
+
+                                  if( resuls_db.params.data.image_url  == "img/photo-camera.png" || resuls_db.params.data.image_url  == "img/list_icon.png" ){
+                                    //we cannot upload the image becase its default image
+                                    $log.log('Quit uploading property image ');
+                                  }
+                                  else{
+                                    //upload image
+                                    $log.log('upload property image to server ');
+
+                                    var filename =  resuls_db.params.data.property_id  + '.'+  resuls_db.params.data.image_url.substr(resuls_db.params.data.image_url.lastIndexOf('.')+1) ;
+                                    var serverurl = 'property/uploadpropertyimg';
+                                    var myfilepath = resuls_db.params.data.image_url;
+                                    var data = {property_id : resuls_db.params.data.property_id };
+
+                                    uploadImage(filename, serverurl, myfilepath, data );
+                                  }
+
+                              }
+
+                              // if( resuls_db.params.table == 'property_info' && ( resuls_db.params.data.sign_url.length > 0) ){
+                              //     // we got to update the url
+                              //
+                              //       //upload image
+                              //       $log.log('upload property image to server ');
+                              //
+                              //       var filename =  resuls_db.params.data.property_id + '_signature' + '.'+  resuls_db.params.data.sign_url.substr(resuls_db.params.data.sign_url.lastIndexOf('.')+1) ;
+                              //       var serverurl = 'property/uploadsignature';
+                              //       var myfilepath = resuls_db.params.data.sign_url;
+                              //       var data = {property_id : resuls_db.params.data.property_id };
+                              //
+                              //       uploadImage(filename, serverurl, myfilepath, data );
+                              //
+                              //
+                              // }
+
+
                         });
+
+
+
 
                       });
 
@@ -1109,6 +1162,33 @@ appFact.factory('synSrv', function($log, DatabaseSrv, srvObjManipulation, common
     };
 
 
+    function uploadImage(filename, serverurl, myfilepath, data ){
+
+          $log.log('::: UPLOADING SINGLE PHOTO :::');
+
+          var options = {
+              fileKey: "photo",
+              fileName: filename,
+              chunkedMode: false,
+              mimeType: "multipart/form-data"
+          };
+          var server = ( (PGAppConfig.APP=="DEV")? PGAppConfig.apiDevEndPoint : PGAppConfig.apiEndPoint ) +  serverurl;
+          var filePath = myfilepath;
+
+          var params = {};
+          params.headers = {Authorization: 'Bearer ' +  PGAppConfig.TOKEN_KEY };
+          params.data = data;
+          options.params = params;
+
+          $cordovaFileTransfer.upload(server, filePath, options).then(function(result) {
+              $log.log("SUCCESS: IMAGEC :::" , result.response );
+
+          }, function(err) {
+              $log.log("ERROR: " , err );
+              //alert(JSON.stringify(err));
+          });
+
+    };
 
 
 

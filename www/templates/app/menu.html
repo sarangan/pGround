@@ -18,17 +18,21 @@
     </ion-header-bar>
     <ion-content>
       <ion-list>
-      
+
         <ion-item menu-close ui-sref="app.inspections">
           Inspections
         </ion-item>
         <ion-item menu-close ui-sref="app.inspections">
           Settings
         </ion-item>
-        <ion-item menu-close ui-sref="how()">
+        <ion-item menu-close ng-click="help()">
           How does it work?
         </ion-item>
-         <ion-item menu-close ng-click="logout()">
+        <ion-item menu-close ng-click="exit()">
+          Exit
+        </ion-item>
+
+         <ion-item menu-close ng-click="logout()" style="margin-top:50px; background-color: #FEF9DB;">
           Logout
         </ion-item>
 

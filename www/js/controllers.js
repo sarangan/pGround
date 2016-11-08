@@ -1,15 +1,38 @@
 var appCtrl = angular.module('PGApp.controllers', []);
 
-appCtrl.controller('AppCtrl', function($scope, $state, $ionicModal, $timeout, AuthService) {
+appCtrl.controller('AppCtrl', function($scope, $state, $ionicModal, $timeout, AuthService, myModals, $ionicPopup, $log) {
 
   $scope.logout = function(){
-    AuthService.logout();
-    $state.go('login');
+
+    var confirmPopup = $ionicPopup.confirm({
+      okText : 'Yes',
+      cancelText : 'No',
+      title: 'Logout',
+      template: 'Are you sure you want to logout?, you might loose your data...'
+    });
+
+   confirmPopup.then(function(res) {
+     if(res) {
+        $log.log('deleting room');
+        AuthService.logout();
+        $state.go('login');
+      }
+
+   });
+
+  };
+
+  $scope.help = function(){
+    myModals.help();
+  };
+
+  $scope.exit = function(){
+    ionic.Platform.exitApp(); // stops the app
   }
 
 });
 
-appCtrl.controller('MainCtrl', function($scope, $state, $ionicModal, $timeout, AuthService) {
+appCtrl.controller('MainCtrl', function($scope, $state, $ionicModal, $timeout, AuthService, myModals, $log) {
 
   $scope.login = function(){
     $state.go('login');
@@ -20,13 +43,18 @@ appCtrl.controller('MainCtrl', function($scope, $state, $ionicModal, $timeout, A
   }
 
   $scope.how = function(){
-    $state.go('how');
+    myModals.help();
   }
 
 });
 
 
-appCtrl.controller('HowCtrl', function($scope, $state, $ionicModal, $timeout, AuthService) {
+appCtrl.controller('HowCtrl', function($scope, $state, $log) {
+
+
+  $scope.onClose = function(){
+    $scope.closeModal(null);
+  };
 
 });
 
@@ -204,7 +232,7 @@ appCtrl.controller('InspectionListCtrl', function(
 
        });
 
-     
+
     }
 
 
@@ -363,9 +391,7 @@ appCtrl.controller('NewPropInfoCtrl', function(
 
           $log.log($scope.data);
 
-
             if(!$scope.property_id){
-
 
               $log.log('inserting');
 
@@ -398,8 +424,8 @@ appCtrl.controller('NewPropInfoCtrl', function(
                       if($scope.property_id ){
 
 
-                          var query = "INSERT INTO property_info (property_id, address_1, address_2, city, postalcode,  report_type, report_date, image_url) VALUES (?,?,?,?,?,?,?,?)";
-                          var data = [$scope.property_id, $scope.data.address_1, $scope.data.address_2, $scope.data.city, $scope.data.postalcode, $scope.data.report_type, new Date($scope.data.report_date).toLocaleDateString("en-UK"), $scope.data.reportImage ];
+                          var query = "INSERT INTO property_info (property_id, address_1, address_2, city, postalcode,  report_type, report_date, image_url, sign_url, locked) VALUES (?,?,?,?,?,?,?,?,?,?)";
+                          var data = [$scope.property_id, $scope.data.address_1, $scope.data.address_2, $scope.data.city, $scope.data.postalcode, $scope.data.report_type, new Date($scope.data.report_date).toLocaleDateString("en-UK"), $scope.data.reportImage, '', 0 ];
                           $log.log('date');
                           $log.log(data);
                           DatabaseSrv.executeQuery(query, data ).then(function(prop_info_result){
@@ -1061,6 +1087,7 @@ appCtrl.controller('ProplistCtrl', function($scope, $state, $stateParams, common
   $scope.items = [];
   $scope.data = { };
   $scope.breadcums = [];
+  $scope.sign_url = false;
 
   $scope.$on('$ionicView.beforeEnter', function() {
 
@@ -1080,6 +1107,8 @@ appCtrl.controller('ProplistCtrl', function($scope, $state, $stateParams, common
 
           if(propinfo.hasOwnProperty('status')){
             if(propinfo.status == 1){
+
+              $scope.sign_url =  (propinfo.data.sign_url.length > 0) ? true: false;
               var address = (propinfo.data.address_1.length > 9) ? propinfo.data.address_1.substring(0, 9) + '...' : propinfo.data.address_1;
               $scope.breadcums.push(address);
               $scope.breadcums.push('Room list');
@@ -1102,13 +1131,9 @@ appCtrl.controller('ProplistCtrl', function($scope, $state, $stateParams, common
           property_id:  $scope.property_id
         };
 
-
-
-
-
         DatabaseSrv.initLocalDB().then(function(initdb){
 
-          var query = "select property_masteritem_link.*,  property_masteritem_link.com_type as template_type, (select count(photos.photo_id) from photos where photos.parent_id = property_masteritem_link.prop_master_id) as image_count from property_masteritem_link where NOT(property_masteritem_link.option ='NUM' and property_masteritem_link.type ='DEFAULT') and property_masteritem_link.property_id =? and property_masteritem_link.status = 1 order by property_masteritem_link.priority, property_masteritem_link.prop_master_id, property_masteritem_link.option,  property_masteritem_link.name";
+          var query = "select property_masteritem_link.*,  property_masteritem_link.com_type as template_type, (select count(photos.photo_id) from photos where photos.parent_id = property_masteritem_link.prop_master_id or photos.item_id = property_masteritem_link.prop_master_id ) as image_count from property_masteritem_link where NOT(property_masteritem_link.option ='NUM' and property_masteritem_link.type ='DEFAULT') and property_masteritem_link.property_id =? and property_masteritem_link.status = 1 order by property_masteritem_link.priority, property_masteritem_link.prop_master_id, property_masteritem_link.option,  property_masteritem_link.name";
 
           var data = [$scope.property_id];
 
@@ -1194,30 +1219,53 @@ appCtrl.controller('ProplistCtrl', function($scope, $state, $stateParams, common
   };
 
 
-  $scope.syncProperty = function(){
+    $scope.syncProperty = function(){
+
+          var confirmPopup = $ionicPopup.confirm({
+            title: 'Finishing up report?',
+            template: 'Are you sure you want to finish this report?'
+          });
+
+         confirmPopup.then(function(res) {
+           if(res) {
+              $log.log('sync room');
+
+                if($scope.sign_url == true){
+                  synSrv.synProperty($scope.property_id );
+                }
+                else{
+
+                  var confirmPopupx = $ionicPopup.confirm({
+                    okText : 'Yes',
+                    cancelText : 'No',
+                    title: 'Customer Signature?',
+                    template: 'Do you want to get customer signature?'
+                  });
+
+                  confirmPopupx.then(function(res) {
+                    if(res) {
+                       $log.log('sync room');
+                       $state.go('app.draw', {property_id: $scope.property_id });
+                     }
+                     else{
+                       synSrv.synProperty($scope.property_id );
+                     }
+
+                   });
 
 
-    var confirmPopup = $ionicPopup.confirm({
-          title: 'Finishing up report?',
-          template: 'Are you sure you want to finish this report?'
-        });
 
-       confirmPopup.then(function(res) {
-         if(res) {
-           $log.log('deleting room');
+                }
 
 
-            synSrv.synProperty($scope.property_id );
-            
+           }
+         });
+    };
 
-         }
-
-       });
-
-
-
-    
-  };
+    //open customer signature
+    $scope.openSign = function(){
+        $state.go('app.draw', {property_id: $scope.property_id });
+    };
 
 
 });
@@ -2290,6 +2338,8 @@ appCtrl.controller('SubItemsListCtrl', function($scope, $state, $stateParams, co
   $scope.delete = function(){
 
     var confirmPopup = $ionicPopup.confirm({
+      okText : 'Yes',
+      cancelText : 'No',
      title: 'Delete a room',
      template: 'Are you sure you want to delete this room?'
    });
@@ -3397,7 +3447,7 @@ appCtrl.controller('RecordSoundCtrl', function($scope, $state, $stateParams, com
 });
 
 //general photos controller
-appCtrl.controller('GeneralPhotosCtrl', function($scope, $state, $stateParams, commonSrv, $log, $ionicPopup, DatabaseSrv, $ionicModal, $ionicPopup, srvObjManipulation, genericModalService, synSrv, $cordovaCamera){
+appCtrl.controller('GeneralPhotosCtrl', function($scope, $state, $stateParams, commonSrv, $log, $ionicPopup, DatabaseSrv, $ionicModal, srvObjManipulation, genericModalService, synSrv, $cordovaCamera){
 
 
    $scope.prop_subitem_id = '';
@@ -3642,6 +3692,82 @@ appCtrl.controller('GeneralPhotosCtrl', function($scope, $state, $stateParams, c
 
 
 });
+
+
+
+/*---------- Signature pad --------------*/
+appCtrl.controller('SignPadCtrl', function($scope, $state, $stateParams, commonSrv, $log, $ionicPopup, DatabaseSrv, srvObjManipulation, synSrv, genericModalService){
+
+      $scope.property_id = '';
+      var canvas = document.getElementById('signatureCanvas');
+      var signaturePad = new SignaturePad(canvas);
+
+      $scope.$on('$ionicView.beforeEnter', function() {
+
+          $scope.property_id = $stateParams.property_id;
+          initLoadData();
+      });
+
+      $scope.clearCanvas = function() {
+          signaturePad.clear();
+      };
+
+      $scope.saveCanvas = function() {
+          var sigImg = signaturePad.toDataURL();
+          $scope.signature = sigImg;
+
+          callSave();
+      };
+
+      function initLoadData() {
+
+            if( $scope.property_id ){
+                  DatabaseSrv.initLocalDB().then(function(initdb){
+                      var query = "select property_info.* from property_info where property_info.property_id=?";
+                      var data = [$scope.property_id];
+                      DatabaseSrv.executeQuery(query, data ).then(function(result){
+                          if(result.status == 1 && result.data.rows.length > 0){
+                              $scope.signature =  result.data.rows.item(0).sign_url;
+                              $log.log('signature url found');
+                              $log.log($scope.signature);
+
+                          }
+
+                      });
+                });
+            }
+      };
+
+
+      //save image
+      function callSave(){
+
+          if($scope.signature.length > 0){
+
+             DatabaseSrv.initLocalDB().then(function(initdb){
+
+               var query = "UPDATE property_info set sign_url=? where property_info.property_id=?";
+               var data = [$scope.signature, $scope.property_id ];
+
+               DatabaseSrv.executeQuery(query, data ).then(function(result){
+
+                  if(result.status == 1){
+                    $log.log('saved signature url!!!');
+                    genericModalService.showToast('Successfully Saved!', 'LCenter');
+                  }
+
+                });
+
+
+             });
+
+          }
+
+      }
+
+
+});
+/*----------end Signature pad --------------*/
 
 
 //-----------------------------Login control -------------------------------------------------
