@@ -126,11 +126,21 @@ angular.module('PGApp', [
     })
 
   .state('app.draw', {
-      url: '/draw/:property_id',
+      url: '/draw/:property_id/:type',
       views: {
         'menuContent': {
           templateUrl: 'templates/app/draw.html',
           controller: 'SignPadCtrl'
+        }
+      }
+    })
+
+    .state('app.signlist', {
+      url: '/signlist/:property_id',
+      views: {
+        'menuContent': {
+          templateUrl: 'templates/app/sign-list.html',
+          controller: 'SignListCtrl'
         }
       }
     })

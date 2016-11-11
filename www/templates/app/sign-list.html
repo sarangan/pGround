@@ -1,0 +1,40 @@
+<ion-view view-title="Signatures">
+
+	<ion-nav-bar class="bar-calm pg-theme">
+	    	<ion-nav-back-button>
+	    	</ion-nav-back-button>
+
+	      <ion-nav-buttons side="right">
+		        <button class="button" ng-click="save()">Save
+		        </button>
+		    </ion-nav-buttons>
+
+	</ion-nav-bar>
+
+	<ion-content overflow-scroll="true">
+
+	  	<ion-list>
+
+	  		<ion-item style="padding: 0px;">
+	  			<div class="breadcrumb">
+					<a ng-repeat="bread in breadcums track by $index">{{bread}}</a>
+				</div>
+		  	</ion-item>
+
+			  <ion-item ng-repeat="item in signs track by $index"  ui-sref="app.draw({ type: item.type, property_id: property_id })" class="item-icon-right">
+				    <p style="font-size:16px;">{{item.name}}</p>
+						<i class="icon ion-checkmark-circled" style="color:green;" ng-show="item.signed"></i>
+				</ion-item>
+
+		</ion-list>
+
+<div class="list">
+		<label class="item item-divider">Additional comments</label>
+
+		<label class="item item-input">
+				<input type="text"  ng-model="comment" style="min-height: 200px; " >
+		</label>
+
+</div>
+  </ion-content>
+</ion-view>

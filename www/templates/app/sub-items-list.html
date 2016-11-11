@@ -29,7 +29,7 @@
 
 		  	<a class="item" ng-repeat="item in items | filter: { type : 'ITEM' } track by $index" ui-sref="app.addSubDetails({sub_id: item.prop_subitem_id, master_id: prop_master_id, type: 'SUB', property_id: property_id })">
 		  		{{item.item_name}}
-			    <span class="item-note"> {{item.image_count}} {{ item.image_count > 1? 'Images': 'Image' }} <i class="icon ion-ios-arrow-right"></i></span>
+			    <span class="item-note"> {{item.image_count}} {{ item.image_count > 1? 'Images': 'Image' }} <i class="icon ion-chevron-right" style="vertical-align: text-top;"></i></span>
 			</a>
 
 		</div>

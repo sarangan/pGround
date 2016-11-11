@@ -614,7 +614,7 @@ appFact.factory('DatabaseSrv', function($q, PGAppConfig, $cordovaSQLite, $ionicP
     if(db_con){
 
       $cordovaSQLite.execute(db_con, "CREATE TABLE IF NOT EXISTS property (id integer primary key, property_id text, company_id integer, description text, status integer, mb_createdAt DATETIME DEFAULT CURRENT_TIMESTAMP, sync integer DEFAULT 1 )");
-      $cordovaSQLite.execute(db_con, "CREATE TABLE IF NOT EXISTS property_info (property_id text, address_1 text, address_2 text, city text, postalcode text, report_type text, report_date DATETIME, image_url text, mb_createdAt DATETIME DEFAULT CURRENT_TIMESTAMP, sign_url text, locked integer DEFAULT 0, sync integer DEFAULT 1)");
+      $cordovaSQLite.execute(db_con, "CREATE TABLE IF NOT EXISTS property_info (property_id text, address_1 text, address_2 text, city text, postalcode text, report_type text, report_date DATETIME, image_url text, mb_createdAt DATETIME DEFAULT CURRENT_TIMESTAMP, locked integer DEFAULT 0, sync integer DEFAULT 1)");
       $cordovaSQLite.execute(db_con, "CREATE TABLE IF NOT EXISTS property_masteritem_link (id integer primary key, prop_master_id text, property_id text, com_master_id integer, type text, com_type text, option text, self_prop_master_id text, name text, priority integer, total_num integer, status integer, mb_createdAt DATETIME DEFAULT CURRENT_TIMESTAMP, sync integer DEFAULT 1)");
       $cordovaSQLite.execute(db_con, "CREATE TABLE IF NOT EXISTS property_subitem_link (id integer primary key, prop_subitem_id text, property_id text, com_subitem_id integer, item_name text, type text, priority integer, status integer, mb_createdAt DATETIME DEFAULT CURRENT_TIMESTAMP, sync integer DEFAULT 1)");
 
@@ -627,6 +627,9 @@ appFact.factory('DatabaseSrv', function($q, PGAppConfig, $cordovaSQLite, $ionicP
       $cordovaSQLite.execute(db_con, "CREATE TABLE IF NOT EXISTS property_sub_voice_general (id integer primary key, prop_sub_feedback_general_id text, property_id text, item_id text, parent_id text, voice_name text, voice_url text, mb_createdAt DATETIME DEFAULT CURRENT_TIMESTAMP, sync integer DEFAULT 1)");
 
       $cordovaSQLite.execute(db_con, "CREATE TABLE IF NOT EXISTS property_meter_link (id integer primary key, prop_meter_id text, property_id text, com_meter_id integer, meter_name text, reading_value text, status integer, mb_createdAt DATETIME DEFAULT CURRENT_TIMESTAMP, sync integer DEFAULT 1)");
+
+      $cordovaSQLite.execute(db_con, "CREATE TABLE IF NOT EXISTS signatures (id integer primary key, sign_id text, property_id text, comment text, tenant_url text, lanlord_url text, clerk_url text, mb_createdAt DATETIME DEFAULT CURRENT_TIMESTAMP, sync integer DEFAULT 1)"); //type TENANT, LANLORD, CLERK
+
       $log.log('tables created..');
      }
 
@@ -764,7 +767,6 @@ appFact.factory('PropInfoSrv', function(DatabaseSrv, $q, $log){
                 propInfoData.description = result.data.rows.item(0).description;
 
                 propInfoData.image_url = result.data.rows.item(0).image_url;
-                propInfoData.sign_url = result.data.rows.item(0).sign_url;
 
                 if( propInfoData.image_url.length == 0 || propInfoData.image_url.indexOf('list_icon.png') ){
                   propInfoData.image_url =  "img/photo-camera.png";
@@ -885,6 +887,8 @@ appFact.factory('Sounds', function($q) {
  $cordovaSQLite.execute(db_con, "CREATE TABLE IF NOT EXISTS property_sub_feedback_general (id integer primary key, prop_sub_feedback_general_id text, item_id text, parent_id text, comment text, createdAt DATETIME DEFAULT CURRENT_TIMESTAMP)");
  $cordovaSQLite.execute(db_con, "CREATE TABLE IF NOT EXISTS property_sub_voice_general (id integer primary key, prop_sub_feedback_general_id text, item_id text, parent_id text, voice_name text, voice_url text, createdAt DATETIME DEFAULT CURRENT_TIMESTAMP)");
  $cordovaSQLite.execute(db_con, "CREATE TABLE IF NOT EXISTS property_meter_link (id integer primary key, prop_meter_id text, property_id text, com_meter_id integer, meter_name text, reading_value text, status integer, createdAt DATETIME DEFAULT CURRENT_TIMESTAMP)");
+ $cordovaSQLite.execute(db_con, "CREATE TABLE IF NOT EXISTS signatures (id integer primary key, sign_id text, property_id text, comment text, tenant_url text, lanlord_url text, clerk_url text, mb_createdAt DATETIME DEFAULT CURRENT_TIMESTAMP, sync integer DEFAULT 1)"); //type TENANT, LANLORD, CLERK
+
  */
 
 appFact.factory('synSrv', function($log, DatabaseSrv, srvObjManipulation, commonSrv, genericModalService, $q, $timeout, $cordovaFileTransfer, PGAppConfig ){
@@ -899,7 +903,8 @@ appFact.factory('synSrv', function($log, DatabaseSrv, srvObjManipulation, common
     {table_name: 'property_sub_feedback_general', pk_name: 'prop_sub_feedback_general_id'},
     {table_name: 'property_sub_voice_general', pk_name: 'prop_sub_feedback_general_id'},
     {table_name: 'property_meter_link', pk_name: 'prop_meter_id'},
-    {table_name: 'photos', pk_name: 'photo_id'}
+    {table_name: 'photos', pk_name: 'photo_id'},
+    {table_name: 'signatures', pk_name: 'sign_id'}
   ];
 
   var init = function(){
@@ -1022,7 +1027,7 @@ appFact.factory('synSrv', function($log, DatabaseSrv, srvObjManipulation, common
 
 
       }
-      /*else if(syncData.table == 'property_sub_voice_general' && (syncData.data.voice_url.length > 0) ){
+      else if(syncData.table == 'property_sub_voice_general' && (syncData.data.voice_url.length > 0) ){
 
             $log.log('::: UPLOADING Voice files :::');
           var mine = "multipart/form-data";
@@ -1076,7 +1081,7 @@ appFact.factory('synSrv', function($log, DatabaseSrv, srvObjManipulation, common
 
 
 
-      }*/
+      }
       else{
 
               commonSrv.postData('property/syncmob', syncData, 'noloading').then(function(result){

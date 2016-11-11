@@ -44,11 +44,12 @@
 
 				<a class="item" ng-repeat="item in items | orderBy: 'priority' track by $index"  ng-click="openLink(item)">
 			  		{{item.name}}
-				    <span class="item-note"> {{item.image_count}} {{ item.image_count > 1? 'Images': 'Image' }} <i class="icon ion-ios-arrow-right"></i></span>
+				    <span class="item-note"> {{item.image_count}} {{ item.image_count > 1? 'Images': 'Image' }} <i class="icon ion-chevron-right" style="vertical-align: text-top;"></i></span>
 				</a>
 
-				<a class="item"  ng-click="openSign()" style="background-color: #D3DCE3;">
-						Customer Signature
+				<a class="item"  ng-click="openSign()">
+						Signatures
+						<span class="item-note">{{sign_url}} of 3 <i class="icon ion-chevron-right" style="vertical-align: text-top; "></i></span>
 				</a>
 
 			 <!-- </ion-item> -->

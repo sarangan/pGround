@@ -424,8 +424,8 @@ appCtrl.controller('NewPropInfoCtrl', function(
                       if($scope.property_id ){
 
 
-                          var query = "INSERT INTO property_info (property_id, address_1, address_2, city, postalcode,  report_type, report_date, image_url, sign_url, locked) VALUES (?,?,?,?,?,?,?,?,?,?)";
-                          var data = [$scope.property_id, $scope.data.address_1, $scope.data.address_2, $scope.data.city, $scope.data.postalcode, $scope.data.report_type, new Date($scope.data.report_date).toLocaleDateString("en-UK"), $scope.data.reportImage, '', 0 ];
+                          var query = "INSERT INTO property_info (property_id, address_1, address_2, city, postalcode,  report_type, report_date, image_url, locked) VALUES (?,?,?,?,?,?,?,?,?)";
+                          var data = [$scope.property_id, $scope.data.address_1, $scope.data.address_2, $scope.data.city, $scope.data.postalcode, $scope.data.report_type, new Date($scope.data.report_date).toLocaleDateString("en-UK"), $scope.data.reportImage,  0 ];
                           $log.log('date');
                           $log.log(data);
                           DatabaseSrv.executeQuery(query, data ).then(function(prop_info_result){
@@ -434,6 +434,14 @@ appCtrl.controller('NewPropInfoCtrl', function(
                             if(prop_info_result.status ==  1){
 
                                 synSrv.update($scope.property_id, 'property_info', $scope.property_id, 'INSERT', 'property_id' );
+
+                                //updating the signatures table just for something better
+                                query = "INSERT INTO signatures (sign_id, property_id, comment, tenant_url, lanlord_url, clerk_url ) VALUES (?,?,?,?,?,?)";
+                                var sign_id = srvObjManipulation.generateUid();
+                                data = [ sign_id, $scope.property_id, '', '', '', '' ];
+                                DatabaseSrv.executeQuery(query, data ).then(function(signatures_result){
+                                  $log.log('inserted singantes table ');
+                                });
 
                                 //------------------- setting property template --------------------
 
@@ -1087,13 +1095,14 @@ appCtrl.controller('ProplistCtrl', function($scope, $state, $stateParams, common
   $scope.items = [];
   $scope.data = { };
   $scope.breadcums = [];
-  $scope.sign_url = false;
+  $scope.sign_url = 0;
 
   $scope.$on('$ionicView.beforeEnter', function() {
 
     $scope.items = [];
     $scope.data = { };
     $scope.breadcums = [];
+    $scope.sign_url = 0;
 
     $scope.property_id = $stateParams.property_id;
 
@@ -1108,7 +1117,7 @@ appCtrl.controller('ProplistCtrl', function($scope, $state, $stateParams, common
           if(propinfo.hasOwnProperty('status')){
             if(propinfo.status == 1){
 
-              $scope.sign_url =  (propinfo.data.sign_url.length > 0) ? true: false;
+              //$scope.sign_url =  (propinfo.data.sign_url.length > 0) ? true: false;
               var address = (propinfo.data.address_1.length > 9) ? propinfo.data.address_1.substring(0, 9) + '...' : propinfo.data.address_1;
               $scope.breadcums.push(address);
               $scope.breadcums.push('Room list');
@@ -1155,6 +1164,32 @@ appCtrl.controller('ProplistCtrl', function($scope, $state, $stateParams, common
 
 
           });
+
+
+          query = "select signatures.* from signatures where signatures.property_id=?";
+          data = [$scope.property_id];
+
+          DatabaseSrv.executeQuery(query, data ).then(function(result){
+
+            console.log('item length', result.data.rows.length);
+              if(result.data.rows.length > 0) {
+
+
+                if(result.data.rows.item(0).tenant_url.length > 0) {
+                  $scope.sign_url +=1;
+                }
+                else if(result.data.rows.item(0).lanlord_url.length > 0) {
+                  $scope.sign_url +=1;
+                }
+                else if(result.data.rows.item(0).clerk_url.length > 0) {
+                  $scope.sign_url +=1;
+                }
+
+              }
+
+
+          });
+
 
       });
 
@@ -1230,7 +1265,7 @@ appCtrl.controller('ProplistCtrl', function($scope, $state, $stateParams, common
            if(res) {
               $log.log('sync room');
 
-                if($scope.sign_url == true){
+                if($scope.sign_url > 0){
                   synSrv.synProperty($scope.property_id );
                 }
                 else{
@@ -1245,7 +1280,7 @@ appCtrl.controller('ProplistCtrl', function($scope, $state, $stateParams, common
                   confirmPopupx.then(function(res) {
                     if(res) {
                        $log.log('sync room');
-                       $state.go('app.draw', {property_id: $scope.property_id });
+                       $state.go('app.signlist', {property_id: $scope.property_id });
                      }
                      else{
                        synSrv.synProperty($scope.property_id );
@@ -1264,7 +1299,7 @@ appCtrl.controller('ProplistCtrl', function($scope, $state, $stateParams, common
 
     //open customer signature
     $scope.openSign = function(){
-        $state.go('app.draw', {property_id: $scope.property_id });
+        $state.go('app.signlist', {property_id: $scope.property_id });
     };
 
 
@@ -3699,12 +3734,14 @@ appCtrl.controller('GeneralPhotosCtrl', function($scope, $state, $stateParams, c
 appCtrl.controller('SignPadCtrl', function($scope, $state, $stateParams, commonSrv, $log, $ionicPopup, DatabaseSrv, srvObjManipulation, synSrv, genericModalService){
 
       $scope.property_id = '';
+      $scope.type = ''
       var canvas = document.getElementById('signatureCanvas');
       var signaturePad = new SignaturePad(canvas);
 
       $scope.$on('$ionicView.beforeEnter', function() {
 
           $scope.property_id = $stateParams.property_id;
+          $scope.type = $stateParams.type;
           initLoadData();
       });
 
@@ -3723,13 +3760,27 @@ appCtrl.controller('SignPadCtrl', function($scope, $state, $stateParams, commonS
 
             if( $scope.property_id ){
                   DatabaseSrv.initLocalDB().then(function(initdb){
-                      var query = "select property_info.* from property_info where property_info.property_id=?";
+                      // TENANT, LANLORD, CLERK
+                      var query = "select signatures.* from signatures where signatures.property_id=?";
                       var data = [$scope.property_id];
                       DatabaseSrv.executeQuery(query, data ).then(function(result){
                           if(result.status == 1 && result.data.rows.length > 0){
-                              $scope.signature =  result.data.rows.item(0).sign_url;
-                              $log.log('signature url found');
-                              $log.log($scope.signature);
+
+                              if($scope.type ==  'TENANT' ){
+                                $scope.signature =  result.data.rows.item(0).tenant_url;
+                                $log.log('signature url found');
+                                $log.log($scope.signature);
+                              }
+                              else if($scope.type ==  'LANLORD' ){
+                                $scope.signature =  result.data.rows.item(0).lanlord_url;
+                                $log.log('signature url found');
+                                $log.log($scope.signature);
+                              }
+                              else if($scope.type ==  'CLERK' ){
+                                $scope.signature =  result.data.rows.item(0).clerk_url;
+                                $log.log('signature url found');
+                                $log.log($scope.signature);
+                              }
 
                           }
 
@@ -3745,9 +3796,19 @@ appCtrl.controller('SignPadCtrl', function($scope, $state, $stateParams, commonS
           if($scope.signature.length > 0){
 
              DatabaseSrv.initLocalDB().then(function(initdb){
+              var query = '';
 
-               var query = "UPDATE property_info set sign_url=? where property_info.property_id=?";
-               var data = [$scope.signature, $scope.property_id ];
+              if($scope.type ==  'TENANT' ){
+                query = "UPDATE signatures set tenant_url=? where property_id=?";
+              }
+              else if($scope.type ==  'LANLORD' ){
+                query = "UPDATE signatures set lanlord_url=? where property_id=?";
+              }
+              else if($scope.type ==  'CLERK' ){
+                query = "UPDATE signatures set clerk_url=? where property_id=?";
+              }
+
+              var data = [$scope.signature, $scope.property_id ];
 
                DatabaseSrv.executeQuery(query, data ).then(function(result){
 
@@ -3756,7 +3817,7 @@ appCtrl.controller('SignPadCtrl', function($scope, $state, $stateParams, commonS
                     genericModalService.showToast('Successfully Saved!', 'LCenter');
                   }
 
-                });
+              });
 
 
              });
@@ -3769,6 +3830,126 @@ appCtrl.controller('SignPadCtrl', function($scope, $state, $stateParams, commonS
 });
 /*----------end Signature pad --------------*/
 
+
+
+/*---------- Signature list --------------*/
+appCtrl.controller('SignListCtrl', function($scope, $state, $stateParams, $log, DatabaseSrv, PropInfoSrv){
+
+      $scope.property_id = '';
+      $scope.signs = [
+        { name:'Tenant', type: 'TENANT'} ,
+        { name:'Landlord', type: 'LANLORD'} ,
+        { name:'Clerk', type: 'CLERK'}
+      ];
+      $scope.comment =  '';
+
+      $scope.breadcums = [];
+
+      $scope.$on('$ionicView.beforeEnter', function() {
+          $scope.property_id = $stateParams.property_id;
+
+          $scope.breadcums = [];
+
+          //getting property info for breadcums
+          PropInfoSrv.getPropInfo($scope.property_id).then(function(propinfo){
+
+            if(propinfo.hasOwnProperty('status')){
+              if(propinfo.status == 1){
+                var address = (propinfo.data.address_1.length > 9) ? propinfo.data.address_1.substring(0, 9) + '...' : propinfo.data.address_1;
+                $scope.breadcums.push(address);
+                $scope.breadcums.push('Room list');
+                $scope.breadcums.push('Signatures');
+              }
+            }
+
+          });
+
+
+          initLoadData();
+      });
+
+
+      function initLoadData() {
+
+            if( $scope.property_id ){
+                  DatabaseSrv.initLocalDB().then(function(initdb){
+                      // TENANT, LANLORD, CLERK
+                      var query = "select signatures.* from signatures where signatures.property_id=?";
+                      var data = [$scope.property_id];
+                      DatabaseSrv.executeQuery(query, data ).then(function(result){
+
+                          if(result.status == 1 && result.data.rows.length > 0){
+
+                              $scope.comment = result.data.rows.item(0).comment;
+
+                              $scope.signs = [];
+
+                                var obj = { name:'Tenant', type: 'TENANT'};
+                                $scope.signature =  result.data.rows.item(0).tenant_url;
+                                if($scope.signature.length > 0){
+                                  obj['signed'] = true;
+                                }
+                                else{
+                                  obj['signed'] = false;
+                                }
+                                $scope.signs.push(obj);
+
+                                obj = { name:'Landlord', type: 'LANLORD'};
+                                $scope.signature =  result.data.rows.item(0).lanlord_url;
+                                if($scope.signature.length > 0){
+                                  obj['signed'] = true;
+                                }
+                                else{
+                                  obj['signed'] = false;
+                                }
+                                $scope.signs.push(obj);
+
+
+                                obj = { name:'Clerk', type: 'CLERK'};
+                                $scope.signature =  result.data.rows.item(0).clerk_url;
+                                if($scope.signature.length > 0){
+                                  obj['signed'] = true;
+                                }
+                                else{
+                                  obj['signed'] = false;
+                                }
+                                $scope.signs.push(obj);
+
+                                console.log($scope.signs);
+                          }
+
+                      });
+                });
+            }
+      };
+
+
+      //save image
+      function save(){
+
+             DatabaseSrv.initLocalDB().then(function(initdb){
+
+               var query = "UPDATE signatures set comment=? where signatures.property_id=?";
+               var data = [$scope.comment, $scope.property_id ];
+
+               DatabaseSrv.executeQuery(query, data ).then(function(result){
+
+                  if(result.status == 1){
+                    $log.log('saved signature comment!!!');
+                    genericModalService.showToast('Successfully Saved!', 'LCenter');
+                  }
+
+                });
+
+             });
+
+      }
+
+
+});
+
+
+/*---------- End Signature list --------------*/
 
 //-----------------------------Login control -------------------------------------------------
 
