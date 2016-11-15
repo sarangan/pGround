@@ -804,6 +804,13 @@ appCtrl.controller('PropCtrl', function($scope, $state, $stateParams, commonSrv,
 
     $scope.property_id = $stateParams.property_id;
 
+    $scope.template = [];
+    $scope.data = {};
+
+    $scope.options = [];
+    $scope.nums = [];
+
+
     initLoadData();
 
    // $ionicHistory.clearHistory(); // clear history
