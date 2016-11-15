@@ -191,7 +191,7 @@
     color: white;
     font-size: 20px;
     position: fixed;
-    bottom: 5%; /* Adjust height */
+    bottom: 8%; /* Adjust height */
     right: 5%; /* Adjust position */
     
     right: 20px;
@@ -430,4 +430,8 @@
 .item p, .input-label, .item{
     color: #000000 !important;
     font-weight: bold;
+}
+
+.popup{
+    z-index: 1000;
 }

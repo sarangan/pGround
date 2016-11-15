@@ -74,6 +74,7 @@ appCtrl.controller('InspectionListCtrl', function(
   commonSrv,
   AuthService,
   DatabaseSrv,
+  $ionicHistory,
   $log,
   synSrv,
   $ionicPopup){
@@ -88,6 +89,10 @@ appCtrl.controller('InspectionListCtrl', function(
       $scope.items = [];
       loadData();
 
+    });
+
+    $scope.$on('$ionicView.afterEnter', function() {
+      $ionicHistory.clearHistory();    
     });
 
     //load data
@@ -783,7 +788,7 @@ appCtrl.controller('NewPropInfoCtrl', function(
 
 
 //-------------------------- this is to load property template --------------------------------------
-appCtrl.controller('PropCtrl', function($scope, $state, $stateParams, commonSrv, $log, $ionicPopup, $ionicHistory, DatabaseSrv, srvObjManipulation, $timeout, genericModalService, synSrv){
+appCtrl.controller('PropCtrl', function($scope, $state, $stateParams, commonSrv, $log, $ionicPopup, $ionicHistory, DatabaseSrv, srvObjManipulation, $timeout, genericModalService, synSrv, $ionicPlatform){
 
   $scope.property_id = 0;
   $scope.template = [];
@@ -803,6 +808,14 @@ appCtrl.controller('PropCtrl', function($scope, $state, $stateParams, commonSrv,
 
    // $ionicHistory.clearHistory(); // clear history
   });
+
+  var deregisterFirst = $ionicPlatform.registerBackButtonAction(
+      function() {
+        $log.log("BACK BUTTON PRESSED::: NO WAY")
+      }, 100
+    );
+  $scope.$on('$destroy', deregisterFirst);
+
 
 
   // go back to listing screen
@@ -959,6 +972,7 @@ appCtrl.controller('PropCtrl', function($scope, $state, $stateParams, commonSrv,
                     if(com_master_item.status == 1 && com_master_item.data.rows.length > 0){
 
                       if(com_master_item.params.total_num > 0){
+
 
                         query = "INSERT INTO property_masteritem_link (prop_master_id, property_id, com_master_id, type, com_type, option, self_prop_master_id, name,  priority, total_num, status) ";
 
@@ -1156,6 +1170,13 @@ appCtrl.controller('ProplistCtrl', function($scope, $state, $stateParams, common
 
                   console.log('item ', item);
                   $scope.items.push(item);
+
+                  if(item.template_type == 'METER'){
+
+                    getMeterPhotosCount(i);
+                  }
+
+                  
                 }
 
                 //$scope.items = result.data;
@@ -1207,10 +1228,48 @@ appCtrl.controller('ProplistCtrl', function($scope, $state, $stateParams, common
 
   };
 
+
+  function getMeterPhotosCount(pos){
+
+        DatabaseSrv.initLocalDB().then(function(initdb){
+
+          // property_meter_link (id integer primary key, prop_meter_id text, property_id text, com_meter_id integer, meter_name text, reading_value text, status integer, mb_createdAt DATETIME DEFAULT CURRENT_TIMESTAMP, sync integer DEFAULT 1)");
+
+          
+          var query = "select property_meter_link.prop_meter_id, (select count(photos.photo_id) from photos where photos.parent_id = property_meter_link.prop_meter_id or photos.item_id = property_meter_link.prop_meter_id) as image_count from property_meter_link where property_meter_link.property_id=?";
+
+          var data = [$scope.property_id];
+
+          DatabaseSrv.executeQuery(query, data ).then(function(result){
+
+            console.log('item length', result.data.rows.length);
+              if(result.data.rows.length > 0) {
+
+                  var count = 0;
+
+                  for (var i = 0; i < result.data.rows.length; i++) {
+                      var item = result.data.rows.item(i);
+
+                      count += parseInt(item.image_count);
+
+                      $log.log('meter count ', count);
+
+                  }
+
+                   $scope.items[pos].image_count = count;
+
+                   $log.log($scope.items[pos]);
+              }
+
+            });
+
+        });
+  }
+
    $scope.moveItem = function(item, fromIndex, toIndex) {
 
-    fromIndex -= 2;
-    toIndex -= 2;
+      fromIndex -= 2;
+      toIndex -= 2;
 
       $scope.items.splice(fromIndex, 1);
       $scope.items.splice(toIndex, 0, item);
@@ -1307,12 +1366,13 @@ appCtrl.controller('ProplistCtrl', function($scope, $state, $stateParams, common
 
 
 //--------------------------property list sorting list ---------------------------------------------
-appCtrl.controller('PropertyListSortCtrl', function($scope, $state, $stateParams, commonSrv, $log, $ionicPopup, DatabaseSrv, $timeout, genericModalService, synSrv){
+appCtrl.controller('PropertyListSortCtrl', function($scope, $state, $stateParams, commonSrv, $log, $ionicPopup, DatabaseSrv, $timeout, genericModalService, synSrv, $ionicHistory, $ionicPlatform){
 
   $scope.property_id = 0;
   $scope.items = [];
   $scope.data = { };
 
+  $scope.confirm = false;
 
   $scope.$on('$ionicView.beforeEnter', function() {
     $scope.items = [];
@@ -1322,9 +1382,54 @@ appCtrl.controller('PropertyListSortCtrl', function($scope, $state, $stateParams
 
     $scope.property_id = $stateParams.property_id;
 
+    $scope.confirm = false;
+
     initLoadData();
 
   });
+
+
+ // $scope.$on('$ionicView.beforeLeave', function(event) {
+
+  $scope.goBack= function(){
+
+    if($scope.confirm == true){
+
+        var confirmPopup = $ionicPopup.confirm({
+          okText : 'Yes',
+          cancelText : 'No',
+          title: 'Save!!!',
+          template: 'It looks like you have been editing something, Do you want to save?'
+        });
+
+       confirmPopup.then(function(res) {
+         if(res) {
+            // $ionicHistory.goBack();
+            $scope.save();
+          }
+          else{
+            $ionicHistory.goBack();
+             $scope.confirm = false;
+          }
+       });
+    }
+    else{
+      $ionicHistory.goBack();
+    }
+
+  };
+
+  var deregisterFirst = $ionicPlatform.registerBackButtonAction(
+      function() {
+        $log.log("BACK BUTTON PRESSED::: NO WAY");
+        $scope.goBack();
+      }, 100
+    );
+  $scope.$on('$destroy', deregisterFirst);
+
+
+  //}); 
+
 
   (function init(){
 
@@ -1375,6 +1480,7 @@ appCtrl.controller('PropertyListSortCtrl', function($scope, $state, $stateParams
     $scope.items.splice(fromIndex, 1);
     $scope.items.splice(toIndex, 0, item);
 
+     $scope.confirm = true;
   };
 
 
@@ -1396,11 +1502,15 @@ appCtrl.controller('PropertyListSortCtrl', function($scope, $state, $stateParams
 
                   if(result.status == 1){
 
+                     $scope.confirm = true;
+
                     synSrv.update($scope.property_id, 'property_masteritem_link', result.params.prop_master_id , 'UPDATE', 'prop_master_id' );
 
                     $log.log('prop sort saved!');
                   }
                   else{
+
+                      $scope.confirm = true;
                       $log.log('prop sorting save error!');
                   }
 
@@ -1409,7 +1519,7 @@ appCtrl.controller('PropertyListSortCtrl', function($scope, $state, $stateParams
           }
 
           $timeout(function(){
-
+            $scope.confirm = true;
                  /* var alertPopup = $ionicPopup.alert({
                         title: 'Saved!',
                         template: 'Successfully Saved!'
@@ -1431,24 +1541,24 @@ appCtrl.controller('PropertyListSortCtrl', function($scope, $state, $stateParams
 
 
 //--------------------------general condition list ---------------------------------------------
-appCtrl.controller('GeneralConditionCtrl', function($scope, $state, $stateParams, commonSrv, $log, $ionicPopup, myModals, DatabaseSrv, $timeout, genericModalService, PropInfoSrv, synSrv){
+appCtrl.controller('GeneralConditionCtrl', function($scope, $state, $stateParams, commonSrv, $log, $ionicPopup, myModals, DatabaseSrv, $timeout, genericModalService, PropInfoSrv, synSrv, $ionicHistory, $ionicPlatform){
 
   $scope.property_id = 0;
   $scope.items = [];
   $scope.data = {};
   $scope.breadcums = [];
+  $scope.confirm = false;
 
   $scope.$on('$ionicView.beforeEnter', function() {
 
     $scope.items = [];
     $scope.data = {};
     $scope.breadcums = [];
+    $scope.confirm = false;
 
-     $scope.property_id = $stateParams.property_id;
+    $scope.property_id = $stateParams.property_id;
 
     initLoadData();
-
-
 
     $scope.property_id = $stateParams.property_id;
 
@@ -1472,6 +1582,48 @@ appCtrl.controller('GeneralConditionCtrl', function($scope, $state, $stateParams
 
 
   })();
+
+
+  var deregisterFirst = $ionicPlatform.registerBackButtonAction(
+      function() {
+        $log.log("BACK BUTTON PRESSED::: NO WAY");
+        $scope.goBack();
+      }, 100
+    );
+  $scope.$on('$destroy', deregisterFirst);
+
+
+  $scope.changeValue = function(){
+    $scope.confirm = true;
+  };
+
+  $scope.goBack= function(){
+
+    if($scope.confirm == true){
+
+        var confirmPopup = $ionicPopup.confirm({
+          okText : 'Yes',
+          cancelText : 'No',
+          title: 'Save!!!',
+          template: 'It looks like you have been editing something, Do you want to save?'
+        });
+
+       confirmPopup.then(function(res) {
+         if(res) {
+             //$ionicHistory.goBack();
+             $scope.save();
+          }
+          else{
+            $ionicHistory.goBack();
+             $scope.confirm = false;
+          }
+       });
+    }
+    else{
+      $ionicHistory.goBack();
+    }
+
+  };
 
   function initLoadData(){
 
@@ -1552,6 +1704,8 @@ appCtrl.controller('GeneralConditionCtrl', function($scope, $state, $stateParams
         };
           DatabaseSrv.executeQuery(query, data, params ).then(function(result){
 
+              $scope.confirm = false;
+
               if(result.status == 1){
 
                 synSrv.update($scope.property_id, 'Property_general_condition_link', result.params.prop_general_id , 'UPDATE', 'prop_general_id' );
@@ -1572,7 +1726,7 @@ appCtrl.controller('GeneralConditionCtrl', function($scope, $state, $stateParams
                     title: 'Saved!',
                     template: 'Successfully Saved!'
                   });*/
-
+          $scope.confirm = false;
            genericModalService.showToast('Successfully Saved!', 'LCenter');
 
       }, 300);
@@ -1592,12 +1746,15 @@ appCtrl.controller('GCommentCtrl', function($scope, $state, $stateParams, parame
   $scope.general_condition_id = 0;
   $scope.property_id = '';
   $scope.data = {};
+  $scope.confirm = false;
 
   //init function
   var init = (function(){
 
     $scope.general_condition_id = parameters.general_id;
     $scope.property_id = parameters.property_id;
+
+    $scope.confirm = false;
 
     //$scope.data.comment = parameters.comment;
 
@@ -1606,8 +1763,6 @@ appCtrl.controller('GCommentCtrl', function($scope, $state, $stateParams, parame
      var data = {
           condition_id:  $scope.general_condition_id
         };
-
-
 
         DatabaseSrv.initLocalDB().then(function(initdb){
 
@@ -1648,8 +1803,13 @@ appCtrl.controller('GCommentCtrl', function($scope, $state, $stateParams, parame
 
   })();
 
+  $scope.changingValue = function(){
+    $scope.confirm = true;
+  };
 
   $scope.saveComment = function(){
+
+      $scope.confirm = false;
 
       if($scope.general_condition_id){
 
@@ -1672,6 +1832,8 @@ appCtrl.controller('GCommentCtrl', function($scope, $state, $stateParams, parame
                     title: 'Saved!',
                     template: 'Successfully Saved!'
                   });*/
+
+                 
 
                   synSrv.update($scope.property_id, 'Property_general_condition_link', $scope.general_condition_id , 'UPDATE', 'prop_general_id' );
 
@@ -1725,7 +1887,35 @@ appCtrl.controller('GCommentCtrl', function($scope, $state, $stateParams, parame
   };
 
   $scope.onClose = function(){
-    $scope.closeModal(null);
+    
+    if($scope.confirm == true){
+
+        var confirmPopup = $ionicPopup.confirm({
+          okText : 'Yes',
+          cancelText : 'No',
+          title: 'Save!!!',
+          template: 'It looks like you have been editing something, Do you want to save?'
+        });
+
+       confirmPopup.then(function(res) {
+         if(res) {
+            // $ionicHistory.goBack();
+           $scope.saveComment();
+          }
+          else{
+            $scope.closeModal(null);
+             $scope.confirm = false;
+          }
+       });
+
+
+
+    }
+    else{
+       $scope.confirm = false;
+      $scope.closeModal(null);
+    }
+
   }
 
 
@@ -1733,23 +1923,64 @@ appCtrl.controller('GCommentCtrl', function($scope, $state, $stateParams, parame
 
 
 //--------------------------general condition sorting list ---------------------------------------------
-appCtrl.controller('GeneralConditionSortCtrl', function($scope, $state, $stateParams, commonSrv, $log, $ionicPopup, DatabaseSrv, $timeout, genericModalService, synSrv){
+appCtrl.controller('GeneralConditionSortCtrl', function($scope, $state, $stateParams, commonSrv, $log, $ionicPopup, DatabaseSrv, $timeout, genericModalService, synSrv, $ionicHistory, $ionicPlatform){
 
   $scope.property_id = 0;
   $scope.items = [];
   $scope.data = {};
-
+  $scope.confirm = false;
 
   $scope.$on('$ionicView.beforeEnter', function() {
     $scope.items = [];
     $scope.data = {};
     $scope.data.showReorder = true;
+    $scope.confirm = false;
 
     $scope.property_id = $stateParams.property_id;
 
     initLoadData();
 
   });
+
+
+
+  var deregisterFirst = $ionicPlatform.registerBackButtonAction(
+      function() {
+        $log.log("BACK BUTTON PRESSED::: NO WAY");
+        $scope.goBack();
+      }, 100
+    );
+  $scope.$on('$destroy', deregisterFirst);
+
+
+  $scope.goBack= function(){
+
+    if($scope.confirm == true){
+
+        var confirmPopup = $ionicPopup.confirm({
+          okText : 'Yes',
+          cancelText : 'No',
+          title: 'Save!!!',
+          template: 'It looks like you have been editing something, Do you want to save?'
+        });
+
+       confirmPopup.then(function(res) {
+         if(res) {
+             //$ionicHistory.goBack();
+             $scope.save();
+          }
+          else{
+            $ionicHistory.goBack();
+             $scope.confirm = false;
+          }
+       });
+    }
+    else{
+      $ionicHistory.goBack();
+    }
+
+  };
+
 
   (function init(){
 
@@ -1804,7 +2035,7 @@ appCtrl.controller('GeneralConditionSortCtrl', function($scope, $state, $statePa
   $scope.moveItem = function(item, fromIndex, toIndex) {
     $scope.items.splice(fromIndex, 1);
     $scope.items.splice(toIndex, 0, item);
-
+    $scope.confirm = true;
   };
 
 
@@ -1825,6 +2056,7 @@ appCtrl.controller('GeneralConditionSortCtrl', function($scope, $state, $statePa
 
             DatabaseSrv.executeQuery(query, data, params).then(function(result){
 
+                $scope.confirm = false;
                 if(result.status == 1){
 
                   synSrv.update($scope.property_id, 'Property_general_condition_link', result.params.prop_general_id , 'UPDATE', 'prop_general_id' );
@@ -1845,7 +2077,7 @@ appCtrl.controller('GeneralConditionSortCtrl', function($scope, $state, $statePa
                       title: 'Saved!',
                       template: 'Successfully Saved!'
                     });*/
-
+                    $scope.confirm = false;
                     genericModalService.showToast('Successfully Saved!', 'LCenter');
 
         }, 300);
@@ -1953,16 +2185,12 @@ appCtrl.controller('MeterListCtrl', function($scope, $state, $stateParams, commo
 
   };
 
-  $scope.reset = function (argument) {
-     DatabaseSrv.setCompanyTemplate();
-  }
-
 
 });
 
 
 //--------------------------sub items list ---------------------------------------------
-appCtrl.controller('SubItemsListCtrl', function($scope, $state, $stateParams, commonSrv, $log, $ionicPopup, DatabaseSrv, $ionicPopup, roomObj, myModals, genericModalService, PropInfoSrv, $cordovaCamera, srvObjManipulation, synSrv){
+appCtrl.controller('SubItemsListCtrl', function($scope, $state, $stateParams, commonSrv, $log, $ionicPopup, DatabaseSrv, $ionicPopup, roomObj, myModals, genericModalService, PropInfoSrv, $cordovaCamera, srvObjManipulation, synSrv, $rootScope){
 
   $scope.property_id = 0;
   $scope.prop_master_id = 0;
@@ -2018,6 +2246,12 @@ appCtrl.controller('SubItemsListCtrl', function($scope, $state, $stateParams, co
 
   })();
 
+
+  $rootScope.$on("reloadSubItems", function(){
+      $log.log('reload contents of forums');
+      initLoadData();
+  });
+
   function initLoadData(){
 
       if($scope.property_id != 0  || $scope.prop_master_id != 0 ){
@@ -2036,6 +2270,23 @@ appCtrl.controller('SubItemsListCtrl', function($scope, $state, $stateParams, co
 
 
         });*/
+
+       $scope.items = [];
+        $scope.data = {};
+        $scope.breadcums = [];
+
+        $scope.data.viewName =  'Sub items list';
+
+
+        $scope.property_id = $stateParams.property_id;
+        $scope.prop_master_id = $stateParams.master_id;
+
+
+        $scope.room  =  roomObj.getData().roomObj;
+
+        $scope.showButton = ($scope.room.type == 'SELF')? true: false;
+
+        $log.log('room obj ', $scope.room);
 
 
         DatabaseSrv.initLocalDB().then(function(initdb){
@@ -2500,10 +2751,11 @@ appCtrl.controller('SubItemsListCtrl', function($scope, $state, $stateParams, co
 
 
 //--------------------------sub items general condition comment ---------------------------------------------
-appCtrl.controller('SubCommentCtrl', function($scope, $state, $stateParams, parameters, commonSrv, $log, $ionicPopup, DatabaseSrv, srvObjManipulation, genericModalService, synSrv){
+appCtrl.controller('SubCommentCtrl', function($scope, $state, $stateParams, parameters, commonSrv, $log, $ionicPopup, DatabaseSrv, srvObjManipulation, genericModalService, synSrv, $rootScope, $timeout){
 
   $scope.prop_subitem_id = 0;
   $scope.data = {};
+  $scope.confirm = false;
 
   $scope.prop_sub_feedback_general_id = '';
 
@@ -2513,6 +2765,7 @@ appCtrl.controller('SubCommentCtrl', function($scope, $state, $stateParams, para
     $scope.prop_subitem_id = parameters.prop_subitem_id;
     $scope.property_id = parameters.property_id;
     $scope.prop_master_id = parameters.prop_master_id;
+    $scope.confirm = false;
     //$scope.data.comment = parameters.comment;
 
     if($scope.prop_subitem_id ){
@@ -2553,6 +2806,7 @@ appCtrl.controller('SubCommentCtrl', function($scope, $state, $stateParams, para
 
 
   $scope.saveComment = function(){
+    $scope.confirm = false;
 
       if($scope.prop_sub_feedback_general_id.trim().length > 0){
 
@@ -2575,6 +2829,18 @@ appCtrl.controller('SubCommentCtrl', function($scope, $state, $stateParams, para
                     title: 'Saved!',
                     template: 'Successfully Saved!'
                   });*/
+
+                  /*$rootScope.$broadcast('addSubComment', $scope.data.comment.length );
+                  $rootScope.$apply();*/
+
+
+                $timeout(function() {
+                  
+                   $rootScope.$emit("reloadSubItems", {});
+
+                }, 300);
+
+                
 
                   synSrv.update($scope.property_id, 'property_sub_feedback_general', $scope.prop_sub_feedback_general_id , 'UPDATE', 'prop_sub_feedback_general_id' );
 
@@ -2620,6 +2886,13 @@ appCtrl.controller('SubCommentCtrl', function($scope, $state, $stateParams, para
                         template: 'Successfully Saved!'
                       });*/
 
+                      $timeout(function() {
+                  
+                         $rootScope.$emit("reloadSubItems", {});
+
+                      }, 300);
+
+
                       synSrv.update($scope.property_id, 'property_sub_feedback_general', prop_sub_feedback_general_id , 'INSERT', 'prop_sub_feedback_general_id' );
 
                       genericModalService.showToast('Successfully Saved!', 'LCenter');
@@ -2647,8 +2920,49 @@ appCtrl.controller('SubCommentCtrl', function($scope, $state, $stateParams, para
 
   };
 
+  $scope.changingValue = function(){
+    $scope.confirm = true;
+  };
+
   $scope.onClose = function(){
-    $scope.closeModal(null);
+
+    if($scope.confirm == true){
+
+        var confirmPopup = $ionicPopup.confirm({
+          okText : 'Yes',
+          cancelText : 'No',
+          title: 'Save!!!',
+          template: 'It looks like you have been editing something, Do you want to save?'
+        });
+
+       confirmPopup.then(function(res) {
+         if(res) {
+            // $ionicHistory.goBack();
+           $scope.saveComment();
+          }
+          else{           
+             $scope.confirm = false;
+             $scope.closeModal(null);
+          }
+       });
+
+
+
+    }
+    else{
+       $scope.confirm = false;
+      $scope.closeModal(null);
+    }
+
+
+    $timeout(function() {
+                  
+       $rootScope.$emit("reloadSubItems", {});
+
+    }, 300);
+    
+    
+
   }
 
 
@@ -2656,7 +2970,7 @@ appCtrl.controller('SubCommentCtrl', function($scope, $state, $stateParams, para
 
 
 //-------------------------- add item photo comment options ---------------------------------------------
-appCtrl.controller('AddSubDetailsCtrl', function($scope, $state, $stateParams, commonSrv, $log, $ionicPopup, DatabaseSrv, $cordovaCamera, $ionicModal, $ionicPopup, srvObjManipulation, genericModalService, PropInfoSrv, synSrv){
+appCtrl.controller('AddSubDetailsCtrl', function($scope, $state, $stateParams, commonSrv, $log, $ionicPopup, DatabaseSrv, $cordovaCamera, $ionicModal, $ionicPopup, srvObjManipulation, genericModalService, PropInfoSrv, synSrv,  $ionicPlatform,  $ionicHistory){
 
   $scope.sub_id = '';
   $scope.type = '';
@@ -2672,6 +2986,8 @@ appCtrl.controller('AddSubDetailsCtrl', function($scope, $state, $stateParams, c
   $scope.property_id = '';
   $scope.breadcums = [];
   $scope.data.viewName = 'item';
+
+  $scope.confirm = false;
 
 
   var options = {
@@ -2706,10 +3022,54 @@ appCtrl.controller('AddSubDetailsCtrl', function($scope, $state, $stateParams, c
       $scope.type = $stateParams.type;
       $scope.master_id =  $stateParams.master_id;
 
+      $scope.confirm = false;
+
       loadBreadCums();
       initLoadData();
 
   });
+
+   var deregisterFirst = $ionicPlatform.registerBackButtonAction(
+      function() {
+        $log.log("BACK BUTTON PRESSED::: NO WAY");
+        $scope.goBack();
+      }, 100
+    );
+  $scope.$on('$destroy', deregisterFirst);
+
+  $scope.goBack= function(){
+
+    if($scope.confirm == true){
+
+        var confirmPopup = $ionicPopup.confirm({
+          okText : 'Yes',
+          cancelText : 'No',
+          title: 'Save!!!',
+          template: 'It looks like you have been editing something, Do you want to save?'
+        });
+
+       confirmPopup.then(function(res) {
+         if(res) {
+            // $ionicHistory.goBack();
+            $scope.save();
+          }
+          else{
+            $scope.confirm = false;
+            $ionicHistory.goBack();
+             
+          }
+       });
+    }
+    else{
+      $ionicHistory.goBack();
+    }
+
+  };
+
+
+  $scope.changingValue = function(){
+    $scope.confirm = true;
+  };
 
   (function init(){
 
@@ -2909,6 +3269,7 @@ appCtrl.controller('AddSubDetailsCtrl', function($scope, $state, $stateParams, c
 
   $scope.searchOptChange = function(opt){
     $scope.searchOptSelected = opt.value;
+     $scope.confirm = true;
   };
 
   $scope.openCamera = function(){
@@ -3085,6 +3446,8 @@ appCtrl.controller('AddSubDetailsCtrl', function($scope, $state, $stateParams, c
 
   //save photos and comment and option section
   $scope.save = function(){
+
+    $scope.confirm = false;
 
     DatabaseSrv.initLocalDB().then(function(initdb){
 
@@ -3782,6 +4145,8 @@ appCtrl.controller('SignPadCtrl', function($scope, $state, $stateParams, commonS
                                 $log.log($scope.signature);
                               }
 
+                              signaturePad.clear();
+
                           }
 
                       });
@@ -3833,7 +4198,7 @@ appCtrl.controller('SignPadCtrl', function($scope, $state, $stateParams, commonS
 
 
 /*---------- Signature list --------------*/
-appCtrl.controller('SignListCtrl', function($scope, $state, $stateParams, $log, DatabaseSrv, PropInfoSrv){
+appCtrl.controller('SignListCtrl', function($scope, $state, $stateParams, $log, DatabaseSrv, PropInfoSrv, $ionicPopup, $ionicHistory, $ionicPlatform){
 
       $scope.property_id = '';
       $scope.signs = [
@@ -3841,7 +4206,9 @@ appCtrl.controller('SignListCtrl', function($scope, $state, $stateParams, $log, 
         { name:'Landlord', type: 'LANLORD'} ,
         { name:'Clerk', type: 'CLERK'}
       ];
+
       $scope.comment =  '';
+      $scope.confirm = false;
 
       $scope.breadcums = [];
 
@@ -3849,7 +4216,7 @@ appCtrl.controller('SignListCtrl', function($scope, $state, $stateParams, $log, 
           $scope.property_id = $stateParams.property_id;
 
           $scope.breadcums = [];
-
+          $scope.confirm = false;
           //getting property info for breadcums
           PropInfoSrv.getPropInfo($scope.property_id).then(function(propinfo){
 
@@ -3864,9 +4231,51 @@ appCtrl.controller('SignListCtrl', function($scope, $state, $stateParams, $log, 
 
           });
 
-
           initLoadData();
       });
+
+    var deregisterFirst = $ionicPlatform.registerBackButtonAction(
+        function() {
+          $log.log("BACK BUTTON PRESSED::: NO WAY");
+          $scope.goBack();
+        }, 100
+      );
+    $scope.$on('$destroy', deregisterFirst);
+
+
+    $scope.goBack= function(){
+
+      if($scope.confirm == true){
+
+          var confirmPopup = $ionicPopup.confirm({
+            okText : 'Yes',
+            cancelText : 'No',
+            title: 'Save!!!',
+            template: 'It looks like you have been editing something, Do you want to save?'
+          });
+
+         confirmPopup.then(function(res) {
+           if(res) {
+              // $ionicHistory.goBack();
+             $scope.save();
+            }
+            else{
+              $scope.confirm = false;
+              $ionicHistory.goBack();
+              
+            }
+         });
+      }
+      else{
+        $ionicHistory.goBack();
+      }
+
+  };
+
+  
+  $scope.changingValue = function(){
+    $scope.confirm = true;
+  }
 
 
       function initLoadData() {
@@ -3925,7 +4334,9 @@ appCtrl.controller('SignListCtrl', function($scope, $state, $stateParams, $log, 
 
 
       //save image
-      function save(){
+      $scope.save = function(){
+
+              $scope.confirm = true;
 
              DatabaseSrv.initLocalDB().then(function(initdb){
 

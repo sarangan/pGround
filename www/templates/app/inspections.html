@@ -29,7 +29,7 @@
 	  	<div class="list">
 
 	  		<a class="item item-avatar" ng-repeat="item in items | orderBy: 'mb_createdAt' " ng-click="openLink(item.property_id)">
-		      <img src="{{avatarImg(item.image_url)}}" class="custom-avatar-img">
+		      <img ng-src="{{avatarImg(item.image_url)}}" class="custom-avatar-img">
 
 		      	<div class="row">
 				  		<div class="col col-75"><h2 style="font-weight: bold;">{{item.address_1}} {{item.address_2}}</h2><p>{{item.city}} {{item.postalcode}}</p></div>

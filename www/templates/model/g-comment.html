@@ -18,7 +18,7 @@
 
         <div class="list">
           <label class="item item-input pad-textarea">
-            <textarea placeholder="Enter your message" my-text="" ng-model="data.comment" ng-trim="true" id="newpostTextarea" style="height: 80vh;">{{data.comment}}</textarea>
+            <textarea placeholder="Enter your message" my-text="" ng-model="data.comment" ng-trim="true" id="newpostTextarea" style="height: 80vh;" ng-change="changingValue()">{{data.comment}}</textarea>
           </label>
         </div>
 

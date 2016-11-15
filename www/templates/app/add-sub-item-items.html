@@ -2,8 +2,14 @@
 
 
 <ion-nav-bar class="bar-calm pg-theme" >
-    <ion-nav-back-button>
-    </ion-nav-back-button>
+    <!-- <ion-nav-back-button>
+	    </ion-nav-back-button> -->
+
+	    <ion-nav-buttons side="left">
+	        <button class="button button-clear button-icon ion-android-arrow-back" ng-click="goBack()">
+	        </button>
+	      </ion-nav-buttons>
+
     <ion-nav-buttons side="right">
     	<!--button class="button button-clear button-icon ion-refresh" ng-click="refresh()">
 	     </button-->
@@ -41,20 +47,20 @@
 			<label class="item item-divider" ng-if="type == 'METER'">Meter Reading</label>
 
 			<label class="item item-input" ng-if="type == 'METER'">
-			    <input type="text" placeholder="Meter Reading" ng-model="data.reading_value" ng-if="type == 'METER'">
+			    <input type="text" placeholder="Meter Reading" ng-model="data.reading_value" ng-if="type == 'METER'" ng-change="changingValue()">
 			</label>
 
 			<label class="item item-divider">Description</label>
 
 			<label class="item item-input pad-textarea">
-	            <input type="text" placeholder="Description" ng-model="data.description" >
+	            <input type="text" placeholder="Description" ng-model="data.description" ng-change="changingValue()">
 	        </label>
 
 
 			<label class="item item-divider">Comment</label>
 
 			<label class="item item-input pad-textarea">
-	            <textarea placeholder="Enter your message" my-text="" ng-model="data.comment" ng-trim="true" id="newpostTextarea" style="height: 20vh;"></textarea>
+	            <textarea placeholder="Enter your message" my-text="" ng-model="data.comment" ng-trim="true" id="newpostTextarea" style="height: 20vh;" ng-change="changingValue()"></textarea>
 	        </label>
 			
 			<label class="item item-divider">Photos</label>

@@ -1,8 +1,13 @@
 <ion-view view-title="Signatures">
 
 	<ion-nav-bar class="bar-calm pg-theme">
-	    	<ion-nav-back-button>
-	    	</ion-nav-back-button>
+	    	    <!-- <ion-nav-back-button>
+	    </ion-nav-back-button> -->
+
+	    <ion-nav-buttons side="left">
+	        <button class="button button-clear button-icon ion-android-arrow-back" ng-click="goBack()">
+	        </button>
+	      </ion-nav-buttons>
 
 	      <ion-nav-buttons side="right">
 		        <button class="button" ng-click="save()">Save
@@ -28,13 +33,13 @@
 
 		</ion-list>
 
-<div class="list">
-		<label class="item item-divider">Additional comments</label>
+		<div class="list">
+				<label class="item item-divider">Additional comments</label>
 
-		<label class="item item-input">
-				<input type="text"  ng-model="comment" style="min-height: 200px; " >
-		</label>
+				<label class="item item-input">
+						<input type="text"  ng-model="comment" style="min-height: 200px; " ng-change="changingValue()">
+				</label>
 
-</div>
+		</div>
   </ion-content>
 </ion-view>
