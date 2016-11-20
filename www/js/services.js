@@ -181,7 +181,7 @@ appSrv.service('ModalService', function($ionicModal, $rootScope) {
 });
 
 //this is for login auth service
-appSrv.service('AuthService', function($q, $http, PGAppConfig, $localstorage, commonSrv, $log, myModals, genericModalService, DatabaseSrv, synSrv) {
+appSrv.service('AuthService', function($q, $http, PGAppConfig, $localstorage, commonSrv, $log, myModals, genericModalService, DatabaseSrv, synSrv,  $ionicLoading) {
 
   var LOCAL_TOKEN_KEY = PGAppConfig.LOCAL_TOKEN_KEY;//'HMZAPPAUTHKEY';
   var USER_DETAILS_KEY = 'PGAPPAUTHUSER';
@@ -323,8 +323,18 @@ appSrv.service('AuthService', function($q, $http, PGAppConfig, $localstorage, co
   //get company template
   function getCompanyTemplate(token, user){
 
+      var query = '';
+
       commonSrv.postData( 'company/getTemplate')
-          .then(function(result) {
+          .then(function(result){
+
+             $ionicLoading.show({
+              content: 'Loading',
+              animation: 'fade-in',
+              showBackdrop: true,
+              maxWidth: 200,
+              showDelay: 0
+            });
 
             console.log(result);
 
@@ -339,84 +349,63 @@ appSrv.service('AuthService', function($q, $http, PGAppConfig, $localstorage, co
                       if(result.data.master ){
 
                           var master_items = result.data.master;
-                          var query = "INSERT INTO company_masteritem_link (com_master_id, original_master_id, company_id, item_name, type, option, priority, status) VALUES (?,?,?,?,?,?,?,?)";
-
-                          for(var i =0, l= master_items.length; i < l; i++){
-
-                            DatabaseSrv.executeQuery(query, [master_items[i].com_master_id , master_items[i].original_master_id, master_items[i].company_id, master_items[i].item_name, master_items[i].type, master_items[i].option,  master_items[i].priority,  master_items[i].status ]).then(function(masteritems){
-
-                            });
-                           /* $cordovaSQLite.execute(db, query, [master_items[i].com_master_id , master_items[i].original_master_id, master_items[i].company_id, master_items[i].item_name, master_items[i].type, master_items[i].option,  master_items[i].priority,  master_items[i].status ]).then(function(res) {
-                                console.log("INSERT master item ID -> " + res.insertId);
-                            }, function (err) {
-                                console.error(err);
-                            });*/
-
+                          query = "INSERT INTO company_masteritem_link (com_master_id, original_master_id, company_id, item_name, type, option, priority, status) ";
+                          query +=  " select "+ master_items[0].com_master_id + " as com_master_id, " + master_items[0].original_master_id + " as original_master_id, " + master_items[0].company_id  + " as company_id, '" + master_items[0].item_name + "' as item_name, '" + master_items[0].type + "' as type, '" + master_items[0].option + "' as option, " + master_items[0].priority + " as priority, "+ Number(master_items[0].status) +" as status ";
+                          for(var i = 1, l= master_items.length; i < l; i++){
+                            query += " UNION ALL select "+ master_items[i].com_master_id + ", " + master_items[i].original_master_id + ", " + master_items[i].company_id  + ", '" + master_items[i].item_name + "', '" + master_items[i].type + "', '" + master_items[i].option + "', " + master_items[i].priority + "," +  Number(master_items[i].status) + " ";
                           }
 
-                      }
+                          //inserting master items 
+                          DatabaseSrv.executeQuery(query, [], {}, 'noloading').then(function(masteritems){ //master saving
 
+                            if(result.data.sub ){
 
-                      if(result.data.sub ){
+                                var sub_items = result.data.sub;
+                                query = "INSERT INTO company_subitem_link (com_subitem_id, com_master_id, company_id, item_name, type, priority, status) ";
+                                query += " select " + sub_items[0].com_subitem_id  +  " as com_subitem_id, " +  sub_items[0].com_master_id + " as com_master_id, " + sub_items[0].company_id + " as company_id, '" + sub_items[0].item_name + "' as item_name, '" + sub_items[0].type + "' as type, " + sub_items[0].priority + " as priority, " +  Number(sub_items[0].status) + " as status " ;
+                                for(var i =1, l= sub_items.length; i < l; i++){
+                                   query += " UNION ALL select "+ sub_items[i].com_subitem_id  +  ", " +  sub_items[i].com_master_id + ", " + sub_items[i].company_id + ", '" + sub_items[i].item_name + "', '" + sub_items[i].type + "', " + sub_items[i].priority + ", " +  Number(sub_items[i].status)  + " " ;
+                                }
 
-                          var sub_items = result.data.sub;
-                          var query = "INSERT INTO company_subitem_link (com_subitem_id, com_master_id, company_id, item_name, type, priority, status) VALUES (?,?,?,?,?,?,?)";
+                                DatabaseSrv.executeQuery(query, [], {}, 'noloading').then(function(subitems){ //sub item saving
 
-                          for(var i =0, l= sub_items.length; i < l; i++){
-                             DatabaseSrv.executeQuery(query, [sub_items[i].com_subitem_id , sub_items[i].com_master_id, sub_items[i].company_id, sub_items[i].item_name, sub_items[i].type, sub_items[i].priority,  sub_items[i].status ]).then(function(subitems){
+                                      if(result.data.meter ){
 
-                             });
-                           /* $cordovaSQLite.execute(db, query, [sub_items[i].com_subitem_id , sub_items[i].com_master_id, sub_items[i].company_id, sub_items[i].item_name, sub_items[i].type, sub_items[i].priority,  sub_items[i].status ]).then(function(res) {
-                                console.log("INSERT sub item ID -> " + res.insertId);
-                            }, function (err) {
-                                console.error(err);
-                            });*/
+                                          var meter_items = result.data.meter;
+                                          query = "INSERT INTO company_meter_link (com_meter_id, company_id, meter_name, status) ";
+                                          query += " select " + meter_items[0].com_meter_id +  " as com_meter_id, " + meter_items[0].company_id + " as company_id, '" + meter_items[0].meter_name + "' as meter_name, " +  Number(meter_items[0].status) + " as status " ;
+                                          for(var i =1, l= meter_items.length; i < l; i++){
+                                             query += " UNION ALL select "+  meter_items[i].com_meter_id +  ", " + meter_items[i].company_id + ", '" + meter_items[i].meter_name + "', " +  Number(meter_items[i].status) + " " ;
+                                          }
 
-                          }
+                                            DatabaseSrv.executeQuery(query, [], {}, 'noloading').then(function(meter){ //meter saving
+                                                
+                                                if(result.data.general ){
+                                                      var general_items = result.data.general;
+                                                      query = "INSERT INTO company_general_condition_link (com_general_id, company_id, item_name, options, priority, type, status) ";
 
-                      }
+                                                      query += " select " + general_items[0].com_general_id +  " as com_general_id, " + general_items[0].company_id  + " as company_id, '" + general_items[0].item_name + "' as item_name, '" + general_items[0].options + "' as options, " + general_items[0].priority + " as priority, '" + general_items[0].type + "' as type, " + Number(general_items[0].status) + " as status ";
+                                                      for(var i =1, l= general_items.length; i < l; i++){
+                                                        query += " UNION ALL select " + general_items[i].com_general_id +  ", " + general_items[i].company_id  + ", '" + general_items[i].item_name + "', '" + general_items[i].options + "', " + general_items[i].priority + ", '" + general_items[i].type + "', " + Number(general_items[i].status) + " ";
+                                                      }
+                                                      DatabaseSrv.executeQuery(query, [], {}, 'noloading').then(function(general){ //general saving
+                                                        //last saving
 
+                                                        $ionicLoading.hide();
+                                                      });
+                                                }
 
-                  if(result.data.meter ){
+                                            });
+                                            //----------finished meter 
+                                      }
 
-                      var meter_items = result.data.meter;
-                      var query = "INSERT INTO company_meter_link (com_meter_id, company_id, meter_name, status) VALUES (?,?,?,?)";
+                                });// sub itemss insert
 
-                      for(var i =0, l= meter_items.length; i < l; i++){
+                            }
 
-                        DatabaseSrv.executeQuery(query, [meter_items[i].com_meter_id , meter_items[i].company_id, meter_items[i].meter_name, meter_items[i].status ] ).then(function(meter){
+                          }); //master saving 
 
-                        });
-
-                        /*$cordovaSQLite.execute(db, query, [meter_items[i].com_meter_id , meter_items[i].company_id, meter_items[i].meter_name, meter_items[i].status ]).then(function(res) {
-                            console.log("INSERT meter item ID -> " + res.insertId);
-                        }, function (err) {
-                            console.error(err);
-                        });*/
-
-                      }
-
-                  }
-
-
-                  if(result.data.general ){
-
-                      var general_items = result.data.general;
-                      var query = "INSERT INTO company_general_condition_link (com_general_id, company_id, item_name, options, priority, type, status) VALUES (?,?,?,?,?,?,?)";
-
-                      for(var i =0, l= general_items.length; i < l; i++){
-
-                        DatabaseSrv.executeQuery(query, [general_items[i].com_general_id , general_items[i].company_id, general_items[i].item_name,  general_items[i].options,  general_items[i].priority,  general_items[i].type, general_items[i].status ] ).then(function(generalitems){
-                        });
-                       /* $cordovaSQLite.execute(db, query, [general_items[i].com_general_id , general_items[i].company_id, general_items[i].item_name,  general_items[i].options,  general_items[i].priority,  general_items[i].type, general_items[i].status ]).then(function(res) {
-                            console.log("INSERT general item ID -> " + res.insertId);
-                        }, function (err) {
-                            console.error(err);
-                        });*/
-
-                      }
-
-                  }
+                      } //master if end                   
 
 
                 });

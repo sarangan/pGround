@@ -586,7 +586,7 @@ appFact.factory('DatabaseSrv', function($q, PGAppConfig, $cordovaSQLite, $ionicP
 
       $cordovaSQLite.execute(db_con, "CREATE TABLE IF NOT EXISTS company_masteritem_link (com_master_id integer primary key, original_master_id integer, company_id integer, item_name text, type text, option text, priority integer, status integer)");
       $cordovaSQLite.execute(db_con, "CREATE TABLE IF NOT EXISTS company_subitem_link (com_subitem_id integer primary key, com_master_id integer, company_id integer, item_name text, type text, priority integer, status integer)");
-      $cordovaSQLite.execute(db_con, "CREATE TABLE IF NOT EXISTS company_meter_link (com_meter_id integer primary key, company_id integer, meter_name text, type text, status integer)");
+      $cordovaSQLite.execute(db_con, "CREATE TABLE IF NOT EXISTS company_meter_link (com_meter_id integer primary key, company_id integer, meter_name text, status integer)");
       $cordovaSQLite.execute(db_con, "CREATE TABLE IF NOT EXISTS company_general_condition_link (com_general_id integer primary key, company_id integer, item_name text, options text, priority integer, type text, status integer)");
 
       $cordovaSQLite.execute(db_con, "CREATE TABLE IF NOT EXISTS sync (id integer primary key, syn_id text, property_id text, table_name text, key_id text, task text, pk_name text, status integer )"); //task INSERT, UPDATE, DELETE
@@ -681,7 +681,9 @@ appFact.factory('DatabaseSrv', function($q, PGAppConfig, $cordovaSQLite, $ionicP
       $cordovaSQLite.execute(db_con, query, data).then(function(res) {
           $log.log("INSERT item -> " );
           $log.log(res);
-          $ionicLoading.hide();
+          if(loadingContent !=  'noloading' ){
+            $ionicLoading.hide();
+          }
           q.resolve({status: 1, data: res, params: params });
 
       }, function (err) {
@@ -694,7 +696,9 @@ appFact.factory('DatabaseSrv', function($q, PGAppConfig, $cordovaSQLite, $ionicP
 
    }
 
-   $ionicLoading.hide();
+   if(loadingContent !=  'noloading' ){
+    $ionicLoading.hide();
+  }
 
    return q.promise;
 

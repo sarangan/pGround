@@ -526,7 +526,7 @@ appCtrl.controller('NewPropInfoCtrl', function(
                                                         //master items import
                                                         // merger
 
-                                                        query = "select Company_masteritem_link.* from Company_masteritem_link where Company_masteritem_link.status='true'";
+                                                        query = "select Company_masteritem_link.* from Company_masteritem_link where Company_masteritem_link.status=1";
 
                                                         DatabaseSrv.executeQuery(query, []).then(function(master_items){
 
@@ -885,11 +885,11 @@ appCtrl.controller('PropCtrl', function($scope, $state, $stateParams, commonSrv,
 
 
   $scope.setToggle = function(value){
-
+    console.log('toggle', value);
     if(value == 1)
-      return true;
+      return 1;
     else
-      return false;
+      return 0;
   };
 
   //toggle change
@@ -1038,7 +1038,7 @@ appCtrl.controller('PropCtrl', function($scope, $state, $stateParams, commonSrv,
             for(var i=0, l = $scope.options.length; i < l ; i++){
 
               var query = "UPDATE Property_masteritem_link SET status=? WHERE prop_master_id=?";
-              var status = $scope.options[i].status == true? 1: 0;
+              var status = ($scope.options[i].status)? 1: 0;
               var data = [status, $scope.options[i].prop_master_id ];
 
               var params =  {
@@ -1509,7 +1509,7 @@ appCtrl.controller('PropertyListSortCtrl', function($scope, $state, $stateParams
 
                   if(result.status == 1){
 
-                     $scope.confirm = true;
+                     $scope.confirm = false;
 
                     synSrv.update($scope.property_id, 'property_masteritem_link', result.params.prop_master_id , 'UPDATE', 'prop_master_id' );
 
@@ -1517,7 +1517,7 @@ appCtrl.controller('PropertyListSortCtrl', function($scope, $state, $stateParams
                   }
                   else{
 
-                      $scope.confirm = true;
+                      $scope.confirm = false;
                       $log.log('prop sorting save error!');
                   }
 
@@ -1526,7 +1526,7 @@ appCtrl.controller('PropertyListSortCtrl', function($scope, $state, $stateParams
           }
 
           $timeout(function(){
-            $scope.confirm = true;
+            $scope.confirm = false;
                  /* var alertPopup = $ionicPopup.alert({
                         title: 'Saved!',
                         template: 'Successfully Saved!'
@@ -4101,25 +4101,29 @@ appCtrl.controller('GeneralPhotosCtrl', function($scope, $state, $stateParams, c
 
 
 /*---------- Signature pad --------------*/
-appCtrl.controller('SignPadCtrl', function($scope, $state, $stateParams, commonSrv, $log, $ionicPopup, DatabaseSrv, srvObjManipulation, synSrv, genericModalService){
+appCtrl.controller('SignPadCtrl', function($scope, $state, $stateParams, commonSrv, $log, $ionicPopup, DatabaseSrv, srvObjManipulation, synSrv, genericModalService, $ionicHistory){
 
       $scope.property_id = '';
       $scope.type = ''
       var canvas = document.getElementById('signatureCanvas');
       var signaturePad = new SignaturePad(canvas);
+      $scope.confirm = false;
 
       $scope.$on('$ionicView.beforeEnter', function() {
 
           $scope.property_id = $stateParams.property_id;
           $scope.type = $stateParams.type;
+          $scope.confirm = false;
           initLoadData();
       });
 
       $scope.clearCanvas = function() {
           signaturePad.clear();
+          $scope.confirm = true;
       };
 
       $scope.saveCanvas = function() {
+          $scope.confirm = true;
           var sigImg = signaturePad.toDataURL();
           $scope.signature = sigImg;
 
@@ -4164,7 +4168,7 @@ appCtrl.controller('SignPadCtrl', function($scope, $state, $stateParams, commonS
 
       //save image
       function callSave(){
-
+          
           if($scope.signature.length > 0){
 
              DatabaseSrv.initLocalDB().then(function(initdb){
@@ -4196,7 +4200,32 @@ appCtrl.controller('SignPadCtrl', function($scope, $state, $stateParams, commonS
 
           }
 
-      }
+      };
+
+
+      $scope.goBack= function(){
+
+              var confirmPopup = $ionicPopup.confirm({
+                okText : 'Yes',
+                cancelText : 'No',
+                title: 'Save!!!',
+                template: 'Do you want to close this form?'
+              });
+
+             confirmPopup.then(function(res) {
+               if(res) {
+                   $ionicHistory.goBack();
+                  // $scope.saveCanvas();
+                }
+                else{
+                 /* $scope.confirm = false;
+                  $ionicHistory.goBack();*/
+                  
+                }
+             });
+          
+
+      };
 
 
 });
@@ -4362,6 +4391,8 @@ appCtrl.controller('SignListCtrl', function($scope, $state, $stateParams, $log, 
              });
 
       }
+
+
 
 
 });

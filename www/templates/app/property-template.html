@@ -60,7 +60,7 @@
 			<div class="item item-toggle" ng-repeat="item in options | orderBy: 'priority' ">
 			     {{item.name}}
 			     <label class="toggle toggle-balanced">
-			       <input type="checkbox" ng-model="item.status" ng-checked="item.status" ng-change="toggleChange()">
+			       <input type="checkbox" ng-model="item.status" ng-checked="item.status==1?true:false" ng-change="toggleChange()">
 			       <div class="track">
 			         <div class="handle"></div>
 			       </div>
