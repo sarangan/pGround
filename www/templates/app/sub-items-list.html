@@ -1,6 +1,15 @@
 <ion-view view-title="{{data.viewName}}">
 
 
+	<ion-nav-bar class="bar-calm pg-theme">
+			<ion-nav-buttons side="right">
+					<button class="button" ng-click="goBack()">
+						Done
+					</button>
+			</ion-nav-buttons>
+	</ion-nav-bar>
+
+
 	<ion-floating-menu has-footer="false" button-color="#009AF2" icon="ion-plus" iconColor="#fff" ng-if="showButton">
 	    <ion-floating-item icon="ion-edit" button-color="#009AF2" click="rename()"></ion-floating-item>
 	    <ion-floating-item icon="ion-trash-b" button-color="#009AF2" click="delete()"></ion-floating-item>

@@ -2,15 +2,17 @@
 
 
 <ion-nav-bar class="bar-calm pg-theme">
-    <ion-nav-back-button>
-    </ion-nav-back-button>
-    <ion-nav-buttons side="right">
-        <button class="button" ng-click="save()">
-        	Save
+    <!-- <ion-nav-back-button>
+    </ion-nav-back-button> -->
+
+      <ion-nav-buttons side="right">
+        <button class="button" ng-click="goBack()">
+          Done
         </button>
-    </ion-nav-buttons>
+      </ion-nav-buttons>
+
 </ion-nav-bar>
-	
+
   <ion-content overflow-scroll="true">
 
 		<div class="list">
@@ -19,19 +21,19 @@
 
 			  <label class="item item-input item-floating-label">
 			    <span class="input-label">Address</span>
-			    <input type="text" placeholder="Address" ng-model="data.address_1">
+			    <input type="text" placeholder="Address" ng-model="data.address_1" ng-change="changingValue()">
 			  </label>
 			  <label class="item item-input item-floating-label">
 			    <span class="input-label">Address 2</span>
-			    <input type="text" placeholder="Address 2" ng-model="data.address_2">
+			    <input type="text" placeholder="Address 2" ng-model="data.address_2" ng-change="changingValue()">
 			  </label>
 			  <label class="item item-input item-floating-label">
 			    <span class="input-label">Town</span>
-			    <input type="text" placeholder="Town" ng-model="data.city">
+			    <input type="text" placeholder="Town" ng-model="data.city" ng-change="changingValue()">
 			  </label>
 			  <label class="item item-input item-floating-label">
 			    <span class="input-label">Postal code</span>
-			    <input type="text" placeholder="Postal code" ng-model="data.postalcode">
+			    <input type="text" placeholder="Postal code" ng-model="data.postalcode" ng-change="changingValue()">
 			  </label>
 
 		    <label class="item item-divider">Report Details</label>
@@ -40,7 +42,7 @@
 				    <div class="input-label">
 				      Report type
 				    </div>
-				    <select ng-model="data.report_type">
+				    <select ng-model="data.report_type" ng-change="changingValue()">
 				      <option value="Check-in Report">Check-in Report</option>
 				      <option value="Check-out Report">Check-out Report</option>
 				      <option value="Inventory Report">Inventory Report</option>
@@ -54,14 +56,14 @@
 
 				<label class="item item-input">
 				  <span class="input-label">Report Date</span>
-				  <input type="date" placeholder="dd/mm/yyyy" ng-model="data.report_date">
+				  <input type="date" placeholder="dd/mm/yyyy" ng-model="data.report_date" ng-change="changingValue()">
 				</label>
 
 			<label class="item item-divider">Additional info</label>
 
 				<label class="item item-input item-floating-label">
 				    <span class="input-label">Description</span>
-				    <input type="text" placeholder="Description" ng-model="data.description">
+				    <input type="text" placeholder="Description" ng-model="data.description" ng-change="changingValue()">
 				</label>
 
 

@@ -24,11 +24,11 @@
     background-size: 80% auto;*/
     height: 100%;
     /*background-repeat: no-repeat;*/
-    
+
 }
 
 .login-main-heading{
-    text-align: center;   
+    text-align: center;
 }
 .login-heading{
     color: #4F5055;
@@ -58,13 +58,13 @@
 }
 
 @media (min-width: 680px){
-    
+
     .modal{
       top: 0 !important;
-      bottom: 0 !important; 
+      bottom: 0 !important;
       left: 0 !important;
       right: 0 !important;
-      min-height: 100% !important; 
+      min-height: 100% !important;
       width: 100% !important;
     }
 }
@@ -107,8 +107,8 @@
 }
 
 .popup-buttons button.button.ng-binding.button-positive{
-    border-color: #ffffff !important; 
-    background-color: #ffffff !important; 
+    border-color: #ffffff !important;
+    background-color: #ffffff !important;
     color: #009AF2 !important;
     text-align: right;
     border: none;
@@ -117,8 +117,8 @@
 }
 
 .popup-buttons button.button.ng-binding.button-default{
-    border-color: #ffffff !important; 
-    background-color: #ffffff !important; 
+    border-color: #ffffff !important;
+    background-color: #ffffff !important;
     text-align: right;
     border: none;
     box-shadow: none;
@@ -137,7 +137,7 @@
     line-height: 50px;
 }
 
-#floating-menu li.menu-button{ 
+#floating-menu li.menu-button{
     line-height: 60px;
 }
 /*-------- floating menu customization --------*/
@@ -193,7 +193,7 @@
     position: fixed;
     bottom: 8%; /* Adjust height */
     right: 5%; /* Adjust position */
-    
+
     right: 20px;
     z-index: 9999;
     width: 60px;
@@ -209,7 +209,7 @@
     padding: 0;
     border: none;
     border-radius: 50%;
-    
+
 }
 
 .float-button .content {
@@ -230,7 +230,7 @@
     width: 75px;*/
     overflow: hidden;
     position: relative;
-   
+
 }
 .imgur-grid-image{
     /*top: -33px;*/
@@ -258,7 +258,7 @@
 
 .zoom-pane .scroll {
 	min-height: 100% !important;
-	 
+
 	display: -webkit-box;
 	display: -moz-box;
 	display: -ms-flexbox;
@@ -358,13 +358,13 @@
     position: absolute !important;
     top: -6px !important;
     right: -14px !important;
-    
+
     color: darkgreen !important;
 }
 
 .general-action-btn{
     margin-right: 20px;
-    
+
     background-color: #009AF2;
     color: white;
     font-size: 20px;
@@ -378,11 +378,11 @@
     backface-visibility: hidden;
     border: none;
     border-radius: 50%;
-    
+
 }
 
 .breadcrumb {
-	/*centering*/	
+	/*centering*/
 	overflow-x: auto;
     white-space: nowrap;
 }
@@ -390,7 +390,7 @@
 .breadcrumb a {
 	text-decoration: none;
 	outline: none;
-	display: block;	
+	display: block;
 	font-size: 12px;
 	line-height: 30px;
 	color: white;
@@ -405,21 +405,21 @@
 	left: 14px;
 }
 .breadcrumb a:last-child {
-	border-radius: 0 5px 5px 0; 
+	border-radius: 0 5px 5px 0;
 	padding-right: 20px;
 }
 .breadcrumb a:after {
 	content: '';
 	position: absolute;
-	top: 0; 
+	top: 0;
 	right: -15px; /*half of square's length*/
-	width: 30px; 
+	width: 30px;
 	height: 30px;
 	transform: scale(0.707) rotate(45deg);
 	z-index: 1;
 	background: #66b5de;
-	box-shadow: 
-		2px -2px 0 2px rgba(0, 0, 0, 0.4), 
+	box-shadow:
+		2px -2px 0 2px rgba(0, 0, 0, 0.4),
 		3px -3px 0 2px rgba(255, 255, 255, 0.1);
 	border-radius: 0 5px 0 50px;
 }
@@ -434,4 +434,16 @@
 
 .popup{
     z-index: 1000;
+}
+
+.bar .title{
+  text-align: center !important;
+}
+
+.gen-green{
+  color: green;
+}
+
+.gen-yellow{
+  color: #b92f25;
 }

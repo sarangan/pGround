@@ -2,24 +2,25 @@
 
 
 <ion-nav-bar class="bar-calm pg-theme" >
-    <!-- <ion-nav-back-button>
+    <!-- <ion-nav-back-button> button-icon ion-android-arrow-back
 	    </ion-nav-back-button> -->
 
-	    <ion-nav-buttons side="left">
-	        <button class="button button-clear button-icon ion-android-arrow-back" ng-click="goBack()">
+	    <ion-nav-buttons side="right">
+	        <button class="button" ng-click="goBack()">
+						Done
 	        </button>
 	      </ion-nav-buttons>
 
-    <ion-nav-buttons side="right">
+    <!-- <ion-nav-buttons side="right"> -->
     	<!--button class="button button-clear button-icon ion-refresh" ng-click="refresh()">
 	     </button-->
-        <button class="button" ng-click="save()">Save
-        </button>
-        
-    </ion-nav-buttons>
+        <!-- <button class="button" ng-click="save()">Save
+        </button> -->
+
+    <!-- </ion-nav-buttons> -->
 </ion-nav-bar>
-	
-	
+
+
   <ion-content overflow-scroll="true">
 
 		<ion-list>
@@ -62,7 +63,7 @@
 			<label class="item item-input pad-textarea">
 	            <textarea placeholder="Enter your message" my-text="" ng-model="data.comment" ng-trim="true" id="newpostTextarea" style="height: 20vh;" ng-change="changingValue()"></textarea>
 	        </label>
-			
+
 			<label class="item item-divider">Photos</label>
 		</ion-list>
 
